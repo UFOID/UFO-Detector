@@ -11,6 +11,9 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = Detector
 TEMPLATE = app
 
+win32:CONFIG += windows
+win64:CONFIG += windows
+
 QMAKE_CXXFLAGS += -std=c++11
 
 CONFIG += c++11
@@ -49,7 +52,8 @@ HEADERS  += \
     camera.h \
     messageupdate.h \
     imageexplorer.h \
-    uploader.h
+    uploader.h \
+    OpencvInclude.h
 
 FORMS    += \
     mainwindow.ui \
@@ -59,17 +63,32 @@ FORMS    += \
     imageexplorer.ui \
     uploader.ui
 
-INCLUDEPATH += C:\own\install\include
+windows {
+    INCLUDEPATH += C:\own\install\include
+    LIBS += C:\own\bin\libopencv_core300.dll
+    LIBS += C:\own\bin\libopencv_highgui300.dll
+    LIBS += C:\own\bin\libopencv_imgproc300.dll
+    LIBS += C:\own\bin\libopencv_calib3d300.dll
+    LIBS += C:\own\bin\libopencv_features2d300.dll
+    LIBS += C:\own\bin\libopencv_flann300.dll
+    LIBS += C:\own\bin\libopencv_ml300.dll
+    LIBS += C:\own\bin\libopencv_objdetect300.dll
+    LIBS += C:\own\bin\libopencv_video300.dll
+    LIBS += C:\own\bin\libopencv_videoio300.dll
+    LIBS += C:\own\bin\libopencv_imgcodecs300.dll
+}
 
-
-LIBS += C:\own\bin\libopencv_core300.dll
-LIBS += C:\own\bin\libopencv_highgui300.dll
-LIBS += C:\own\bin\libopencv_imgproc300.dll
-LIBS += C:\own\bin\libopencv_calib3d300.dll
-LIBS += C:\own\bin\libopencv_features2d300.dll
-LIBS += C:\own\bin\libopencv_flann300.dll
-LIBS += C:\own\bin\libopencv_ml300.dll
-LIBS += C:\own\bin\libopencv_objdetect300.dll
-LIBS += C:\own\bin\libopencv_video300.dll
-LIBS += C:\own\bin\libopencv_videoio300.dll
-LIBS += C:\own\bin\libopencv_imgcodecs300.dll
+unix {
+    INCLUDEPATH += /usr/include/opencv2/
+    LIBS += -lopencv_core
+    LIBS += -lopencv_highgui
+    LIBS += -lopencv_imgproc
+    LIBS += -lopencv_calib3d
+    LIBS += -lopencv_features2d
+    LIBS += -lopencv_flann
+    LIBS += -lopencv_ml
+    LIBS += -lopencv_objdetect
+    LIBS += -lopencv_video
+    #LIBS += -lopencv_videoio
+    #LIBS += -lopencv_imgcodecs
+}

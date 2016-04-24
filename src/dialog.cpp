@@ -89,7 +89,7 @@ void Dialog::getPointsInContour(vector<Point2f> & contour)
     QSettings mySettings("UFOID","Detector");
     if(insideContour.size()!=0)
 	{
-        mySettings.setValue("regionsize",insideContour.size());
+        mySettings.setValue("regionsize", QVariant::fromValue((long unsigned int)insideContour.size()));
         savePointsAsXML(insideContour);
     }
     else ui->labelInfo->setText("ERROR saving XML file. No points inside area");
