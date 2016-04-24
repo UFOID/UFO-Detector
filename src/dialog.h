@@ -19,6 +19,7 @@
 #ifndef DIALOG_H
 #define DIALOG_H
 
+#include "config.h"
 #include <QDialog>
 #include <opencv2/opencv.hpp>
 #include "graphicsscene.h"
@@ -34,7 +35,7 @@ class Dialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit Dialog(QWidget *parent = 0, Camera *camPtr = 0);
+    explicit Dialog(QWidget *parent = 0, Camera *camPtr = 0, Config *configPtr = 0);
     ~Dialog();
 
 private slots:
@@ -46,6 +47,7 @@ private slots:
 private:
     Ui::Dialog *ui;
     Camera *cameraPtr;
+    Config *m_config;
     GraphicsScene *scene;
     void getPointsInContour(std::vector<cv::Point2f> & contour);
     void savePointsAsXML(std::vector<cv::Point2f> & contour);

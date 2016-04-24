@@ -2,6 +2,8 @@
 
 Config::Config(QObject *parent) : QObject(parent)
 {
+    m_settings = new QSettings("UFOID", "Detector");
+
 #if defined (Q_OS_WIN)
     m_videoEncoderLocation = QCoreApplication::applicationDirPath()+"/ffmpeg.exe";
 #elif defined (Q_OS_LINUX) || defined (Q_OS_UNIX)
@@ -14,5 +16,13 @@ Config::Config(QObject *parent) : QObject(parent)
 
 QString Config::videoEncoderLocation() {
     return m_videoEncoderLocation;
+}
+
+QString Config::detectionAreaFile() {
+    return m_settings->value("detectionareafile", QCoreApplication::applicationDirPath()+"/detectionArea.xml").toString();
+}
+
+void Config::setDetectionAreaFile(QString fileName) {
+    m_settings->setValue("detectionareafile", QVariant(fileName));
 }
 

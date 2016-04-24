@@ -31,7 +31,8 @@
  * Checking the status of the area file is broken. Commented out
  */
 
-SettingsDialog::SettingsDialog(QWidget *parent, Camera *camPtr) :QDialog(parent),ui(new Ui::SettingsDialog), cameraPtr(camPtr)
+SettingsDialog::SettingsDialog(QWidget *parent, Camera *camPtr, Config *configPtr) :
+    QDialog(parent), ui(new Ui::SettingsDialog), cameraPtr(camPtr), m_config(configPtr)
 {
     ui->setupUi(this);
     this->setWindowTitle("Settings");
@@ -45,9 +46,8 @@ SettingsDialog::SettingsDialog(QWidget *parent, Camera *camPtr) :QDialog(parent)
     ui->lineH->setText(settings.value("cameraheight",480).toString());
     ui->lineW->setValidator(new QIntValidator(10, 1280, this));
     ui->lineH->setValidator(new QIntValidator(10, 768, this));
-    xmlFile = settings.value("xmlfile",QString(QCoreApplication::applicationDirPath()+"/detectionArea.xml")).toString();
     ui->lineVideoPath->setText(settings.value("videofilepath").toString());
-    ui->lineXMLfile->setText(xmlFile);
+    ui->lineDetectionAreaFile->setText(m_config->detectionAreaFile());
     ui->lineToken->setText(settings.value("usertoken","").toString());
     if(settings.value("saveimages").toBool())
 	{
@@ -82,7 +82,7 @@ void SettingsDialog::saveSettings()
     settings.setValue("cameraindex",ui->comboBoxWebcam->currentIndex()); /// @todo cameraindex may change if cameras added/removed
     settings.setValue("camerawidth",ui->lineW->text());
     settings.setValue("cameraheight",ui->lineH->text());
-    settings.setValue("xmlfile",ui->lineXMLfile->text());
+    m_config->setDetectionAreaFile(ui->lineDetectionAreaFile->text());
     settings.setValue("saveimages",ui->checkBoxsaveImages->isChecked());
     settings.setValue("imagespath",ui->lineImagePath->text());
     settings.setValue("recordwithrect",ui->checkBoxRectangle->isChecked());
@@ -156,13 +156,13 @@ void SettingsDialog::on_buttonCancel_clicked()
 
 void SettingsDialog::on_checkBoxsaveImages_stateChanged(int arg1)
 {
-    if(arg1==2)
+    if(arg1==Qt::Checked)
 	{
         ui->labelImagePath->setEnabled(true);
         ui->lineImagePath->setEnabled(true);
         ui->toolButtonImagePath->setEnabled(true);
     }
-    if(arg1==0)
+    if(arg1==Qt::Unchecked)
 	{
         ui->labelImagePath->setDisabled(true);
         ui->lineImagePath->setDisabled(true);
@@ -170,28 +170,31 @@ void SettingsDialog::on_checkBoxsaveImages_stateChanged(int arg1)
     }
 }
 
-void SettingsDialog::on_toolButtonXMLfile_clicked()
+void SettingsDialog::on_toolButtonDetectionAreaFile_clicked()
 {
-    QString xmlFile = QFileDialog::getOpenFileName(this,tr("Select the XML file"),QDir::currentPath(),tr("XML file (*.xml)"));
-    ui->lineXMLfile->setText(xmlFile);
+    /// @todo use previous detection area file name if user cancels file selection
+    QString detectionAreaFileName = QFileDialog::getOpenFileName(this,
+        tr("Select the detection area file"),QDir::currentPath(), tr("XML file (*.xml)"));
+    ui->lineDetectionAreaFile->setText(detectionAreaFileName);
 }
 
 void SettingsDialog::on_toolButtonImagePath_clicked()
 {
-    QString imagePath = QFileDialog::getExistingDirectory(this,tr("Select Directory"),QDir::currentPath(),QFileDialog::ShowDirsOnly);
+    QString imagePath = QFileDialog::getExistingDirectory(this, tr("Select Directory"),
+        QDir::currentPath(), QFileDialog::ShowDirsOnly);
     ui->lineImagePath->setText(imagePath);
 }
 
-void SettingsDialog::on_buttonXML_clicked()
+void SettingsDialog::on_buttonSelectDetectionArea_clicked()
 {
     if (wasSaved)
 	{
-        QMessageBox::warning(this,"Warning","Restart the application before creating XML file");
+        QMessageBox::warning(this,"Warning","Restart the application before creating detection area file");
     }
     else
 	{
         dialogIsOpened=true;
-        myDialog = new Dialog(0, cameraPtr);
+        myDialog = new Dialog(0, cameraPtr, m_config);
         myDialog->setModal(true);
         myDialog->show();
         //connect(myDialog,SIGNAL(savedFile()),this,SLOT(startThreadCheckXML()));

@@ -74,7 +74,7 @@ private:
 
 
     std::vector<cv::Point> region;
-    std::string xmlFile;
+    std::string detectionAreaFile;
 
     std::atomic<bool> isActive;
     std::atomic<bool> willParseRectangle;
@@ -91,7 +91,7 @@ private:
     inline int detectMotion(const cv::Mat & motion, cv::Mat & result, cv::Mat & result_cropped,
                      std::vector<cv::Point> &region,
                      int max_deviation);
-    bool parseRegionXML(std::string file_region, std::vector<cv::Point> &region);
+    bool parseDetectionAreaFile(std::string file_region, std::vector<cv::Point> &region);
     bool lightDetection(cv::Rect &rectangle, cv::Mat &croppedImage);
     void detectingThread();
     void detectingThreadHigh();
@@ -107,7 +107,7 @@ private:
 signals:
     void positiveMessage();
     void negativeMessage();
-    void errorReadingXML();
+    void errorReadingDetectionAreaFile();
 	void broadcastOutputText(QString output_text);
 	void progressValueChanged(int value);
     void updatePixmap(QImage img);

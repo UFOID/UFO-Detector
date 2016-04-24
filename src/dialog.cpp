@@ -32,14 +32,15 @@ using namespace std;
 /*
  * Dialog for the detection area selection
  */
-Dialog::Dialog(QWidget *parent, Camera *camPtr) : QDialog(parent),  ui(new Ui::Dialog), cameraPtr(camPtr)
+Dialog::Dialog(QWidget *parent, Camera *camPtr, Config *configPtr) :
+    QDialog(parent),  ui(new Ui::Dialog), cameraPtr(camPtr), m_config(configPtr)
 {
     ui->setupUi(this);
 
     QSettings mySettings("UFOID","Detector");
     WIDTH = mySettings.value("camerawidth",640).toInt();
     HEIGHT = mySettings.value("cameraheight",480).toInt();
-    areaFilePath = mySettings.value("xmlfile",QString(QCoreApplication::applicationDirPath()+"/detectionArea.xml")).toString().toStdString();
+    areaFilePath = m_config->detectionAreaFile().toStdString();
 
     QFile area(areaFilePath.c_str());
     if(!area.exists())
@@ -92,7 +93,7 @@ void Dialog::getPointsInContour(vector<Point2f> & contour)
         mySettings.setValue("regionsize", QVariant::fromValue((long unsigned int)insideContour.size()));
         savePointsAsXML(insideContour);
     }
-    else ui->labelInfo->setText("ERROR saving XML file. No points inside area");
+    else ui->labelInfo->setText("ERROR saving detection area file. No points inside area.");
 }
 
 /*

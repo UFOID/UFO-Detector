@@ -65,15 +65,23 @@ private:
     Config* m_config;
 
     QDomDocument documentXML;
-    QFile fileXML;
+    QFile logFile;  ///< log file (XML)
     QString programVersion;
     QNetworkAccessManager *manager;
 
     void updateWebcamFrame();
     bool checkAndSetResolution(const int WIDTH, const int HEIGHT);
     void initializeStylsheet();
-    void readXmlAndGetRootElement();
-    void checkAreaXML();
+
+    /**
+     * @brief readLogFileAndGetRootElement Read logfile containing existing video info
+     */
+    void readLogFileAndGetRootElement();
+
+    /**
+     * @brief checkDetectionAreaFile Check detection area file and create if doesn't exist
+     */
+    void checkDetectionAreaFile();
     bool checkCameraAndCodec(const int WIDTH, const int HEIGHT, const int CODEC);
     void checkFolders();
 
@@ -103,7 +111,7 @@ private slots:
     void createUploadWindow();
     void setPositiveMessage();
     void setNegativeMessage();
-    void setErrorReadingXML();
+    void setErrorReadingDetectionAreaFile();
     void updateWidgets(QString filename, QString datetime, QString videoLength);
     void on_aboutButton_clicked();
     void checkForUpdate(QNetworkReply* reply);

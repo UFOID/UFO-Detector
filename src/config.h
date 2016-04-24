@@ -2,6 +2,8 @@
 #define CONFIG_H
 
 #include <QObject>
+#include <QSettings>
+#include <QApplication>
 
 /**
  * @brief Global configuration variables
@@ -13,13 +15,17 @@ public:
     explicit Config(QObject *parent = 0);
 
     QString videoEncoderLocation(); ///< full path to video encoder (ffmpeg, avconv)
+    QString detectionAreaFile(); ///< XML file for detection area
+
+    void setDetectionAreaFile(QString fileName);
 
 signals:
 
 public slots:
 
 private:
-    QString m_videoEncoderLocation;
+    QSettings* m_settings;
+    QString m_videoEncoderLocation; /// @todo put video encoder location to settings, too
 };
 
 #endif // CONFIG_H

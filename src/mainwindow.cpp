@@ -69,8 +69,8 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
 
     if(VERSION==""||VERSION<programVersion)
 	{
-        mySettings.remove("xmlfile");
-        mySettings.setValue("xmlfile",QCoreApplication::applicationDirPath()+"/detectionArea.xml");
+        mySettings.remove("detectionareafile");
+        mySettings.setValue("detectionareafile",QCoreApplication::applicationDirPath()+"/detectionArea.xml");
         qDebug() << "cleared critical settings";
         mySettings.setValue("version",programVersion);
     }
@@ -87,8 +87,8 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
     counterPositive_=0;
     recordingCounter_=0;
 
-    readXmlAndGetRootElement();
-    checkAreaXML();
+    readLogFileAndGetRootElement();
+    checkDetectionAreaFile();
     initializeStylsheet();
     checkFolders();
     if (checkCameraAndCodec(WIDTH,HEIGHT,CODEC))
@@ -156,7 +156,7 @@ void MainWindow::setSignalsAndSlots(ActualDetector* ptrDetector)
     theDetector = ptrDetector;
     connect(theDetector,SIGNAL(positiveMessage()),this,SLOT(setPositiveMessage()));
     connect(theDetector,SIGNAL(negativeMessage()),this,SLOT(setNegativeMessage()));
-    connect(theDetector,SIGNAL(errorReadingXML()),this,SLOT(setErrorReadingXML()));
+    connect(theDetector,SIGNAL(errorReadingDetectionAreaFile()),this,SLOT(setErrorReadingDetectionAreaFile()));
     connect(theDetector->getRecorder(),SIGNAL(updateListWidget(QString,QString,QString)),this,SLOT(updateWidgets(QString,QString,QString)));
     connect(theDetector->getRecorder(),SIGNAL(recordingStarted()),this,SLOT(recordingWasStarted()));
     connect(theDetector->getRecorder(),SIGNAL(recordingStopped()),this,SLOT(recordingWasStoped()));
@@ -182,7 +182,7 @@ void MainWindow::updateWidgets(QString filename, QString datetime, QString video
 
     recordingCounter_++;
     ui->lineCount->setText(QString::number(recordingCounter_));
-    readXmlAndGetRootElement();
+    readLogFileAndGetRootElement();
 }
 
 /*
@@ -239,24 +239,24 @@ void MainWindow::deletingFileAndRemovingItem()
             if (dateInXML.compare(dateToRemove)==0)
 			{
               documentXML.firstChildElement().removeChild(node);
-              if(!fileXML.open(QIODevice::WriteOnly | QIODevice::Text))
+              if(!logFile.open(QIODevice::WriteOnly | QIODevice::Text))
 			  {
                   qDebug() <<  "fail open xml - delete";
                   return;
               }
               else
 			  {
-                  QTextStream stream(&fileXML);
+                  QTextStream stream(&logFile);
                   stream.setCodec("UTF-8");
                   stream << documentXML.toString();
-                  fileXML.close();
+                  logFile.close();
               }
               break;
             }
         }
         node = node.nextSibling();
     }
-    fileXML.close();
+    logFile.close();
     emit elementWasRemoved();
 
 }
@@ -363,10 +363,10 @@ void MainWindow::setNegativeMessage()
 /*
  * Error when reading detection area file
  */
-void MainWindow::setErrorReadingXML()
+void MainWindow::setErrorReadingDetectionAreaFile()
 {
-    ui->outputText->append("ERROR: xml file containing the area information was not read correctly");
-    ui->outputText->append("Detection is not working. Select area of detection first in the settings");
+    ui->outputText->append("ERROR: xml file containing the detection area information was not read correctly");
+    ui->outputText->append("ERROR: Detection is not working. Select area of detection first in the settings.");
 }
 
 /*
@@ -399,7 +399,7 @@ void MainWindow::on_settingsButton_clicked()
 {
     if (!isDetecting)
 	{
-        settingsDialog = new SettingsDialog(0,CamPtr);
+        settingsDialog = new SettingsDialog(0, CamPtr, m_config);
         settingsDialog->setModal(true);
         settingsDialog->show();
         settingsDialog->setAttribute(Qt::WA_DeleteOnClose);
@@ -574,81 +574,65 @@ void MainWindow::initializeStylsheet()
     ui->outputText->append("For feedback and bug reports contact the developer at contact@ufoid.net");
 }
 
-
-/*
- * Read logfile containing existing video infos
- */
-void MainWindow::readXmlAndGetRootElement()
+void MainWindow::readLogFileAndGetRootElement()
 {
-	fileXML.setFileName(QString(QCoreApplication::applicationDirPath()+"/logs.xml"));
-	if(fileXML.exists())
+    logFile.setFileName(QString(QCoreApplication::applicationDirPath()+"/logs.xml"));
+    if(logFile.exists())
 	{
-		if(!fileXML.open(QIODevice::ReadOnly | QIODevice::Text))
+        if(!logFile.open(QIODevice::ReadOnly | QIODevice::Text))
 		{
 			qDebug() << "fail reading the file" << endl;
 		}
 		else
 		{
-			if(!documentXML.setContent(&fileXML))
+            if(!documentXML.setContent(&logFile))
 			{
 				qDebug() << "failed to load doc" << endl;
 			}
 			else
 			{
-				fileXML.close();
+                logFile.close();
 				qDebug() << "correctly loaded root element" << endl;
 			}
 		}
 	}
 	else
 	{
-		if(!fileXML.open(QIODevice::WriteOnly | QIODevice::Text))
+        if(!logFile.open(QIODevice::WriteOnly | QIODevice::Text))
 		{
-			qDebug() << "failed creating file" << endl;
+            qDebug() << "failed creating log file" << endl;
 		}
 		else
 		{
-			qDebug() << "creating xmlfile" << endl;
+            qDebug() << "creating log file" << endl;
 			QDomDocument tempFirstTime;
             tempFirstTime.appendChild(tempFirstTime.createElement("UFOID"));
-			QTextStream stream(&fileXML);
+            QTextStream stream(&logFile);
 			stream << tempFirstTime.toString();
-			fileXML.close();
-			readXmlAndGetRootElement();
+            logFile.close();
+            readLogFileAndGetRootElement();
 		}
 	}
 }
 
-/*
- * Check the detection area file
- */
-void MainWindow::checkAreaXML()
+void MainWindow::checkDetectionAreaFile()
 {
-    QSettings settings("UFOID","Detector");
-    String xmlFile = settings.value("xmlfile").toString().toStdString();
-    if(xmlFile == "")
-	{
-        QFile area(QString(QCoreApplication::applicationDirPath()+"/detectionArea.xml"));
-        area.open(QIODevice::WriteOnly | QIODevice::Text);
-        settings.setValue("xmlfile",QString(QCoreApplication::applicationDirPath()+"/detectionArea.xml"));
-        qDebug() << "created areaXML file in " << area.fileName();
+    QString areaFileName = m_config->detectionAreaFile();
+    QFile areaFile(areaFileName);
+    if(areaFile.exists())
+    {
+         qDebug() << "found detection area file";
     }
     else
-	{
-        QFile area(xmlFile.c_str());
-        if(area.exists())
-		{
-             qDebug() << "found areaXML file";
-        }
-        else
-		{
-            settings.setValue("xmlfile",QString(QCoreApplication::applicationDirPath()+"/detectionArea.xml"));
-            area.setFileName(QString(QCoreApplication::applicationDirPath()+"/detectionArea.xml"));
-            area.open(QIODevice::WriteOnly | QIODevice::Text);
-            qDebug() << "created areaXML file";
+    {
+        areaFile.setFileName(areaFileName);
+        if (areaFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            qDebug() << "created detection area file " << areaFile.fileName();
+            areaFile.close();
+        } else {
+            qDebug() << "failed to create detection area file " << areaFile.fileName();
         }
     }
-
 }
 
 /*
@@ -769,12 +753,12 @@ void MainWindow::checkFolders()
 void MainWindow::checkForUpdate(QNetworkReply *reply)
 {
     QByteArray data = reply->readAll();
-    qDebug() <<   "XML download size:" << data.size() << "bytes";
+    qDebug() <<   "Downloaded version data," << data.size() << "bytes";
     QDomDocument versionXML;
 
     if(!versionXML.setContent(data))
 	{
-        qWarning() << "Failed to parse QML";
+        qWarning() << "Failed to parse downloaded version data";
     }
     else
 	{
