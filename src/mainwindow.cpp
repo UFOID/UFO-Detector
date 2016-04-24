@@ -656,83 +656,87 @@ void MainWindow::checkAreaXML()
  */
 bool MainWindow::checkCameraAndCodec(const int WIDTH, const int HEIGHT, const int CODEC)
 {
-	bool sucess = false;
-	if (checkAndSetResolution(WIDTH,HEIGHT)&&!threadWebcam&&CamPtr->isWebcamOpen())
-	{
-		try
-		{
-			webcamFrame = CamPtr->getWebcamFrame();
-			cv::resize(webcamFrame,webcamFrame, displayResolution,0, 0, INTER_CUBIC);
-			sucess = true;
-		}
-		catch( cv::Exception& e )  
-		{
-			const char* err_msg = e.what();
-			std::cout << "exception caught: " << err_msg << std::endl;
-			CamPtr->stopReadingWebcam();
-			ui->outputText->append("ERROR: Found webcam but video frame could not be read. Reconnect and check resolution in settings");
-		}
-	}
-	else if (!CamPtr->isWebcamOpen())
-	{
-		ui->outputText->append("ERROR: Could not open webcam. Select webcam in settings");
-	}
+    bool success = false;
+    if (checkAndSetResolution(WIDTH,HEIGHT)&&!threadWebcam&&CamPtr->isWebcamOpen())
+    {
+        try
+        {
+            webcamFrame = CamPtr->getWebcamFrame();
+            cv::resize(webcamFrame,webcamFrame, displayResolution,0, 0, INTER_CUBIC);
+            success = true;
+        }
+        catch( cv::Exception& e )
+        {
+            const char* err_msg = e.what();
+            std::cout << "exception caught: " << err_msg << std::endl;
+            CamPtr->stopReadingWebcam();
+            ui->outputText->append("ERROR: Found webcam but video frame could not be read. Reconnect and check resolution in settings");
+        }
+    }
+    else if (!CamPtr->isWebcamOpen())
+    {
+        ui->outputText->append("ERROR: Could not open webcam. Select webcam in settings");
+    }
 
-	if (CODEC==0)
-	{
-		VideoWriter theVideoWriter;
-		theVideoWriter.open("filename.avi",0, 25,Size(WIDTH,HEIGHT), true);
-		if (!theVideoWriter.isOpened())
-		{
-			ui->outputText->append("ERROR: Could not find Raw Video Codec");
-			ui->outputText->append("Please contact the developer with the information about your system");
-		}
-		else
-		{
-			theVideoWriter.release();
-			remove("filename.avi");
-		}
-	}
-	else if (CODEC==1)
-	{
-		VideoWriter theVideoWriter;
-		theVideoWriter.open("filename.avi",0, 25,Size(WIDTH,HEIGHT), true);
-		if (!theVideoWriter.isOpened())
-		{
-			ui->outputText->append("ERROR: Could not find Raw Video Codec");
-			ui->outputText->append("Please contact the developer with the information about your system");
-		}
-		else
-		{
-			theVideoWriter.release();
-			remove("filename.avi");
-		}
 
-		QFile ffmpegFile(QCoreApplication::applicationDirPath()+"/ffmpeg.exe");
-		if(!ffmpegFile.exists())
-		{
-			ui->outputText->append("ERROR: Could not find FFmpeg.exe needed for FFV1 Codec. Please contact the developer.");
-		}
+    if (CODEC==0)
+    {
+        VideoWriter theVideoWriter;
+        theVideoWriter.open("filename.avi",0, 25,Size(WIDTH,HEIGHT), true);
+        if (!theVideoWriter.isOpened())
+        {
+            ui->outputText->append("ERROR: Could not find Raw Video Codec");
+            ui->outputText->append("Please contact the developer with the information about your system");
+        }
+        else
+        {
+            theVideoWriter.release();
+            remove("filename.avi");
+        }
+    }
+    else if (CODEC==1)
+    {
+        VideoWriter theVideoWriter;
+        theVideoWriter.open("filename.avi",0, 25,Size(WIDTH,HEIGHT), true);
+        if (!theVideoWriter.isOpened())
+        {
+            ui->outputText->append("ERROR: Could not find Raw Video Codec");
+            ui->outputText->append("Please contact the developer with the information about your system");
+        }
+        else
+        {
+            theVideoWriter.release();
+            remove("filename.avi");
+        }
 
-	}
-	else if (CODEC==2)
-	{
-		VideoWriter theVideoWriter;
-		theVideoWriter.open("filename.avi",CV_FOURCC('L','A','G','S'), 25,Size(WIDTH,HEIGHT), true);
-		if (!theVideoWriter.isOpened())
-		{
-			ui->outputText->append("ERROR: Could not find Lagarith Lossless Video Codec");
-			ui->outputText->append("Download and install from http://lags.leetcode.net/codec.html");
-		}
-		else
-		{
-			theVideoWriter.release();
-			remove("filename.avi");
-		}
+        QFile ffmpegFile(QCoreApplication::applicationDirPath()+"/ffmpeg.exe");
+        if(!ffmpegFile.exists())
+        {
+            ui->outputText->append("ERROR: Could not find FFmpeg.exe needed for FFV1 Codec. Please contact the developer.");
+        }
 
-	}
-	
-	return sucess;
+    }
+    else if (CODEC==2)
+    {
+        VideoWriter theVideoWriter;
+        theVideoWriter.open("filename.avi",CV_FOURCC('L','A','G','S'), 25,Size(WIDTH,HEIGHT), true);
+        if (!theVideoWriter.isOpened())
+        {
+            ui->outputText->append("ERROR: Could not find Lagarith Lossless Video Codec");
+            ui->outputText->append("Download and install from http://lags.leetcode.net/codec.html");
+        }
+        else
+        {
+            theVideoWriter.release();
+            remove("filename.avi");
+        }
+
+    }
+
+    ui->startButton->setEnabled(success);
+    ui->stopButton->setEnabled(success);
+
+    return success;
 }
 
 /*
