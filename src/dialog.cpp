@@ -104,7 +104,7 @@ void Dialog::savePointsAsXML(vector<Point2f> & contour)
     QDomElement root = doc.createElement("UFOID");
     doc.appendChild(root);
     int count=0;
-    for(int i = 0; i < contour.size(); i++)
+    for(int i = 0; i < (int)contour.size(); i++)
 	{
         QDomElement node = doc.createElement("point");
         node.setAttribute("x",contour[i].x);

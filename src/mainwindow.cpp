@@ -40,8 +40,6 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-
-
 using namespace cv;
 
 MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
@@ -125,7 +123,6 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
     request.setUrl(QUrl("http://ufoid.net/version.xml"));
     request.setRawHeader( "User-Agent" , "Mozilla Firefox" );
     manager->get(request);
-
 
     qDebug() << "mainwindow constructed" ;
 }
@@ -840,6 +837,7 @@ MainWindow::~MainWindow()
  */
 void MainWindow::closeEvent(QCloseEvent *event)
 {
+    Q_UNUSED(event);
     theDetector->stopThread();
 
     QSettings theSettings("UFOID","Detector");

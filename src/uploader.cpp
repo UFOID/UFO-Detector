@@ -31,8 +31,7 @@
  * See work around.
  */
 Uploader::Uploader(QWidget *parent, QString pathName) :
-    QDialog(parent),filepath(pathName),
-    ui(new Ui::Uploader)
+    QDialog(parent), ui(new Ui::Uploader), filepath(pathName)
 {
     ui->setupUi(this);
     ui->lineFile->setText(pathName);
@@ -57,6 +56,7 @@ Uploader::~Uploader()
 
 void Uploader::uploadFinish(QNetworkReply *r)
 {
+    Q_UNUSED(r);
     disconnect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(uploadFinish(QNetworkReply*)));
     connect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(successReply(QNetworkReply*)));
     QNetworkRequest req;

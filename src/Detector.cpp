@@ -35,8 +35,7 @@ CDetector::CDetector(Mat& gray)
 //----------------------------------------------------------------------
 void CDetector::DetectContour(Mat& img, vector<Rect>& Rects,vector<Point2d>& centers, Rect& croppedRect)
 {
-	double area=0;
-	Rects.clear();
+    Rects.clear();
 	centers.clear();
 	vector<vector<Point> > contours;
 	vector<Vec4i> hierarchy;
@@ -47,7 +46,7 @@ void CDetector::DetectContour(Mat& img, vector<Rect>& Rects,vector<Point2d>& cen
     //findContours( edges, contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE );
     if(contours.size()>0)
 	{
-		for( int i = 0; i < contours.size(); i++ )
+        for(int i = 0; i < (int)contours.size(); i++)
 		{
             Rect r=cv::boundingRect(contours[i]);
             Point tl = croppedRect.tl()+r.tl();
