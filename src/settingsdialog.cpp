@@ -36,6 +36,8 @@ SettingsDialog::SettingsDialog(QWidget *parent, Camera *camPtr) :QDialog(parent)
     ui->setupUi(this);
     this->setWindowTitle("Settings");
 
+    this->setLayout(ui->gridLayout);
+
     QSettings settings("UFOID","Detector");
     int INDEX=settings.value("cameraindex",0).toInt();
     ui->comboBoxWebcam->setCurrentIndex(INDEX);
@@ -50,9 +52,9 @@ SettingsDialog::SettingsDialog(QWidget *parent, Camera *camPtr) :QDialog(parent)
     if(settings.value("saveimages").toBool())
 	{
         ui->checkBoxsaveImages->setChecked(true);
-        emit on_checkBoxsaveImages_stateChanged(2);
+        emit on_checkBoxsaveImages_stateChanged(Qt::Checked);
     }
-    else emit on_checkBoxsaveImages_stateChanged(0);
+    else emit on_checkBoxsaveImages_stateChanged(Qt::Unchecked);
 	
     ui->checkBoxRectangle->setChecked(settings.value("recordwithrect",false).toBool());
     ui->lineImagePath->setText(settings.value("imagespath").toString());
@@ -77,7 +79,7 @@ void SettingsDialog::saveSettings()
 {
     QSettings settings("UFOID","Detector");
     settings.setValue("videofilepath",ui->lineVideoPath->text());
-    settings.setValue("cameraindex",ui->comboBoxWebcam->currentIndex());
+    settings.setValue("cameraindex",ui->comboBoxWebcam->currentIndex()); /// @todo cameraindex may change if cameras added/removed
     settings.setValue("camerawidth",ui->lineW->text());
     settings.setValue("cameraheight",ui->lineH->text());
     settings.setValue("xmlfile",ui->lineXMLfile->text());
