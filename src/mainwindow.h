@@ -54,7 +54,6 @@ private:
     std::atomic<bool> isRecording;
     std::atomic<bool> lastWasPositive, lastWasInfo;    
     bool isDetecting;
-    bool isValidToken;
     int counterPositive_, counterNegative_, recordingCounter_;
     cv::Mat webcamFrame;
     Camera* CamPtr;
@@ -87,7 +86,6 @@ public slots:
     void displayPixmap(QImage img);
 
 private slots:
-    void checkToken(QNetworkReply* reply);
     void on_startButton_clicked();
     void on_stopButton_clicked();
     void on_checkBox_stateChanged(int arg1);

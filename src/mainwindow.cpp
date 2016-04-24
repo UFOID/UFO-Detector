@@ -81,7 +81,6 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr) :QMainWindow(parent),
     isRecording=false;
     lastWasPositive=false;
     lastWasInfo=true;
-    isValidToken=true;
     counterNegative_=0;
     counterPositive_=0;
     recordingCounter_=0;
@@ -262,55 +261,23 @@ void MainWindow::deletingFileAndRemovingItem()
 }
 
 
-void MainWindow::checkToken(QNetworkReply* reply)
-{
-
-    qDebug() << "called API";
-
-    if(reply->error() == QNetworkReply::NoError)
-    {
-        QString strReply = (QString)reply->readAll();
-        QJsonDocument jsonResponse = QJsonDocument::fromJson(strReply.toUtf8());
-        QString method = jsonResponse.object().value("method").toString();
-        if (method == "ftp")
-        {
-            isValidToken = true;
-            qDebug() << "valid";
-        }
-
-    }
-    else
-    {
-        qDebug() << reply->error();
-    }
-
-    delete reply;
-    manager->deleteLater();
-    manager = nullptr;
-}
 
 /*
  * Display the Upload Window
  */
 void MainWindow::createUploadWindow()
 {
-    if(isValidToken)
+
+    for(int row = 0; row < ui->myList->count(); row++)
     {
-        for(int row = 0; row < ui->myList->count(); row++)
+        QListWidgetItem *item = ui->myList->item(row);
+        VideoWidget* widget = qobject_cast<VideoWidget*>(ui->myList->itemWidget(item));
+        if(widget->getUploadLabel()==sender())
         {
-            QListWidgetItem *item = ui->myList->item(row);
-            VideoWidget* widget = qobject_cast<VideoWidget*>(ui->myList->itemWidget(item));
-            if(widget->getUploadLabel()==sender())
-            {
-                Uploader* upload = new Uploader(this,widget->getPathname());
-                upload->show();
-                upload->setAttribute(Qt::WA_DeleteOnClose);
-            }
+            Uploader* upload = new Uploader(this,widget->getPathname());
+            upload->show();
+            upload->setAttribute(Qt::WA_DeleteOnClose);
         }
-    }
-    else
-    {
-        QMessageBox::information(this,"Information","You need a free UFOID.net account to share your videos. If you already have an account enter your User Token in the settings of the UFO Detector");
     }
 
 }
