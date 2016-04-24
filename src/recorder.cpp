@@ -46,6 +46,7 @@ Recorder::Recorder(ActualDetector *parent, Camera *cameraPtr): QObject(parent),c
      const QString recordingPath = mySettings.value("videofilepath").toString();
      withRectangle = mySettings.value("recordwithrect",false).toBool();
      pathDirectory = recordingPath.toLatin1().toStdString();
+     videoEncoderLocation = "";
      if (QSysInfo::windowsVersion()==QSysInfo::WV_WINDOWS8 || QSysInfo::windowsVersion()==QSysInfo::WV_WINDOWS8_1)
 	 {
          codecSetting = mySettings.value("videocodec",2).toInt();
@@ -87,7 +88,7 @@ Recorder::Recorder(ActualDetector *parent, Camera *cameraPtr): QObject(parent),c
      reloadXML();
      recording = false;
      connect(this,SIGNAL(finishedRec(QString,QString)),this,SLOT(finishedRecording(QString,QString)));
-     cout << "recorder constucted" << endl;
+     cout << "recorder constructed" << endl;
 }
 
 /*
@@ -191,7 +192,8 @@ void Recorder::finishedRecording(QString picDir, QString filename)
     QProcess* proc = new QProcess();
     vecProcess.push_back(proc);
     vecString.push_back(picDir);
-    proc->start(QCoreApplication::applicationDirPath()+"/ffmpeg.exe", QStringList() <<"-i"<< picDir << "-vcodec"<< "ffv1" << filename);
+    // these video encoder parameters are ok only for ffmpeg and avconv (which are more or less compatible)
+    proc->start(videoEncoderLocation, QStringList() <<"-i"<< picDir << "-vcodec"<< "ffv1" << filename);
     connect(proc,SIGNAL(finished(int)),this,SLOT(finishedProcess()));
 }
 
@@ -337,6 +339,10 @@ void Recorder::setRectangle(Rect &r, bool isRed)
          color = Scalar(0,0,255);
     }
     else  color = Scalar(255,0,0);
+}
+
+void Recorder::setVideoEncoderLocation(QString location) {
+    videoEncoderLocation = location;
 }
 
 

@@ -21,6 +21,7 @@
 
 #include <vector>
 #include "recorder.h"
+#include "config.h"
 #include <time.h>
 #include <QObject>
 #include "opencv2/objdetect/objdetect.hpp"
@@ -35,7 +36,7 @@ class ActualDetector : public QObject
  Q_OBJECT
 
 public:
-    ActualDetector(MainWindow *parent, Camera *cameraPtr = 0 );
+    ActualDetector(MainWindow *parent, Camera *cameraPtr = 0, Config *configPtr = 0);
     bool start();
     bool initialize();
     void stopThread();
@@ -51,6 +52,7 @@ private:
     int time;
     Recorder theRecorder;
     Camera* camPtr;
+    Config* m_config;
     cv::Mat result, result_cropped;
     cv::Mat prev_frame, current_frame, next_frame;
     cv::Mat d1, d2, motion, treshImg;
@@ -61,7 +63,7 @@ private:
     int minAmountOfMotion, max_deviation;
     std::string pathname, pathnameThresh, fileDir;
     std::string filename;
-    std::string ext;    
+    std::string ext;
     int imageCount;
     int thresholdLevel;
     int WIDTH;

@@ -20,6 +20,7 @@
 
 #include <QMainWindow>
 #include "actualdetector.h"
+#include "config.h"
 #include <QModelIndex>
 #include <QDomDocument>
 #include <QFile>
@@ -32,14 +33,14 @@ class MainWindow;
 
 class QNetworkReply;
 class Camera;
-class Settings;
+class SettingsDialog;
 class QNetworkAccessManager;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0, Camera *cameraPtr = 0);
+    explicit MainWindow(QWidget *parent = 0, Camera *cameraPtr = 0, Config *configPtr = 0);
     ~MainWindow();
     void addOutputText(QString msg);
     bool getCheckboxState();
@@ -47,7 +48,7 @@ public:
 
 private:
     Ui::MainWindow *ui;
-    Settings *settingsDialog;
+    SettingsDialog *settingsDialog;
     ActualDetector* theDetector;
     MessageUpdate* updateWindow;
     std::atomic<bool> isUpdating;
@@ -60,6 +61,8 @@ private:
     Camera* CamPtr;
     std::unique_ptr<std::thread> threadWebcam;
     cv::Size displayResolution;
+
+    Config* m_config;
 
     QDomDocument documentXML;
     QFile fileXML;

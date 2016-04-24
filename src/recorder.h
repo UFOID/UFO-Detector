@@ -39,6 +39,7 @@ public:
     void setup(cv::Mat &f);
     void stopRecording(bool b);
     void setRectangle(cv::Rect &r, bool isRed);
+    void setVideoEncoderLocation(QString location); ///< set location of video encoder (i.e. ffmpeg, avconv)
 
 private:
 	const int DEFAULT_CODEC = 0;
@@ -76,6 +77,8 @@ private:
 
     int codec;
     int codecSetting;
+
+    QString videoEncoderLocation;  ///< location of video encoder (ffmpeg, avconv)
 
     void recordThread();
     void readFrameThread();

@@ -16,8 +16,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "settings.h"
-#include "ui_settings.h"
+#include "settingsdialog.h"
+#include "ui_settingsdialog.h"
 #include <QFileDialog>
 #include <iostream>
 #include <QSettings>
@@ -31,7 +31,7 @@
  * Checking the status of the area file is broken. Commented out
  */
 
-Settings::Settings(QWidget *parent, Camera *camPtr) :QDialog(parent),ui(new Ui::Settings), cameraPtr(camPtr)
+SettingsDialog::SettingsDialog(QWidget *parent, Camera *camPtr) :QDialog(parent),ui(new Ui::SettingsDialog), cameraPtr(camPtr)
 {
     ui->setupUi(this);
     this->setWindowTitle("Settings");
@@ -73,7 +73,7 @@ Settings::Settings(QWidget *parent, Camera *camPtr) :QDialog(parent),ui(new Ui::
 //    threadXMLfile.reset(new std::thread(&Settings::checkAreaFile, this));
 }
 
-void Settings::saveSettings()
+void SettingsDialog::saveSettings()
 {
     QSettings settings("UFOID","Detector");
     settings.setValue("videofilepath",ui->lineVideoPath->text());
@@ -110,13 +110,13 @@ void Settings::saveSettings()
 //    emit finishedCheckingXML();
 //}
 
-void Settings::on_toolButtonVideoPath_clicked()
+void SettingsDialog::on_toolButtonVideoPath_clicked()
 {
     QString videoFilePath=QFileDialog::getExistingDirectory(this,tr("Select Directory"),QDir::currentPath(),QFileDialog::ShowDirsOnly);
     ui->lineVideoPath->setText(videoFilePath);
 }
 
-Settings::~Settings()
+SettingsDialog::~SettingsDialog()
 {
     qDebug() << "destructor settings";
     //disconnect(this,SIGNAL(finishedCheckingXML()),this,SLOT(cleanupThreadCheckXML()));
@@ -124,14 +124,14 @@ Settings::~Settings()
 }
 
 
-void Settings::on_buttonSave_clicked()
+void SettingsDialog::on_buttonSave_clicked()
 {
     saveSettings();
     wasSaved=true;
     QMessageBox::information(this,"Information","Restart the application to apply the changes");
 }
 
-void Settings::on_buttonCancel_clicked()
+void SettingsDialog::on_buttonCancel_clicked()
 {
     if(dialogIsOpened)
     {
@@ -152,7 +152,7 @@ void Settings::on_buttonCancel_clicked()
 //    else QMessageBox::information(this,"Information","Please wait until checking of the area file has finished");
 }
 
-void Settings::on_checkBoxsaveImages_stateChanged(int arg1)
+void SettingsDialog::on_checkBoxsaveImages_stateChanged(int arg1)
 {
     if(arg1==2)
 	{
@@ -168,19 +168,19 @@ void Settings::on_checkBoxsaveImages_stateChanged(int arg1)
     }
 }
 
-void Settings::on_toolButtonXMLfile_clicked()
+void SettingsDialog::on_toolButtonXMLfile_clicked()
 {
     QString xmlFile = QFileDialog::getOpenFileName(this,tr("Select the XML file"),QDir::currentPath(),tr("XML file (*.xml)"));
     ui->lineXMLfile->setText(xmlFile);
 }
 
-void Settings::on_toolButtonImagePath_clicked()
+void SettingsDialog::on_toolButtonImagePath_clicked()
 {
     QString imagePath = QFileDialog::getExistingDirectory(this,tr("Select Directory"),QDir::currentPath(),QFileDialog::ShowDirsOnly);
     ui->lineImagePath->setText(imagePath);
 }
 
-void Settings::on_buttonXML_clicked()
+void SettingsDialog::on_buttonXML_clicked()
 {
     if (wasSaved)
 	{
@@ -212,12 +212,12 @@ void Settings::on_buttonXML_clicked()
 //    }
 //}
 
-void Settings::on_toolButton_clicked()
+void SettingsDialog::on_toolButton_clicked()
 {
     QMessageBox::information(this,"Codec Information","Raw Video results is big file sizes \nA lossless codec is recommended \nWindows 8 users should use the Lagarith Codec");
 }
 
-void Settings::on_toolButtonToken_clicked()
+void SettingsDialog::on_toolButtonToken_clicked()
 {
     QMessageBox::information(this,"UFOID.net User Token","Copy the User Token from your UFOID account in to this field to enable the upload feature\nThe code can be found at http://ufoid.net/profile/edit");
 }

@@ -36,8 +36,11 @@ using namespace cv;
 /*
  * Main Detector class
  */
-ActualDetector::ActualDetector(MainWindow *parent, Camera *cameraPtr): QObject(parent),theRecorder(this,cameraPtr),camPtr(cameraPtr)
+ActualDetector::ActualDetector(MainWindow *parent, Camera *cameraPtr, Config *configPtr) :
+    QObject(parent), theRecorder(this, cameraPtr), camPtr(cameraPtr)
 {
+    m_config = configPtr;
+
     QSettings mySettings("UFOID","Detector");
 
     const QString XMLPATH = mySettings.value("xmlfile").toString();
@@ -51,6 +54,8 @@ ActualDetector::ActualDetector(MainWindow *parent, Camera *cameraPtr): QObject(p
     xmlFile = XMLPATH.toStdString();
     pathname = IMAGEPATH.toStdString();
     kernel_ero = getStructuringElement(MORPH_RECT, Size(1,1));
+
+    theRecorder.setVideoEncoderLocation(m_config->videoEncoderLocation());
 
     std::cout << "actualdetector constructed" <<endl;
 }

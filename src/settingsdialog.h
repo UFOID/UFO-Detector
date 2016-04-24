@@ -29,19 +29,19 @@
 class Camera;
 
 namespace Ui {
-class Settings;
+class SettingsDialog;
 }
 
-class Settings : public QDialog
+class SettingsDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit Settings(QWidget *parent = 0, Camera* camPtr = 0);
-    ~Settings();
+    explicit SettingsDialog(QWidget *parent = 0, Camera* camPtr = 0);
+    ~SettingsDialog();
 
 private:
-    Ui::Settings *ui;
+    Ui::SettingsDialog *ui;
     Camera* cameraPtr;
     void saveSettings();
     bool dialogIsOpened;

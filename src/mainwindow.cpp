@@ -28,7 +28,7 @@
 #include "clickablelabel.h"
 #include "videowidget.h"
 #include "camera.h"
-#include "settings.h"
+#include "settingsdialog.h"
 #include "imageexplorer.h"
 #include <QDesktopServices>
 #include <QDir>
@@ -44,10 +44,13 @@
 
 using namespace cv;
 
-MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr) :QMainWindow(parent),ui(new Ui::MainWindow),CamPtr(cameraPtr)
+MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
+    QMainWindow(parent), ui(new Ui::MainWindow), CamPtr(cameraPtr)
 {
     ui->setupUi(this);
     qDebug() << "begin constructing mainwindow" ;
+
+    m_config = configPtr;
 
     programVersion = "0.6.0";
 
@@ -399,7 +402,7 @@ void MainWindow::on_settingsButton_clicked()
 {
     if (!isDetecting)
 	{
-        settingsDialog = new Settings(0,CamPtr);
+        settingsDialog = new SettingsDialog(0,CamPtr);
         settingsDialog->setModal(true);
         settingsDialog->show();
         settingsDialog->setAttribute(Qt::WA_DeleteOnClose);
@@ -686,7 +689,7 @@ bool MainWindow::checkCameraAndCodec(const int WIDTH, const int HEIGHT, const in
         if (!theVideoWriter.isOpened())
         {
             ui->outputText->append("ERROR: Could not find Raw Video Codec");
-            ui->outputText->append("Please contact the developer with the information about your system");
+            ui->outputText->append("ERROR: Please contact the developer with the information about your system");
         }
         else
         {
@@ -701,7 +704,7 @@ bool MainWindow::checkCameraAndCodec(const int WIDTH, const int HEIGHT, const in
         if (!theVideoWriter.isOpened())
         {
             ui->outputText->append("ERROR: Could not find Raw Video Codec");
-            ui->outputText->append("Please contact the developer with the information about your system");
+            ui->outputText->append("ERROR: Please contact the developer with the information about your system");
         }
         else
         {
@@ -709,10 +712,13 @@ bool MainWindow::checkCameraAndCodec(const int WIDTH, const int HEIGHT, const in
             remove("filename.avi");
         }
 
-        QFile ffmpegFile(QCoreApplication::applicationDirPath()+"/ffmpeg.exe");
+        QFile ffmpegFile(m_config->videoEncoderLocation());
         if(!ffmpegFile.exists())
         {
-            ui->outputText->append("ERROR: Could not find FFmpeg.exe needed for FFV1 Codec. Please contact the developer.");
+            ui->outputText->append("ERROR: Could not find video encoder needed for FFV1 Codec.");
+            ui->outputText->append("ERROR: Please install ffmpeg or avconv, or contact the developer.");
+        } else {
+            ui->outputText->append("Using video encoder "+m_config->videoEncoderLocation());
         }
 
     }
@@ -723,7 +729,7 @@ bool MainWindow::checkCameraAndCodec(const int WIDTH, const int HEIGHT, const in
         if (!theVideoWriter.isOpened())
         {
             ui->outputText->append("ERROR: Could not find Lagarith Lossless Video Codec");
-            ui->outputText->append("Download and install from http://lags.leetcode.net/codec.html");
+            ui->outputText->append("ERROR: Download and install from http://lags.leetcode.net/codec.html");
         }
         else
         {
