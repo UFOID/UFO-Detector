@@ -23,7 +23,6 @@ RC_ICONS = app.ico
 SOURCES += main.cpp\
     recorder.cpp \
     mainwindow.cpp \
-    dialog.cpp \
     graphicsscene.cpp \
     actualdetector.cpp \
     videowidget.cpp \
@@ -39,12 +38,12 @@ SOURCES += main.cpp\
     VIBE.cpp \
     uploader.cpp \
     settingsdialog.cpp \
-    config.cpp
+    config.cpp \
+    detectionareaeditdialog.cpp
 
 HEADERS  += \
     recorder.h \
     mainwindow.h \
-    dialog.h \
     graphicsscene.h \
     actualdetector.h \
     videowidget.h \
@@ -55,15 +54,16 @@ HEADERS  += \
     uploader.h \
     OpencvInclude.h \
     settingsdialog.h \
-    config.h
+    config.h \
+    detectionareaeditdialog.h
 
 FORMS    += \
     mainwindow.ui \
-    dialog.ui \
     messageupdate.ui \
     imageexplorer.ui \
     uploader.ui \
-    settingsdialog.ui
+    settingsdialog.ui \
+    detectionareaeditdialog.ui
 
 windows {
     INCLUDEPATH += C:\own\install\include

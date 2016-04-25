@@ -23,7 +23,7 @@
 #include <QDialog>
 #include <vector>
 #include <opencv2/opencv.hpp>
-#include "dialog.h"
+#include "detectionareaeditdialog.h"
 #include <memory>
 #include <thread>
 
@@ -48,7 +48,7 @@ private:
     void saveSettings();
     bool dialogIsOpened;
     bool wasSaved;
-    Dialog* myDialog;
+    DetectionAreaEditDialog* myDialog;
     //std::unique_ptr<std::thread> threadXMLfile;
     //void checkAreaFile();
 

@@ -194,7 +194,7 @@ void SettingsDialog::on_buttonSelectDetectionArea_clicked()
     else
 	{
         dialogIsOpened=true;
-        myDialog = new Dialog(0, cameraPtr, m_config);
+        myDialog = new DetectionAreaEditDialog(0, cameraPtr, m_config);
         myDialog->setModal(true);
         myDialog->show();
         //connect(myDialog,SIGNAL(savedFile()),this,SLOT(startThreadCheckXML()));
