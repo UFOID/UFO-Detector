@@ -52,7 +52,7 @@ Camera::Camera()
 cv::Mat Camera::getWebcamFrame()
 {
 
-    if (videoFrame.isContinuous())
+    if (videoFrame.data && videoFrame.isContinuous())
 	{
         mutex.lock();
         frameToReturn = videoFrame.clone();

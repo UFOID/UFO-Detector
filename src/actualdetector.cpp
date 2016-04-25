@@ -130,10 +130,7 @@ void ActualDetector::detectingThread()
             prev_frame = current_frame;
             current_frame = next_frame;
             tempImage = camPtr->getWebcamFrame();
-			if (!tempImage.data) 
-			{	// empty frame
-				continue;
-			}
+
             next_frame = tempImage.clone();
             result = next_frame;
             cvtColor(next_frame, next_frame, CV_RGB2GRAY);
