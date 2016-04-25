@@ -46,7 +46,7 @@ SettingsDialog::SettingsDialog(QWidget *parent, Camera *camPtr, Config *configPt
     ui->lineH->setText(settings.value("cameraheight",480).toString());
     ui->lineW->setValidator(new QIntValidator(10, 1280, this));
     ui->lineH->setValidator(new QIntValidator(10, 768, this));
-    ui->lineVideoPath->setText(settings.value("videofilepath").toString());
+    ui->lineVideoPath->setText(m_config->resultVideoDir());
     ui->lineDetectionAreaFile->setText(m_config->detectionAreaFile());
     ui->lineToken->setText(settings.value("usertoken","").toString());
     if(settings.value("saveimages").toBool())
@@ -57,7 +57,7 @@ SettingsDialog::SettingsDialog(QWidget *parent, Camera *camPtr, Config *configPt
     else emit on_checkBoxsaveImages_stateChanged(Qt::Unchecked);
 	
     ui->checkBoxRectangle->setChecked(settings.value("recordwithrect",false).toBool());
-    ui->lineImagePath->setText(settings.value("imagespath").toString());
+    ui->lineImagePath->setText(m_config->resultImageDir());
     ui->lineMinPosRequired->setText(settings.value("minpositive",2).toString());
 
     if (QSysInfo::windowsVersion()==QSysInfo::WV_WINDOWS8 || QSysInfo::windowsVersion()==QSysInfo::WV_WINDOWS8_1)
@@ -78,13 +78,13 @@ SettingsDialog::SettingsDialog(QWidget *parent, Camera *camPtr, Config *configPt
 void SettingsDialog::saveSettings()
 {
     QSettings settings("UFOID","Detector");
-    settings.setValue("videofilepath",ui->lineVideoPath->text());
+    m_config->setResultVideoDir(ui->lineVideoPath->text());
     settings.setValue("cameraindex",ui->comboBoxWebcam->currentIndex()); /// @todo cameraindex may change if cameras added/removed
     settings.setValue("camerawidth",ui->lineW->text());
     settings.setValue("cameraheight",ui->lineH->text());
     m_config->setDetectionAreaFile(ui->lineDetectionAreaFile->text());
     settings.setValue("saveimages",ui->checkBoxsaveImages->isChecked());
-    settings.setValue("imagespath",ui->lineImagePath->text());
+    m_config->setResultImageDir(ui->lineImagePath->text());
     settings.setValue("recordwithrect",ui->checkBoxRectangle->isChecked());
     settings.setValue("minpositive",ui->lineMinPosRequired->text());
     settings.setValue("videocodec",ui->comboBoxCodec->currentIndex());

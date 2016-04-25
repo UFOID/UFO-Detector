@@ -37,7 +37,7 @@ DetectionAreaEditDialog::DetectionAreaEditDialog(QWidget *parent, Camera *camPtr
     QSettings mySettings("UFOID","Detector");
     WIDTH = mySettings.value("camerawidth",640).toInt();
     HEIGHT = mySettings.value("cameraheight",480).toInt();
-    areaFilePath = m_config->detectionAreaFile().toStdString();
+    areaFilePath = m_config->detectionAreaFile().toStdString(); /// @todo no need to use stdstrings
 
     QFile area(areaFilePath.c_str());
     if(!area.exists())
@@ -124,7 +124,7 @@ void DetectionAreaEditDialog::savePointsAsXML(vector<Point2f> & contour)
     }
     else
 	{
-		ui->labelInfo->setText("ERROR saving the XML file. Check \"Area file\" path in settings");
+        ui->labelInfo->setText("ERROR saving the XML file. Check \"Detection area file\" path in settings");
 	}
         
 }

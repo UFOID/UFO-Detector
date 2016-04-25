@@ -83,6 +83,10 @@ private:
      */
     void checkDetectionAreaFile();
     bool checkCameraAndCodec(const int WIDTH, const int HEIGHT, const int CODEC);
+
+    /**
+     * Check that the folder for the images and videos exist
+     */
     void checkFolders();
 
 signals:

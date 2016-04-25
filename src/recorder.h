@@ -19,6 +19,7 @@
 #ifndef RECORDER_H
 #define RECORDER_H
 
+#include "config.h"
 #include <opencv2/highgui/highgui.hpp>
 #include <atomic>
 #include <QDomDocument>
@@ -35,16 +36,16 @@ class Recorder : public QObject {
 Q_OBJECT
 
 public:
-    explicit Recorder(ActualDetector* parent=0, Camera* cameraPtr = 0);
+    explicit Recorder(ActualDetector* parent=0, Camera* cameraPtr = 0, Config* configPtr = 0);
     void setup(cv::Mat &f);
     void stopRecording(bool b);
     void setRectangle(cv::Rect &r, bool isRed);
-    void setVideoEncoderLocation(QString location); ///< set location of video encoder (i.e. ffmpeg, avconv)
 
 private:
 	const int DEFAULT_CODEC = 0;
 
     Camera* camPtr;
+    Config* m_config;
     cv::VideoWriter theVideoWriter;
     cv::Mat frameToRecord;
     cv::Mat firstFrame;
@@ -70,7 +71,7 @@ private:
     std::vector<QString> vecString;
 
     QDomDocument documentXML;
-    QFile fileXML;
+    QFile resultDataFile;
     QDomElement rootXML;
 
     std::chrono::high_resolution_clock::time_point prev, current;
@@ -78,15 +79,13 @@ private:
     int codec;
     int codecSetting;
 
-    QString videoEncoderLocation;  ///< location of video encoder (ffmpeg, avconv)
-
     void recordThread();
     void readFrameThread();
     void readFrameThreadWithoutRect();
     void saveLog(std::string dateTime, QString videoLength);
 
 public slots:
-    void reloadXML();
+    void reloadResultDataFile();
 
 private slots:
     void finishedRecording(QString picDir, QString filename);

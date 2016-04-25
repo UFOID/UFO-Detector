@@ -69,10 +69,9 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
 
     if(VERSION==""||VERSION<programVersion)
 	{
-        mySettings.remove("detectionareafile");
-        mySettings.setValue("detectionareafile",QCoreApplication::applicationDirPath()+"/detectionArea.xml");
+        m_config->resetDetectionAreaFile();
         qDebug() << "cleared critical settings";
-        mySettings.setValue("version",programVersion);
+        mySettings.setValue("version", programVersion);
     }
 
     ui->sliderNoise->setSliderPosition(NOISELEVEL);
@@ -87,10 +86,11 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
     counterPositive_=0;
     recordingCounter_=0;
 
+    checkFolders();
     readLogFileAndGetRootElement();
     checkDetectionAreaFile();
     initializeStylsheet();
-    checkFolders();
+
     if (checkCameraAndCodec(WIDTH,HEIGHT,CODEC))
     {
         threadWebcam.reset(new std::thread(&MainWindow::updateWebcamFrame, this));
@@ -160,7 +160,7 @@ void MainWindow::setSignalsAndSlots(ActualDetector* ptrDetector)
     connect(theDetector->getRecorder(),SIGNAL(updateListWidget(QString,QString,QString)),this,SLOT(updateWidgets(QString,QString,QString)));
     connect(theDetector->getRecorder(),SIGNAL(recordingStarted()),this,SLOT(recordingWasStarted()));
     connect(theDetector->getRecorder(),SIGNAL(recordingStopped()),this,SLOT(recordingWasStoped()));
-    connect(this,SIGNAL(elementWasRemoved()),theDetector->getRecorder(),SLOT(reloadXML()));
+    connect(this,SIGNAL(elementWasRemoved()),theDetector->getRecorder(),SLOT(reloadResultDataFile()));
     connect(theDetector, SIGNAL(progressValueChanged(int)), this , SLOT(on_progressBar_valueChanged(int)) );
 	connect(theDetector, SIGNAL(broadcastOutputText(QString)), this, SLOT(update_output_text(QString)) );
     connect(this,SIGNAL(updatePixmap(QImage)),this,SLOT(displayPixmap(QImage)));
@@ -576,23 +576,23 @@ void MainWindow::initializeStylsheet()
 
 void MainWindow::readLogFileAndGetRootElement()
 {
-    logFile.setFileName(QString(QCoreApplication::applicationDirPath()+"/logs.xml"));
+    logFile.setFileName(m_config->resultDataFile());
     if(logFile.exists())
 	{
         if(!logFile.open(QIODevice::ReadOnly | QIODevice::Text))
 		{
-			qDebug() << "fail reading the file" << endl;
+            qDebug() << "failed to read the result data file" << endl;
 		}
 		else
 		{
             if(!documentXML.setContent(&logFile))
 			{
-				qDebug() << "failed to load doc" << endl;
+                qDebug() << "failed to load the result data file" << endl;
 			}
 			else
 			{
                 logFile.close();
-				qDebug() << "correctly loaded root element" << endl;
+                qDebug() << "correctly loaded root element from result data file" << endl;
 			}
 		}
 	}
@@ -600,11 +600,11 @@ void MainWindow::readLogFileAndGetRootElement()
 	{
         if(!logFile.open(QIODevice::WriteOnly | QIODevice::Text))
 		{
-            qDebug() << "failed creating log file" << endl;
+            qDebug() << "failed creating result data file" << endl;
 		}
 		else
 		{
-            qDebug() << "creating log file" << endl;
+            qDebug() << "creating result data file" << endl;
 			QDomDocument tempFirstTime;
             tempFirstTime.appendChild(tempFirstTime.createElement("UFOID"));
             QTextStream stream(&logFile);
@@ -726,25 +726,37 @@ bool MainWindow::checkCameraAndCodec(const int WIDTH, const int HEIGHT, const in
     return success;
 }
 
-/*
- * Check that the folder for the images and videos exsist
- */
 void MainWindow::checkFolders()
 {
-    QSettings mySettings("UFOID","Detector");
-    QString videoFolder = mySettings.value("videofilepath").toString();
-    QDir folder(videoFolder);
+    QDir videoFolder(m_config->resultVideoDir());
+    QFileInfo detectionAreaFileInfo(m_config->detectionAreaFile());
+    QFileInfo resultDataFileInfo(m_config->resultDataFile());
+    QFileInfo birdTrainingDataFileInfo(m_config->birdClassifierTrainingFile());
+    QDir detectionAreaFileFolder(detectionAreaFileInfo.absoluteDir());
+    QDir resultDataFileFolder(resultDataFileInfo.absoluteDir());
+    QDir birdTrainingDataFileFolder(birdTrainingDataFileInfo.absoluteDir());
 	
-    if (!(folder.exists() &&  videoFolder!=""))
+    if (!(videoFolder.exists() && !m_config->resultVideoDir().isEmpty()))
 	{
-		qDebug() << "create folders";
-        QString loc = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)+"/UFO ID";
-		folder.mkpath(loc+"/Images");
-		folder.mkpath(loc+"/Videos");
-		mySettings.setValue("videofilepath",loc+"/Videos");
-		mySettings.setValue("imagespath",loc+"/Images");
+        qDebug() << "creating video and image folders";
+        videoFolder.mkpath(m_config->resultImageDir());
+        videoFolder.mkpath(m_config->resultVideoDir());
     }
 
+    if (!detectionAreaFileFolder.exists() && !detectionAreaFileFolder.absolutePath().isEmpty()) {
+        qDebug() << "Creating folder for detection area file:" << detectionAreaFileFolder.absolutePath();
+        detectionAreaFileFolder.mkpath(detectionAreaFileFolder.absolutePath());
+    }
+
+    if (!resultDataFileFolder.exists() && !resultDataFileFolder.absolutePath().isEmpty()) {
+        qDebug() << "Creating folder for result data file:" << resultDataFileFolder.absolutePath();
+        resultDataFileFolder.mkpath(resultDataFileFolder.absolutePath());
+    }
+
+    if (!birdTrainingDataFileFolder.exists() && !birdTrainingDataFileFolder.absolutePath().isEmpty()) {
+        qDebug() << "Creating folder for bird classifier training data file:" << birdTrainingDataFileFolder.absolutePath();
+        birdTrainingDataFileFolder.mkpath(birdTrainingDataFileFolder.absolutePath());
+    }
 }
 
 /*

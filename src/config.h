@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QSettings>
 #include <QApplication>
+#include <QDir>
+#include <QStandardPaths>
 
 /**
  * @brief Global configuration variables
@@ -16,16 +18,34 @@ public:
 
     QString videoEncoderLocation(); ///< full path to video encoder (ffmpeg, avconv)
     QString detectionAreaFile(); ///< XML file for detection area
+    QString birdClassifierTrainingFile(); ///< XML file for bird classifier training data (using cascade classifier)
+    QString resultDataFile();   ///< XML file for result data (detection log)
+    QString resultVideoDir();   ///< directory for result videos
+    QString resultImageDir();   ///< directory for result images
 
     void setDetectionAreaFile(QString fileName);
+    void setResultVideoDir(QString dirName);
+    void setResultImageDir(QString dirName);
+
+    void resetDetectionAreaFile();  ///< reset detection area file to default value
 
 signals:
 
 public slots:
 
 private:
-    QSettings* m_settings;
+    QString m_defaultDetectionDataDir; ///< default directory for data (detection area and result data / log)
+    QString m_defaultDetectionAreaFileName; ///< default file name for detection area file
+    QString m_defaultBirdClassifierFileName;  ///< default file name for bird classifier training data file
+    QString m_defaultResultDataFileName; ///< default file name for result data file
+
+    QString m_defaultResultDocumentDir; ///< default root directory for result images and videos
+    QString m_defaultResultVideoDir;    ///< default directory for result videos
+    QString m_defaultResultImageDir;    ///< default directory for result images
+
     QString m_videoEncoderLocation; /// @todo put video encoder location to settings, too
+
+    QSettings* m_settings;
 };
 
 #endif // CONFIG_H

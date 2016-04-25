@@ -37,14 +37,14 @@ using namespace cv;
  * Main Detector class
  */
 ActualDetector::ActualDetector(MainWindow *parent, Camera *cameraPtr, Config *configPtr) :
-    QObject(parent), theRecorder(this, cameraPtr), camPtr(cameraPtr)
+    QObject(parent), theRecorder(this, cameraPtr, configPtr), camPtr(cameraPtr)
 {
     m_config = configPtr;
 
     QSettings mySettings("UFOID","Detector");
 
     const QString DETECTION_AREA_FILE = m_config->detectionAreaFile();
-    const QString IMAGEPATH = mySettings.value("imagespath").toString()+"/";
+    const QString IMAGEPATH = m_config->resultImageDir() + "/";
     willSaveImages = mySettings.value("saveimages",false).toBool();
     WIDTH = mySettings.value("camerawidth").toInt();
     HEIGHT = mySettings.value("cameraheight").toInt();
@@ -54,8 +54,6 @@ ActualDetector::ActualDetector(MainWindow *parent, Camera *cameraPtr, Config *co
     detectionAreaFile = DETECTION_AREA_FILE.toStdString();
     pathname = IMAGEPATH.toStdString();
     kernel_ero = getStructuringElement(MORPH_RECT, Size(1,1));
-
-    theRecorder.setVideoEncoderLocation(m_config->videoEncoderLocation());
 
     std::cout << "actualdetector constructed" <<endl;
 }
@@ -124,7 +122,7 @@ void ActualDetector::detectingThread()
     pair < vector<Point2d>,vector<Rect> > centerAndRectPair;
 
 
-	if (!birds_cascade.load(QCoreApplication::applicationDirPath().toStdString() + "/cascade.xml")) 
+    if (!birds_cascade.load(m_config->birdClassifierTrainingFile().toStdString()))
 	{
         QString output_text = "ERROR could not load cascade classifier";
         emit broadcastOutputText(output_text);
