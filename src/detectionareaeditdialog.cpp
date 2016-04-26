@@ -91,42 +91,44 @@ void DetectionAreaEditDialog::getPointsInContour(vector<Point2f> & contour)
 
 void DetectionAreaEditDialog::savePointsAsXML(vector<Point2f> & contour)
 {
-    QDomDocument doc;
-    QDomElement root = doc.createElement("UFOID");
-    doc.appendChild(root);
-    int count=0;
-    for(int i = 0; i < (int)contour.size(); i++)
-	{
-        QDomElement node = doc.createElement("point");
-        node.setAttribute("x",contour[i].x);
-        node.setAttribute("y",contour[i].y);
-        root.appendChild(node);
-        count++;
-        if(count==1000)
-		{
-            count=0;
-            float temp = (float) contour.size()/ (float) i;
-            int division = 50/temp;
-            ui->progressBar->setValue(division+40);
-        }
-    }
-    ui->progressBar->setValue(90);
-
     QFile file(areaFilePath.c_str());
     if(file.open(QIODevice::WriteOnly | QIODevice::Text))
-	{
-        QTextStream stream(&file);
-        stream << doc.toString();
-        ui->progressBar->setValue(100);
-        file.close();
-        ui->labelInfo->setText("XML file saved succesfully");
+    {
+       QXmlStreamWriter stream(&file);
+       stream.setAutoFormatting(true);
+       stream.writeStartDocument();
+       stream.writeStartElement("UFOID");
+
+       int count=0;
+       for(int i = 0; i < (int)contour.size(); i++)
+       {
+           count++;
+
+           stream.writeStartElement("point");
+           stream.writeAttribute("x",QString::number(contour[i].x));
+           stream.writeAttribute("y",QString::number(contour[i].y));
+           stream.writeEndElement();
+           if(count==1000)
+           {
+               count=0;
+               float temp = (float) contour.size()/ (float) i;
+               int division = 50/temp;
+               ui->progressBar->setValue(division+40);
+           }
+       }
+       stream.writeEndElement();
+       ui->progressBar->setValue(100);
+
+
+       file.close();
+       ui->labelInfo->setText("XML file saved succesfully");
 
     }
     else
-	{
+    {
         ui->labelInfo->setText("ERROR saving the XML file. Check \"Detection area file\" path in settings");
-	}
-        
+    }
+
 }
 
 void DetectionAreaEditDialog::on_buttonConnect_clicked()
@@ -166,11 +168,10 @@ void DetectionAreaEditDialog::on_buttonSave_clicked()
         if (vecFinal.size()>2)
 		{
             getPointsInContour(vecFinal);
-            qDebug() << "saved";
         }
         else ui->labelInfo->setText("ERROR not enough points. Draw at least three points around your area of detection");
     }
-    qDebug() << "saved again";
+
 }
 
 void DetectionAreaEditDialog::closeEvent(QCloseEvent *)
