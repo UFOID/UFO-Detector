@@ -82,8 +82,8 @@ void DetectionAreaEditDialog::getPointsInContour(vector<Point2f> & contour)
     cout << "# points inside contour: " << insideContour.size() << endl;
     QSettings mySettings("UFOID","Detector");
     if(insideContour.size()!=0)
-	{
-        mySettings.setValue("regionsize", QVariant::fromValue((long unsigned int)insideContour.size()));
+    {
+        mySettings.setValue("regionsize", QVariant((int)insideContour.size()));
         savePointsAsXML(insideContour);
     }
     else ui->labelInfo->setText("ERROR saving detection area file. No points inside area.");
