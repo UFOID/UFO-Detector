@@ -37,13 +37,14 @@ using frame_period = std::chrono::duration<long long, std::ratio<1, OUTPUT_FPS>>
 using hr_duration = std::chrono::high_resolution_clock::duration;
 
 
-Recorder::Recorder(ActualDetector *parent, Camera *cameraPtr): QObject(parent),camPtr(cameraPtr)
+Recorder::Recorder(ActualDetector *parent, Camera *cameraPtr, Config *configPtr) :
+    QObject(parent), camPtr(cameraPtr), m_config(configPtr)
 {
      cout << "begin recorder " << endl;
      QSettings mySettings("UFOID","Detector");
      const int WIDTH = mySettings.value("camerawidth",640).toInt();
      const int HEIGHT  = mySettings.value("cameraheight",480).toInt();
-     const QString recordingPath = mySettings.value("videofilepath").toString();
+     const QString recordingPath = m_config->resultVideoDir();
      withRectangle = mySettings.value("recordwithrect",false).toBool();
      pathDirectory = recordingPath.toLatin1().toStdString();
      if (QSysInfo::windowsVersion()==QSysInfo::WV_WINDOWS8 || QSysInfo::windowsVersion()==QSysInfo::WV_WINDOWS8_1)
@@ -84,10 +85,10 @@ Recorder::Recorder(ActualDetector *parent, Camera *cameraPtr): QObject(parent),c
 		 codec = DEFAULT_CODEC;
 	 }
 
-     reloadXML();
+     reloadResultDataFile();
      recording = false;
      connect(this,SIGNAL(finishedRec(QString,QString)),this,SLOT(finishedRecording(QString,QString)));
-     cout << "recorder constucted" << endl;
+     cout << "recorder constructed" << endl;
 }
 
 /*
@@ -191,7 +192,8 @@ void Recorder::finishedRecording(QString picDir, QString filename)
     QProcess* proc = new QProcess();
     vecProcess.push_back(proc);
     vecString.push_back(picDir);
-    proc->start(QCoreApplication::applicationDirPath()+"/ffmpeg.exe", QStringList() <<"-i"<< picDir << "-vcodec"<< "ffv1" << filename);
+    // these video encoder parameters are ok only for ffmpeg and avconv (which are more or less compatible)
+    proc->start(m_config->videoEncoderLocation(), QStringList() <<"-i"<< picDir << "-vcodec"<< "ffv1" << filename);
     connect(proc,SIGNAL(finished(int)),this,SLOT(finishedProcess()));
 }
 
@@ -271,17 +273,17 @@ void Recorder::saveLog(string dateTime, QString videoLength)
     node.setAttribute("Length", videoLength);
     rootXML.appendChild(node);
 
-    if(!fileXML.open(QIODevice::WriteOnly | QIODevice::Text))
+    if(!resultDataFile.open(QIODevice::WriteOnly | QIODevice::Text))
 	{
         cout << "fail open" << endl;
         return;
     }
     else
 	{
-        QTextStream stream(&fileXML);
+        QTextStream stream(&resultDataFile);
         stream.setCodec("UTF-8");
         stream << documentXML.toString();
-        fileXML.close();
+        resultDataFile.close();
     }
     emit updateListWidget(QString::fromLatin1(pathDirectory.c_str()),dateTime.c_str(),videoLength);
 
@@ -290,23 +292,23 @@ void Recorder::saveLog(string dateTime, QString videoLength)
 /*
  * Slot to reload the log file and get the root element. Called from MainWindow when a VideoWidget was removed
  */
-void Recorder::reloadXML()
+void Recorder::reloadResultDataFile()
 {
-    fileXML.setFileName(QString(QCoreApplication::applicationDirPath()+"/logs.xml"));
-    if(!fileXML.open(QIODevice::ReadOnly | QIODevice::Text))
+    resultDataFile.setFileName(m_config->resultDataFile());
+    if(!resultDataFile.open(QIODevice::ReadOnly | QIODevice::Text))
 	{
-        qDebug() << "fail reading the file" << endl;
+        qDebug() << "failed reading the result data file" << endl;
     }
     else
 	{
-        if(!documentXML.setContent(&fileXML))
+        if(!documentXML.setContent(&resultDataFile))
 		{
             qDebug() << "failed to load log document recorder" << endl;
         }
         else
 		{
             rootXML=documentXML.firstChildElement();
-            fileXML.close();
+            resultDataFile.close();
         }
     }
 }
@@ -338,5 +340,4 @@ void Recorder::setRectangle(Rect &r, bool isRed)
     }
     else  color = Scalar(255,0,0);
 }
-
 

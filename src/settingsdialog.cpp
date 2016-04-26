@@ -16,8 +16,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "settings.h"
-#include "ui_settings.h"
+#include "settingsdialog.h"
+#include "ui_settingsdialog.h"
 #include <QFileDialog>
 #include <iostream>
 #include <QSettings>
@@ -31,10 +31,13 @@
  * Checking the status of the area file is broken. Commented out
  */
 
-Settings::Settings(QWidget *parent, Camera *camPtr) :QDialog(parent),ui(new Ui::Settings), cameraPtr(camPtr)
+SettingsDialog::SettingsDialog(QWidget *parent, Camera *camPtr, Config *configPtr) :
+    QDialog(parent), ui(new Ui::SettingsDialog), cameraPtr(camPtr), m_config(configPtr)
 {
     ui->setupUi(this);
     this->setWindowTitle("Settings");
+
+    this->setLayout(ui->gridLayout);
 
     QSettings settings("UFOID","Detector");
     int INDEX=settings.value("cameraindex",0).toInt();
@@ -43,19 +46,18 @@ Settings::Settings(QWidget *parent, Camera *camPtr) :QDialog(parent),ui(new Ui::
     ui->lineH->setText(settings.value("cameraheight",480).toString());
     ui->lineW->setValidator(new QIntValidator(10, 1280, this));
     ui->lineH->setValidator(new QIntValidator(10, 768, this));
-    xmlFile = settings.value("xmlfile",QString(QCoreApplication::applicationDirPath()+"/detectionArea.xml")).toString();
-    ui->lineVideoPath->setText(settings.value("videofilepath").toString());
-    ui->lineXMLfile->setText(xmlFile);
+    ui->lineVideoPath->setText(m_config->resultVideoDir());
+    ui->lineDetectionAreaFile->setText(m_config->detectionAreaFile());
     ui->lineToken->setText(settings.value("usertoken","").toString());
     if(settings.value("saveimages").toBool())
 	{
         ui->checkBoxsaveImages->setChecked(true);
-        emit on_checkBoxsaveImages_stateChanged(2);
+        emit on_checkBoxsaveImages_stateChanged(Qt::Checked);
     }
-    else emit on_checkBoxsaveImages_stateChanged(0);
+    else emit on_checkBoxsaveImages_stateChanged(Qt::Unchecked);
 	
     ui->checkBoxRectangle->setChecked(settings.value("recordwithrect",false).toBool());
-    ui->lineImagePath->setText(settings.value("imagespath").toString());
+    ui->lineImagePath->setText(m_config->resultImageDir());
     ui->lineMinPosRequired->setText(settings.value("minpositive",2).toString());
 
     if (QSysInfo::windowsVersion()==QSysInfo::WV_WINDOWS8 || QSysInfo::windowsVersion()==QSysInfo::WV_WINDOWS8_1)
@@ -73,16 +75,16 @@ Settings::Settings(QWidget *parent, Camera *camPtr) :QDialog(parent),ui(new Ui::
 //    threadXMLfile.reset(new std::thread(&Settings::checkAreaFile, this));
 }
 
-void Settings::saveSettings()
+void SettingsDialog::saveSettings()
 {
     QSettings settings("UFOID","Detector");
-    settings.setValue("videofilepath",ui->lineVideoPath->text());
-    settings.setValue("cameraindex",ui->comboBoxWebcam->currentIndex());
+    m_config->setResultVideoDir(ui->lineVideoPath->text());
+    settings.setValue("cameraindex",ui->comboBoxWebcam->currentIndex()); /// @todo cameraindex may change if cameras added/removed
     settings.setValue("camerawidth",ui->lineW->text());
     settings.setValue("cameraheight",ui->lineH->text());
-    settings.setValue("xmlfile",ui->lineXMLfile->text());
+    m_config->setDetectionAreaFile(ui->lineDetectionAreaFile->text());
     settings.setValue("saveimages",ui->checkBoxsaveImages->isChecked());
-    settings.setValue("imagespath",ui->lineImagePath->text());
+    m_config->setResultImageDir(ui->lineImagePath->text());
     settings.setValue("recordwithrect",ui->checkBoxRectangle->isChecked());
     settings.setValue("minpositive",ui->lineMinPosRequired->text());
     settings.setValue("videocodec",ui->comboBoxCodec->currentIndex());
@@ -110,13 +112,13 @@ void Settings::saveSettings()
 //    emit finishedCheckingXML();
 //}
 
-void Settings::on_toolButtonVideoPath_clicked()
+void SettingsDialog::on_toolButtonVideoPath_clicked()
 {
     QString videoFilePath=QFileDialog::getExistingDirectory(this,tr("Select Directory"),QDir::currentPath(),QFileDialog::ShowDirsOnly);
     ui->lineVideoPath->setText(videoFilePath);
 }
 
-Settings::~Settings()
+SettingsDialog::~SettingsDialog()
 {
     qDebug() << "destructor settings";
     //disconnect(this,SIGNAL(finishedCheckingXML()),this,SLOT(cleanupThreadCheckXML()));
@@ -124,14 +126,14 @@ Settings::~Settings()
 }
 
 
-void Settings::on_buttonSave_clicked()
+void SettingsDialog::on_buttonSave_clicked()
 {
     saveSettings();
     wasSaved=true;
     QMessageBox::information(this,"Information","Restart the application to apply the changes");
 }
 
-void Settings::on_buttonCancel_clicked()
+void SettingsDialog::on_buttonCancel_clicked()
 {
     if(dialogIsOpened)
     {
@@ -152,15 +154,15 @@ void Settings::on_buttonCancel_clicked()
 //    else QMessageBox::information(this,"Information","Please wait until checking of the area file has finished");
 }
 
-void Settings::on_checkBoxsaveImages_stateChanged(int arg1)
+void SettingsDialog::on_checkBoxsaveImages_stateChanged(int arg1)
 {
-    if(arg1==2)
+    if(arg1==Qt::Checked)
 	{
         ui->labelImagePath->setEnabled(true);
         ui->lineImagePath->setEnabled(true);
         ui->toolButtonImagePath->setEnabled(true);
     }
-    if(arg1==0)
+    if(arg1==Qt::Unchecked)
 	{
         ui->labelImagePath->setDisabled(true);
         ui->lineImagePath->setDisabled(true);
@@ -168,28 +170,31 @@ void Settings::on_checkBoxsaveImages_stateChanged(int arg1)
     }
 }
 
-void Settings::on_toolButtonXMLfile_clicked()
+void SettingsDialog::on_toolButtonDetectionAreaFile_clicked()
 {
-    QString xmlFile = QFileDialog::getOpenFileName(this,tr("Select the XML file"),QDir::currentPath(),tr("XML file (*.xml)"));
-    ui->lineXMLfile->setText(xmlFile);
+    /// @todo use previous detection area file name if user cancels file selection
+    QString detectionAreaFileName = QFileDialog::getOpenFileName(this,
+        tr("Select the detection area file"),QDir::currentPath(), tr("XML file (*.xml)"));
+    ui->lineDetectionAreaFile->setText(detectionAreaFileName);
 }
 
-void Settings::on_toolButtonImagePath_clicked()
+void SettingsDialog::on_toolButtonImagePath_clicked()
 {
-    QString imagePath = QFileDialog::getExistingDirectory(this,tr("Select Directory"),QDir::currentPath(),QFileDialog::ShowDirsOnly);
+    QString imagePath = QFileDialog::getExistingDirectory(this, tr("Select Directory"),
+        QDir::currentPath(), QFileDialog::ShowDirsOnly);
     ui->lineImagePath->setText(imagePath);
 }
 
-void Settings::on_buttonXML_clicked()
+void SettingsDialog::on_buttonSelectDetectionArea_clicked()
 {
     if (wasSaved)
 	{
-        QMessageBox::warning(this,"Warning","Restart the application before creating XML file");
+        QMessageBox::warning(this,"Warning","Restart the application before creating detection area file");
     }
     else
 	{
         dialogIsOpened=true;
-        myDialog = new Dialog(0, cameraPtr);
+        myDialog = new DetectionAreaEditDialog(0, cameraPtr, m_config);
         myDialog->setModal(true);
         myDialog->show();
         //connect(myDialog,SIGNAL(savedFile()),this,SLOT(startThreadCheckXML()));
@@ -212,12 +217,12 @@ void Settings::on_buttonXML_clicked()
 //    }
 //}
 
-void Settings::on_toolButton_clicked()
+void SettingsDialog::on_toolButton_clicked()
 {
     QMessageBox::information(this,"Codec Information","Raw Video results is big file sizes \nA lossless codec is recommended \nWindows 8 users should use the Lagarith Codec");
 }
 
-void Settings::on_toolButtonToken_clicked()
+void SettingsDialog::on_toolButtonToken_clicked()
 {
     QMessageBox::information(this,"UFOID.net User Token","Copy the User Token from your UFOID account in to this field to enable the upload feature\nThe code can be found at http://ufoid.net/profile/edit");
 }

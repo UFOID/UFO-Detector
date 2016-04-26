@@ -19,6 +19,7 @@
 #ifndef IMAGEEXPLORER_H
 #define IMAGEEXPLORER_H
 
+#include "config.h"
 #include <QDialog>
 #include <QModelIndex>
 #include <QtNetwork/QNetworkReply>
@@ -35,10 +36,11 @@ class ImageExplorer : public QDialog
     Q_OBJECT
 
 public:
-    explicit ImageExplorer(QWidget *parent = 0);
+    explicit ImageExplorer(QWidget *parent = 0, Config *config = 0);
     ~ImageExplorer();
 
 private:
+    Config* m_config;
     QString mainDir;
     QString currentDir;
     QString folderName;

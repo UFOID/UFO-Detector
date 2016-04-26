@@ -80,7 +80,7 @@ void CTracker::Update(vector<Point2d>& detections)
     if(tracks.size()==0)
     {
         // If no tracks yet
-        for(int i=0;i<detections.size();i++)
+        for(int i=0; i < (int)detections.size(); i++)
         {
             CTrack* tr=new CTrack(detections[i],dt,Accel_noise_mag);
             tracks.push_back(tr);
@@ -102,11 +102,11 @@ void CTracker::Update(vector<Point2d>& detections)
     // ����� ��� ����, �������� ������� ����������
     // -----------------------------------
     double dist;
-    for(int i=0;i<tracks.size();i++)
+    for(int i=0; i < (int)tracks.size(); i++)
     {
         // Point2d prediction=tracks[i]->prediction;
         // cout << prediction << endl;
-        for(int j=0;j<detections.size();j++)
+        for(int j=0; j < (int)detections.size(); j++)
         {
             Point2d diff=(tracks[i]->prediction-detections[j]);
             dist=sqrtf(diff.x*diff.x+diff.y*diff.y);
@@ -125,7 +125,7 @@ void CTracker::Update(vector<Point2d>& detections)
     // Not assigned tracks
     vector<int> not_assigned_tracks;
 
-    for(int i=0;i<assignment.size();i++)
+    for(int i=0; i < (int)assignment.size();i++)
     {
         if(assignment[i]!=-1)
         {
@@ -150,9 +150,9 @@ void CTracker::Update(vector<Point2d>& detections)
     // If one of the removed track has more positive than negative detection set bool to true
     // If one of the removed track was counted as a bird twice or more set bool to true
     // -----------------------------------
-    for(int i=0;i<tracks.size();i++)
+    for(int i=0; i < (int)tracks.size(); i++)
     {
-        if(tracks[i]->skipped_frames>maximum_allowed_skipped_frames)
+        if((int)tracks[i]->skipped_frames > maximum_allowed_skipped_frames)
         {
             if(tracks[i]->posCounter>tracks[i]->negCounter){
                 if(tracks[i]->birdCounter<2){
@@ -173,7 +173,7 @@ void CTracker::Update(vector<Point2d>& detections)
     // -----------------------------------
     vector<int> not_assigned_detections;
     vector<int>::iterator it;
-    for(int i=0;i<detections.size();i++)
+    for(int i=0; i < (int)detections.size(); i++)
     {
         it=find(assignment.begin(), assignment.end(), i);
         if(it==assignment.end())
@@ -187,7 +187,7 @@ void CTracker::Update(vector<Point2d>& detections)
     // -----------------------------------
     if(not_assigned_detections.size()!=0)
     {
-        for(int i=0;i<not_assigned_detections.size();i++)
+        for(int i=0; i < (int)not_assigned_detections.size(); i++)
         {
             CTrack* tr=new CTrack(detections[not_assigned_detections[i]],dt,Accel_noise_mag);
             tracks.push_back(tr);
@@ -196,7 +196,7 @@ void CTracker::Update(vector<Point2d>& detections)
 
     // Update Kalman Filters state
 
-    for(int i=0;i<assignment.size();i++)
+    for(int i=0; i < (int)assignment.size(); i++)
     {
         // If track updated less than one time, than filter state is not correct.
 
@@ -211,7 +211,7 @@ void CTracker::Update(vector<Point2d>& detections)
             tracks[i]->prediction=tracks[i]->KF->Update(Point2f(0,0),0);
         }
 
-        if(tracks[i]->trace.size()>max_trace_length)
+        if((int)tracks[i]->trace.size() > max_trace_length)
         {
             tracks[i]->trace.erase(tracks[i]->trace.begin(),tracks[i]->trace.end()-max_trace_length);
         }
@@ -226,7 +226,7 @@ void CTracker::Update(vector<Point2d>& detections)
 // ---------------------------------------------------------------------------
 CTracker::~CTracker(void)
 {
-    for(int i=0;i<tracks.size();i++)
+    for(int i=0; i < (int)tracks.size(); i++)
     {
     delete tracks[i];
     }
@@ -237,10 +237,10 @@ CTracker::~CTracker(void)
 // Update tracking of there was no movement detected
 // -----------------------------------
 void CTracker::updateEmpty(){
-    for(int i=0;i<tracks.size();i++)
+    for(int i=0; i < (int)tracks.size(); i++)
     {
         tracks[i]->skipped_frames++;
-        if(tracks[i]->skipped_frames>maximum_allowed_skipped_frames)
+        if((int)tracks[i]->skipped_frames > maximum_allowed_skipped_frames)
         {
 
             if(tracks[i]->posCounter>tracks[i]->negCounter){

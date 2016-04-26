@@ -28,7 +28,7 @@
 #include "clickablelabel.h"
 #include "videowidget.h"
 #include "camera.h"
-#include "settings.h"
+#include "settingsdialog.h"
 #include "imageexplorer.h"
 #include <QDesktopServices>
 #include <QDir>
@@ -40,14 +40,15 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-
-
 using namespace cv;
 
-MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr) :QMainWindow(parent),ui(new Ui::MainWindow),CamPtr(cameraPtr)
+MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
+    QMainWindow(parent), ui(new Ui::MainWindow), CamPtr(cameraPtr)
 {
     ui->setupUi(this);
     qDebug() << "begin constructing mainwindow" ;
+
+    m_config = configPtr;
 
     programVersion = "0.6.0";
 
@@ -68,10 +69,9 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr) :QMainWindow(parent),
 
     if(VERSION==""||VERSION<programVersion)
 	{
-        mySettings.remove("xmlfile");
-        mySettings.setValue("xmlfile",QCoreApplication::applicationDirPath()+"/detectionArea.xml");
+        m_config->resetDetectionAreaFile();
         qDebug() << "cleared critical settings";
-        mySettings.setValue("version",programVersion);
+        mySettings.setValue("version", programVersion);
     }
 
     ui->sliderNoise->setSliderPosition(NOISELEVEL);
@@ -85,10 +85,11 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr) :QMainWindow(parent),
     counterPositive_=0;
     recordingCounter_=0;
 
-    readXmlAndGetRootElement();
-    checkAreaXML();
-    initializeStylsheet();
     checkFolders();
+    readLogFileAndGetRootElement();
+    checkDetectionAreaFile();
+    initializeStylsheet();
+
     if (checkCameraAndCodec(WIDTH,HEIGHT,CODEC))
     {
         threadWebcam.reset(new std::thread(&MainWindow::updateWebcamFrame, this));
@@ -122,7 +123,6 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr) :QMainWindow(parent),
     request.setRawHeader( "User-Agent" , "Mozilla Firefox" );
     manager->get(request);
 
-
     qDebug() << "mainwindow constructed" ;
 }
 
@@ -155,11 +155,11 @@ void MainWindow::setSignalsAndSlots(ActualDetector* ptrDetector)
     theDetector = ptrDetector;
     connect(theDetector,SIGNAL(positiveMessage()),this,SLOT(setPositiveMessage()));
     connect(theDetector,SIGNAL(negativeMessage()),this,SLOT(setNegativeMessage()));
-    connect(theDetector,SIGNAL(errorReadingXML()),this,SLOT(setErrorReadingXML()));
+    connect(theDetector,SIGNAL(errorReadingDetectionAreaFile()),this,SLOT(setErrorReadingDetectionAreaFile()));
     connect(theDetector->getRecorder(),SIGNAL(updateListWidget(QString,QString,QString)),this,SLOT(updateWidgets(QString,QString,QString)));
     connect(theDetector->getRecorder(),SIGNAL(recordingStarted()),this,SLOT(recordingWasStarted()));
     connect(theDetector->getRecorder(),SIGNAL(recordingStopped()),this,SLOT(recordingWasStoped()));
-    connect(this,SIGNAL(elementWasRemoved()),theDetector->getRecorder(),SLOT(reloadXML()));
+    connect(this,SIGNAL(elementWasRemoved()),theDetector->getRecorder(),SLOT(reloadResultDataFile()));
     connect(theDetector, SIGNAL(progressValueChanged(int)), this , SLOT(on_progressBar_valueChanged(int)) );
 	connect(theDetector, SIGNAL(broadcastOutputText(QString)), this, SLOT(update_output_text(QString)) );
     connect(this,SIGNAL(updatePixmap(QImage)),this,SLOT(displayPixmap(QImage)));
@@ -181,7 +181,7 @@ void MainWindow::updateWidgets(QString filename, QString datetime, QString video
 
     recordingCounter_++;
     ui->lineCount->setText(QString::number(recordingCounter_));
-    readXmlAndGetRootElement();
+    readLogFileAndGetRootElement();
 }
 
 /*
@@ -238,24 +238,24 @@ void MainWindow::deletingFileAndRemovingItem()
             if (dateInXML.compare(dateToRemove)==0)
 			{
               documentXML.firstChildElement().removeChild(node);
-              if(!fileXML.open(QIODevice::WriteOnly | QIODevice::Text))
+              if(!logFile.open(QIODevice::WriteOnly | QIODevice::Text))
 			  {
                   qDebug() <<  "fail open xml - delete";
                   return;
               }
               else
 			  {
-                  QTextStream stream(&fileXML);
+                  QTextStream stream(&logFile);
                   stream.setCodec("UTF-8");
                   stream << documentXML.toString();
-                  fileXML.close();
+                  logFile.close();
               }
               break;
             }
         }
         node = node.nextSibling();
     }
-    fileXML.close();
+    logFile.close();
     emit elementWasRemoved();
 
 }
@@ -330,10 +330,10 @@ void MainWindow::setNegativeMessage()
 /*
  * Error when reading detection area file
  */
-void MainWindow::setErrorReadingXML()
+void MainWindow::setErrorReadingDetectionAreaFile()
 {
-    ui->outputText->append("ERROR: xml file containing the area information was not read correctly");
-    ui->outputText->append("Detection is not working. Select area of detection first in the settings");
+    ui->outputText->append("ERROR: xml file containing the detection area information was not read correctly");
+    ui->outputText->append("ERROR: Detection is not working. Select area of detection first in the settings.");
 }
 
 /*
@@ -366,7 +366,7 @@ void MainWindow::on_settingsButton_clicked()
 {
     if (!isDetecting)
 	{
-        settingsDialog = new Settings(0,CamPtr);
+        settingsDialog = new SettingsDialog(0, CamPtr, m_config);
         settingsDialog->setModal(true);
         settingsDialog->show();
         settingsDialog->setAttribute(Qt::WA_DeleteOnClose);
@@ -541,81 +541,65 @@ void MainWindow::initializeStylsheet()
     ui->outputText->append("For feedback and bug reports contact the developer at contact@ufoid.net");
 }
 
-
-/*
- * Read logfile containing existing video infos
- */
-void MainWindow::readXmlAndGetRootElement()
+void MainWindow::readLogFileAndGetRootElement()
 {
-	fileXML.setFileName(QString(QCoreApplication::applicationDirPath()+"/logs.xml"));
-	if(fileXML.exists())
+    logFile.setFileName(m_config->resultDataFile());
+    if(logFile.exists())
 	{
-		if(!fileXML.open(QIODevice::ReadOnly | QIODevice::Text))
+        if(!logFile.open(QIODevice::ReadOnly | QIODevice::Text))
 		{
-			qDebug() << "fail reading the file" << endl;
+            qDebug() << "failed to read the result data file" << endl;
 		}
 		else
 		{
-			if(!documentXML.setContent(&fileXML))
+            if(!documentXML.setContent(&logFile))
 			{
-				qDebug() << "failed to load doc" << endl;
+                qDebug() << "failed to load the result data file" << endl;
 			}
 			else
 			{
-				fileXML.close();
-				qDebug() << "correctly loaded root element" << endl;
+                logFile.close();
+                qDebug() << "correctly loaded root element from result data file" << endl;
 			}
 		}
 	}
 	else
 	{
-		if(!fileXML.open(QIODevice::WriteOnly | QIODevice::Text))
+        if(!logFile.open(QIODevice::WriteOnly | QIODevice::Text))
 		{
-			qDebug() << "failed creating file" << endl;
+            qDebug() << "failed creating result data file" << endl;
 		}
 		else
 		{
-			qDebug() << "creating xmlfile" << endl;
+            qDebug() << "creating result data file" << endl;
 			QDomDocument tempFirstTime;
             tempFirstTime.appendChild(tempFirstTime.createElement("UFOID"));
-			QTextStream stream(&fileXML);
+            QTextStream stream(&logFile);
 			stream << tempFirstTime.toString();
-			fileXML.close();
-			readXmlAndGetRootElement();
+            logFile.close();
+            readLogFileAndGetRootElement();
 		}
 	}
 }
 
-/*
- * Check the detection area file
- */
-void MainWindow::checkAreaXML()
+void MainWindow::checkDetectionAreaFile()
 {
-    QSettings settings("UFOID","Detector");
-    String xmlFile = settings.value("xmlfile").toString().toStdString();
-    if(xmlFile == "")
-	{
-        QFile area(QString(QCoreApplication::applicationDirPath()+"/detectionArea.xml"));
-        area.open(QIODevice::WriteOnly | QIODevice::Text);
-        settings.setValue("xmlfile",QString(QCoreApplication::applicationDirPath()+"/detectionArea.xml"));
-        qDebug() << "created areaXML file in " << area.fileName();
+    QString areaFileName = m_config->detectionAreaFile();
+    QFile areaFile(areaFileName);
+    if(areaFile.exists())
+    {
+         qDebug() << "found detection area file";
     }
     else
-	{
-        QFile area(xmlFile.c_str());
-        if(area.exists())
-		{
-             qDebug() << "found areaXML file";
-        }
-        else
-		{
-            settings.setValue("xmlfile",QString(QCoreApplication::applicationDirPath()+"/detectionArea.xml"));
-            area.setFileName(QString(QCoreApplication::applicationDirPath()+"/detectionArea.xml"));
-            area.open(QIODevice::WriteOnly | QIODevice::Text);
-            qDebug() << "created areaXML file";
+    {
+        areaFile.setFileName(areaFileName);
+        if (areaFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            qDebug() << "created detection area file " << areaFile.fileName();
+            areaFile.close();
+        } else {
+            qDebug() << "failed to create detection area file " << areaFile.fileName();
         }
     }
-
 }
 
 /*
@@ -623,104 +607,123 @@ void MainWindow::checkAreaXML()
  */
 bool MainWindow::checkCameraAndCodec(const int WIDTH, const int HEIGHT, const int CODEC)
 {
-	bool sucess = false;
-	if (checkAndSetResolution(WIDTH,HEIGHT)&&!threadWebcam&&CamPtr->isWebcamOpen())
-	{
-		try
-		{
-			webcamFrame = CamPtr->getWebcamFrame();
-			cv::resize(webcamFrame,webcamFrame, displayResolution,0, 0, INTER_CUBIC);
-			sucess = true;
-		}
-		catch( cv::Exception& e )  
-		{
-			const char* err_msg = e.what();
-			std::cout << "exception caught: " << err_msg << std::endl;
-			CamPtr->stopReadingWebcam();
-			ui->outputText->append("ERROR: Found webcam but video frame could not be read. Reconnect and check resolution in settings");
-		}
-	}
-	else if (!CamPtr->isWebcamOpen())
-	{
-		ui->outputText->append("ERROR: Could not open webcam. Select webcam in settings");
-	}
-
-	if (CODEC==0)
-	{
-		VideoWriter theVideoWriter;
-		theVideoWriter.open("filename.avi",0, 25,Size(WIDTH,HEIGHT), true);
-		if (!theVideoWriter.isOpened())
-		{
-			ui->outputText->append("ERROR: Could not find Raw Video Codec");
-			ui->outputText->append("Please contact the developer with the information about your system");
-		}
-		else
-		{
-			theVideoWriter.release();
-			remove("filename.avi");
-		}
-	}
-	else if (CODEC==1)
-	{
-		VideoWriter theVideoWriter;
-		theVideoWriter.open("filename.avi",0, 25,Size(WIDTH,HEIGHT), true);
-		if (!theVideoWriter.isOpened())
-		{
-			ui->outputText->append("ERROR: Could not find Raw Video Codec");
-			ui->outputText->append("Please contact the developer with the information about your system");
-		}
-		else
-		{
-			theVideoWriter.release();
-			remove("filename.avi");
-		}
-
-		QFile ffmpegFile(QCoreApplication::applicationDirPath()+"/ffmpeg.exe");
-		if(!ffmpegFile.exists())
-		{
-			ui->outputText->append("ERROR: Could not find FFmpeg.exe needed for FFV1 Codec. Please contact the developer.");
-		}
-
-	}
-	else if (CODEC==2)
-	{
-		VideoWriter theVideoWriter;
-		theVideoWriter.open("filename.avi",CV_FOURCC('L','A','G','S'), 25,Size(WIDTH,HEIGHT), true);
-		if (!theVideoWriter.isOpened())
-		{
-			ui->outputText->append("ERROR: Could not find Lagarith Lossless Video Codec");
-			ui->outputText->append("Download and install from http://lags.leetcode.net/codec.html");
-		}
-		else
-		{
-			theVideoWriter.release();
-			remove("filename.avi");
-		}
-
-	}
-	
-	return sucess;
-}
-
-/*
- * Check that the folder for the images and videos exsist
- */
-void MainWindow::checkFolders()
-{
-    QSettings mySettings("UFOID","Detector");
-    QString videoFolder = mySettings.value("videofilepath").toString();
-    QDir folder(videoFolder);
-	
-    if (!(folder.exists() &&  videoFolder!=""))
-	{
-		qDebug() << "create folders";
-        QString loc = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)+"/UFO ID";
-		folder.mkpath(loc+"/Images");
-		folder.mkpath(loc+"/Videos");
-		mySettings.setValue("videofilepath",loc+"/Videos");
-		mySettings.setValue("imagespath",loc+"/Images");
+    bool success = false;
+    if (checkAndSetResolution(WIDTH,HEIGHT)&&!threadWebcam&&CamPtr->isWebcamOpen())
+    {
+        try
+        {
+            webcamFrame = CamPtr->getWebcamFrame();
+            cv::resize(webcamFrame,webcamFrame, displayResolution,0, 0, INTER_CUBIC);
+            success = true;
+        }
+        catch( cv::Exception& e )
+        {
+            const char* err_msg = e.what();
+            std::cout << "exception caught: " << err_msg << std::endl;
+            CamPtr->stopReadingWebcam();
+            ui->outputText->append("ERROR: Found webcam but video frame could not be read. Reconnect and check resolution in settings");
+        }
+    }
+    else if (!CamPtr->isWebcamOpen())
+    {
+        ui->outputText->append("ERROR: Could not open webcam. Select webcam in settings");
     }
 
+
+    if (CODEC==0)
+    {
+        VideoWriter theVideoWriter;
+        theVideoWriter.open("filename.avi",0, 25,Size(WIDTH,HEIGHT), true);
+        if (!theVideoWriter.isOpened())
+        {
+            ui->outputText->append("ERROR: Could not find Raw Video Codec");
+            ui->outputText->append("ERROR: Please contact the developer with the information about your system");
+        }
+        else
+        {
+            theVideoWriter.release();
+            remove("filename.avi");
+        }
+    }
+    else if (CODEC==1)
+    {
+        VideoWriter theVideoWriter;
+        theVideoWriter.open("filename.avi",0, 25,Size(WIDTH,HEIGHT), true);
+        if (!theVideoWriter.isOpened())
+        {
+            ui->outputText->append("ERROR: Could not find Raw Video Codec");
+            ui->outputText->append("ERROR: Please contact the developer with the information about your system");
+        }
+        else
+        {
+            theVideoWriter.release();
+            remove("filename.avi");
+        }
+
+        QFile ffmpegFile(m_config->videoEncoderLocation());
+        if(!ffmpegFile.exists())
+        {
+            ui->outputText->append("ERROR: Could not find video encoder needed for FFV1 Codec.");
+            ui->outputText->append("ERROR: Please install ffmpeg or avconv, or contact the developer.");
+        } else {
+            ui->outputText->append("Using video encoder "+m_config->videoEncoderLocation());
+        }
+
+    }
+    else if (CODEC==2)
+    {
+        VideoWriter theVideoWriter;
+        theVideoWriter.open("filename.avi",CV_FOURCC('L','A','G','S'), 25,Size(WIDTH,HEIGHT), true);
+        if (!theVideoWriter.isOpened())
+        {
+            ui->outputText->append("ERROR: Could not find Lagarith Lossless Video Codec");
+            ui->outputText->append("ERROR: Download and install from http://lags.leetcode.net/codec.html");
+        }
+        else
+        {
+            theVideoWriter.release();
+            remove("filename.avi");
+        }
+
+    }
+
+    ui->startButton->setEnabled(success);
+    ui->stopButton->setEnabled(success);
+
+    return success;
+}
+
+void MainWindow::checkFolders()
+{
+    QDir videoFolder(m_config->resultVideoDir());
+    QFileInfo detectionAreaFileInfo(m_config->detectionAreaFile());
+    QFileInfo resultDataFileInfo(m_config->resultDataFile());
+    QFileInfo birdTrainingDataFileInfo(m_config->birdClassifierTrainingFile());
+    QDir detectionAreaFileFolder(detectionAreaFileInfo.absoluteDir());
+    QDir resultDataFileFolder(resultDataFileInfo.absoluteDir());
+    QDir birdTrainingDataFileFolder(birdTrainingDataFileInfo.absoluteDir());
+	
+    if (!(videoFolder.exists() && !m_config->resultVideoDir().isEmpty()))
+	{
+        qDebug() << "creating video and image folders";
+        videoFolder.mkpath(m_config->resultImageDir());
+        videoFolder.mkpath(m_config->resultVideoDir());
+    }
+
+    if (!detectionAreaFileFolder.exists() && !detectionAreaFileFolder.absolutePath().isEmpty()) {
+        qDebug() << "Creating folder for detection area file:" << detectionAreaFileFolder.absolutePath();
+        detectionAreaFileFolder.mkpath(detectionAreaFileFolder.absolutePath());
+    }
+
+    if (!resultDataFileFolder.exists() && !resultDataFileFolder.absolutePath().isEmpty()) {
+        qDebug() << "Creating folder for result data file:" << resultDataFileFolder.absolutePath();
+        resultDataFileFolder.mkpath(resultDataFileFolder.absolutePath());
+    }
+
+    if (!birdTrainingDataFileFolder.exists() && !birdTrainingDataFileFolder.absolutePath().isEmpty()) {
+        qDebug() << "Creating folder for bird classifier training data file:" << birdTrainingDataFileFolder.absolutePath();
+        birdTrainingDataFileFolder.mkpath(birdTrainingDataFileFolder.absolutePath());
+    }
 }
 
 /*
@@ -729,12 +732,12 @@ void MainWindow::checkFolders()
 void MainWindow::checkForUpdate(QNetworkReply *reply)
 {
     QByteArray data = reply->readAll();
-    qDebug() <<   "XML download size:" << data.size() << "bytes";
+    qDebug() <<   "Downloaded version data," << data.size() << "bytes";
     QDomDocument versionXML;
 
     if(!versionXML.setContent(data))
 	{
-        qWarning() << "Failed to parse QML";
+        qWarning() << "Failed to parse downloaded version data";
     }
     else
 	{
@@ -797,6 +800,7 @@ MainWindow::~MainWindow()
  */
 void MainWindow::closeEvent(QCloseEvent *event)
 {
+    Q_UNUSED(event);
     theDetector->stopThread();
 
     QSettings theSettings("UFOID","Detector");

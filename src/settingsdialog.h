@@ -19,36 +19,37 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
+#include "config.h"
 #include <QDialog>
 #include <vector>
 #include <opencv2/opencv.hpp>
-#include "dialog.h"
+#include "detectionareaeditdialog.h"
 #include <memory>
 #include <thread>
 
 class Camera;
 
 namespace Ui {
-class Settings;
+class SettingsDialog;
 }
 
-class Settings : public QDialog
+class SettingsDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit Settings(QWidget *parent = 0, Camera* camPtr = 0);
-    ~Settings();
+    explicit SettingsDialog(QWidget *parent = 0, Camera* camPtr = 0, Config* configPtr = 0);
+    ~SettingsDialog();
 
 private:
-    Ui::Settings *ui;
+    Ui::SettingsDialog *ui;
     Camera* cameraPtr;
+    Config* m_config;
     void saveSettings();
     bool dialogIsOpened;
     bool wasSaved;
-    Dialog* myDialog;
+    DetectionAreaEditDialog* myDialog;
     //std::unique_ptr<std::thread> threadXMLfile;
-    QString xmlFile;
     //void checkAreaFile();
 
 
@@ -57,9 +58,9 @@ private slots:
     void on_buttonSave_clicked();
     void on_buttonCancel_clicked();
     void on_checkBoxsaveImages_stateChanged(int arg1);
-    void on_toolButtonXMLfile_clicked();
+    void on_toolButtonDetectionAreaFile_clicked();
     void on_toolButtonImagePath_clicked();
-    void on_buttonXML_clicked();
+    void on_buttonSelectDetectionArea_clicked();
     //void startThreadCheckXML();
     //void cleanupThreadCheckXML();
     void on_toolButton_clicked();

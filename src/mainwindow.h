@@ -20,6 +20,7 @@
 
 #include <QMainWindow>
 #include "actualdetector.h"
+#include "config.h"
 #include <QModelIndex>
 #include <QDomDocument>
 #include <QFile>
@@ -32,14 +33,14 @@ class MainWindow;
 
 class QNetworkReply;
 class Camera;
-class Settings;
+class SettingsDialog;
 class QNetworkAccessManager;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0, Camera *cameraPtr = 0);
+    explicit MainWindow(QWidget *parent = 0, Camera *cameraPtr = 0, Config *configPtr = 0);
     ~MainWindow();
     void addOutputText(QString msg);
     bool getCheckboxState();
@@ -47,7 +48,7 @@ public:
 
 private:
     Ui::MainWindow *ui;
-    Settings *settingsDialog;
+    SettingsDialog *settingsDialog;
     ActualDetector* theDetector;
     MessageUpdate* updateWindow;
     std::atomic<bool> isUpdating;
@@ -60,17 +61,31 @@ private:
     std::unique_ptr<std::thread> threadWebcam;
     cv::Size displayResolution;
 
+    Config* m_config;
+
     QDomDocument documentXML;
-    QFile fileXML;
+    QFile logFile;  ///< log file (XML)
     QString programVersion;
     QNetworkAccessManager *manager;
 
     void updateWebcamFrame();
     bool checkAndSetResolution(const int WIDTH, const int HEIGHT);
     void initializeStylsheet();
-    void readXmlAndGetRootElement();
-    void checkAreaXML();
+
+    /**
+     * @brief readLogFileAndGetRootElement Read logfile containing existing video info
+     */
+    void readLogFileAndGetRootElement();
+
+    /**
+     * @brief checkDetectionAreaFile Check detection area file and create if doesn't exist
+     */
+    void checkDetectionAreaFile();
     bool checkCameraAndCodec(const int WIDTH, const int HEIGHT, const int CODEC);
+
+    /**
+     * Check that the folder for the images and videos exist
+     */
     void checkFolders();
 
 signals:
@@ -98,7 +113,7 @@ private slots:
     void createUploadWindow();
     void setPositiveMessage();
     void setNegativeMessage();
-    void setErrorReadingXML();
+    void setErrorReadingDetectionAreaFile();
     void updateWidgets(QString filename, QString datetime, QString videoLength);
     void on_aboutButton_clicked();
     void checkForUpdate(QNetworkReply* reply);

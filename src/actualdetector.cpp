@@ -36,19 +36,22 @@ using namespace cv;
 /*
  * Main Detector class
  */
-ActualDetector::ActualDetector(MainWindow *parent, Camera *cameraPtr): QObject(parent),theRecorder(this,cameraPtr),camPtr(cameraPtr)
+ActualDetector::ActualDetector(MainWindow *parent, Camera *cameraPtr, Config *configPtr) :
+    QObject(parent), theRecorder(this, cameraPtr, configPtr), camPtr(cameraPtr)
 {
+    m_config = configPtr;
+
     QSettings mySettings("UFOID","Detector");
 
-    const QString XMLPATH = mySettings.value("xmlfile").toString();
-    const QString IMAGEPATH = mySettings.value("imagespath").toString()+"/";
+    const QString DETECTION_AREA_FILE = m_config->detectionAreaFile();
+    const QString IMAGEPATH = m_config->resultImageDir() + "/";
     willSaveImages = mySettings.value("saveimages",false).toBool();
     WIDTH = mySettings.value("camerawidth").toInt();
     HEIGHT = mySettings.value("cameraheight").toInt();
     willRecordWithRect = mySettings.value("recordwithrect",false).toBool();
     minPositiveRequired = mySettings.value("minpositive", 2).toInt();
 
-    xmlFile = XMLPATH.toStdString();
+    detectionAreaFile = DETECTION_AREA_FILE.toStdString();
     pathname = IMAGEPATH.toStdString();
     kernel_ero = getStructuringElement(MORPH_RECT, Size(1,1));
 
@@ -74,7 +77,7 @@ bool ActualDetector::initialize()
     imageCount = 0;
     ext =".jpg";
 
-    bool succes = parseRegionXML(xmlFile, region);
+    bool succes = parseDetectionAreaFile(detectionAreaFile, region);
 
     willDisplayImage= qobject_cast <MainWindow*>(parent())->getCheckboxState();
     willParseRectangle=false;
@@ -119,7 +122,7 @@ void ActualDetector::detectingThread()
     pair < vector<Point2d>,vector<Rect> > centerAndRectPair;
 
 
-	if (!birds_cascade.load(QCoreApplication::applicationDirPath().toStdString() + "/cascade.xml")) 
+    if (!birds_cascade.load(m_config->birdClassifierTrainingFile().toStdString()))
 	{
         QString output_text = "ERROR could not load cascade classifier";
         emit broadcastOutputText(output_text);
@@ -703,7 +706,7 @@ std::vector<Rect> ActualDetector::getConstantRecs(int totalLight)
 /*
  * Read the detection area file
  */
-bool ActualDetector::parseRegionXML(string file_region, vector<Point> &region)
+bool ActualDetector::parseDetectionAreaFile(string file_region, vector<Point> &region)
 {
     region.clear();
 
@@ -717,7 +720,7 @@ bool ActualDetector::parseRegionXML(string file_region, vector<Point> &region)
     if(!fileXML.open(QIODevice::ReadOnly | QIODevice::Text))
 	{
         qDebug() << "fail reading the file actualldetector" << endl;
-        emit errorReadingXML();
+        emit errorReadingDetectionAreaFile();
         return false;
     }
     else
@@ -725,7 +728,7 @@ bool ActualDetector::parseRegionXML(string file_region, vector<Point> &region)
         if(!doc.setContent(&fileXML))
 		{
             qDebug() << "Failed to read the element";
-            emit errorReadingXML();
+            emit errorReadingDetectionAreaFile();
             return false;
         }
         else

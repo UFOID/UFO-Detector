@@ -19,6 +19,7 @@
 #ifndef DIALOG_H
 #define DIALOG_H
 
+#include "config.h"
 #include <QDialog>
 #include <opencv2/opencv.hpp>
 #include "graphicsscene.h"
@@ -26,16 +27,19 @@
 class Camera;
 
 namespace Ui {
-class Dialog;
+class DetectionAreaEditDialog;
 }
 
-class Dialog : public QDialog
+/**
+ * @brief Dialog for the detection area selection
+ */
+class DetectionAreaEditDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit Dialog(QWidget *parent = 0, Camera *camPtr = 0);
-    ~Dialog();
+    explicit DetectionAreaEditDialog(QWidget *parent = 0, Camera *camPtr = 0, Config *configPtr = 0);
+    ~DetectionAreaEditDialog();
 
 private slots:
     void on_buttonTakePicture_clicked();
@@ -44,10 +48,19 @@ private slots:
     void on_buttonClear_clicked();
 
 private:
-    Ui::Dialog *ui;
+    Ui::DetectionAreaEditDialog *ui;
     Camera *cameraPtr;
+    Config *m_config;
     GraphicsScene *scene;
+
+    /**
+     * Get all points inside the selected area and pass vector with points to savePointsAsXML()
+     */
     void getPointsInContour(std::vector<cv::Point2f> & contour);
+
+    /**
+     * Save the points to area xml
+     */
     void savePointsAsXML(std::vector<cv::Point2f> & contour);
     int WIDTH;
     int HEIGHT;

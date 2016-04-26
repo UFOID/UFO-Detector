@@ -16,8 +16,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "dialog.h"
-#include "ui_dialog.h"
+#include "detectionareaeditdialog.h"
+#include "ui_detectionareaeditdialog.h"
 #include <opencv2/highgui/highgui.hpp>
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
@@ -29,17 +29,15 @@
 using namespace cv;
 using namespace std;
 
-/*
- * Dialog for the detection area selection
- */
-Dialog::Dialog(QWidget *parent, Camera *camPtr) : QDialog(parent),  ui(new Ui::Dialog), cameraPtr(camPtr)
+DetectionAreaEditDialog::DetectionAreaEditDialog(QWidget *parent, Camera *camPtr, Config *configPtr) :
+    QDialog(parent),  ui(new Ui::DetectionAreaEditDialog), cameraPtr(camPtr), m_config(configPtr)
 {
     ui->setupUi(this);
 
     QSettings mySettings("UFOID","Detector");
     WIDTH = mySettings.value("camerawidth",640).toInt();
     HEIGHT = mySettings.value("cameraheight",480).toInt();
-    areaFilePath = mySettings.value("xmlfile",QString(QCoreApplication::applicationDirPath()+"/detectionArea.xml")).toString().toStdString();
+    areaFilePath = m_config->detectionAreaFile().toStdString(); /// @todo no need to use stdstrings
 
     QFile area(areaFilePath.c_str());
     if(!area.exists())
@@ -64,11 +62,7 @@ Dialog::Dialog(QWidget *parent, Camera *camPtr) : QDialog(parent),  ui(new Ui::D
     this->setFixedSize(830,570);
 }
 
-
-/*
- * Get all points inside the selected area and pass vector with points to savePointsAsXML()
- */
-void Dialog::getPointsInContour(vector<Point2f> & contour)
+void DetectionAreaEditDialog::getPointsInContour(vector<Point2f> & contour)
 {
     vector<Point2f> insideContour;
     for(int j = 0; j < HEIGHT; j++)
@@ -89,22 +83,19 @@ void Dialog::getPointsInContour(vector<Point2f> & contour)
     QSettings mySettings("UFOID","Detector");
     if(insideContour.size()!=0)
 	{
-        mySettings.setValue("regionsize",insideContour.size());
+        mySettings.setValue("regionsize", QVariant::fromValue((long unsigned int)insideContour.size()));
         savePointsAsXML(insideContour);
     }
-    else ui->labelInfo->setText("ERROR saving XML file. No points inside area");
+    else ui->labelInfo->setText("ERROR saving detection area file. No points inside area.");
 }
 
-/*
- * Save the points to area xml
- */
-void Dialog::savePointsAsXML(vector<Point2f> & contour)
+void DetectionAreaEditDialog::savePointsAsXML(vector<Point2f> & contour)
 {
     QDomDocument doc;
     QDomElement root = doc.createElement("UFOID");
     doc.appendChild(root);
     int count=0;
-    for(int i = 0; i < contour.size(); i++)
+    for(int i = 0; i < (int)contour.size(); i++)
 	{
         QDomElement node = doc.createElement("point");
         node.setAttribute("x",contour[i].x);
@@ -133,25 +124,25 @@ void Dialog::savePointsAsXML(vector<Point2f> & contour)
     }
     else
 	{
-		ui->labelInfo->setText("ERROR saving the XML file. Check \"Area file\" path in settings");
+        ui->labelInfo->setText("ERROR saving the XML file. Check \"Detection area file\" path in settings");
 	}
         
 }
 
-void Dialog::on_buttonConnect_clicked()
+void DetectionAreaEditDialog::on_buttonConnect_clicked()
 {
     scene->connectDots();
     ui->labelInfo->setText("3. Press the button \"Save\" to save your XML file");
 }
 
-void Dialog::on_buttonClear_clicked()
+void DetectionAreaEditDialog::on_buttonClear_clicked()
 {
     scene->clearPoly();
     scene->clear();
     ui->labelInfo->setText("1. Take a picture with the webcam");
 }
 
-void Dialog::on_buttonTakePicture_clicked()
+void DetectionAreaEditDialog::on_buttonTakePicture_clicked()
 {
     ui->progressBar->setValue(0);
     ui->progressBar->hide();
@@ -164,7 +155,7 @@ void Dialog::on_buttonTakePicture_clicked()
     ui->buttonConnect->setEnabled(true);
 }
 
-void Dialog::on_buttonSave_clicked()
+void DetectionAreaEditDialog::on_buttonSave_clicked()
 {
     if (isPictureTaken)
 	{
@@ -182,7 +173,7 @@ void Dialog::on_buttonSave_clicked()
     qDebug() << "saved again";
 }
 
-void Dialog::closeEvent(QCloseEvent *)
+void DetectionAreaEditDialog::closeEvent(QCloseEvent *)
 {
 //    if(wasSaved)
 //	  {
@@ -190,7 +181,7 @@ void Dialog::closeEvent(QCloseEvent *)
 //    }
 }
 
-Dialog::~Dialog()
+DetectionAreaEditDialog::~DetectionAreaEditDialog()
 {
     delete ui;
 }

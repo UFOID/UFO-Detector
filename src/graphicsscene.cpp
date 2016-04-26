@@ -68,7 +68,7 @@ std::vector<Point2f> GraphicsScene::getCoor()
         connectDots();
         std::vector<QPoint> myVec = pol.toStdVector();
 
-        for(int i=0; i<myVec.size(); i++)
+        for(int i=0; i < (int)myVec.size(); i++)
 		{
             QPoint point = myVec[i];
             Point2f p(point.x(), point.y());

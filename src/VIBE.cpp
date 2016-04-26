@@ -59,7 +59,7 @@ unsigned char getRandPixel(const unsigned char *image_data, const unsigned int w
 	int dy;
 	dx = (x-neighborRange) + rnd[rndPos=(rndPos+1)%rndSize]%(2*neighborRange);
 	dy = (y-neighborRange) + rnd[rndPos=(rndPos+1)%rndSize]%(2*neighborRange);
-	if((dx<0)||(dx>=width))
+    if((dx<0) || (dx >= (int)width))
 	{
 		if(dx<0)
 		{
@@ -70,7 +70,7 @@ unsigned char getRandPixel(const unsigned char *image_data, const unsigned int w
 			dx = (x-neighborRange) + rnd[rndPos=(rndPos+1)%rndSize]%(width - x + neighborRange-1);
 		}
 	}
-	if((dy<0)||(dy>=height))
+    if((dy<0) || (dy >= (int)height))
 	{
 		if(dy<0)
 		{
@@ -132,9 +132,9 @@ int libvibeModelUpdate(vibeModel *model, const unsigned char *image_data, unsign
 	if (model->stride < model->width) return 1;
 
 	unsigned int n=0;
-	for (int j=0; j < model->height; j++)
+    for (int j=0; j < (int)model->height; j++)
 	{
-		for (int i=0; i < model->width; i++)
+        for (int i=0; i < (int)model->width; i++)
 		{
 
 			/****************************************************************/
@@ -145,7 +145,7 @@ int libvibeModelUpdate(vibeModel *model, const unsigned char *image_data, unsign
 			// Compare with every sample
 			for(unsigned int t=0; t<model->pixels[n].numberOfSamples; t++)
 			{               
-				if (abs((int)image_data[n]-(int)model->pixels[n].samples[t]) < model->matchingThreshold)
+                if (abs((int)image_data[n]-(int)model->pixels[n].samples[t]) < (int)model->matchingThreshold)
 				{
 					// If the difference less than threshold value for number of samples MatchingNumber,
 					// then assume, that there is no difference with background
@@ -177,7 +177,7 @@ int libvibeModelUpdate(vibeModel *model, const unsigned char *image_data, unsign
 					switch((rnd[rndPos=(rndPos+1)%rndSize])%8) 
 					{
 					case 0:
-						if ((model->width - 1) <= i) 
+                        if (((int)model->width - 1) <= i)
 						{
 						}
 						else 
@@ -186,14 +186,14 @@ int libvibeModelUpdate(vibeModel *model, const unsigned char *image_data, unsign
 						}
 						break;
 					case 1: 
-						if ((model->width - 1) <= i) 
+                        if (((int)model->width - 1) <= i)
 						{
 						}
 						else
 						{
 							m++;
 						} 
-						if ((model->height - 1) <= j) 
+                        if (((int)model->height - 1) <= j)
 						{
 						}
 						else
@@ -202,7 +202,7 @@ int libvibeModelUpdate(vibeModel *model, const unsigned char *image_data, unsign
 						}
 						break;
 					case 2: 
-						if ((model->height - 1) <= j) 
+                        if (((int)model->height - 1) <= j)
 						{
 						}
 						else 
@@ -218,7 +218,7 @@ int libvibeModelUpdate(vibeModel *model, const unsigned char *image_data, unsign
 						{
 							m--;
 						}
-						if ((model->height - 1) <= j) 
+                        if (((int)model->height - 1) <= j)
 						{
 						}
 						else 
@@ -261,7 +261,7 @@ int libvibeModelUpdate(vibeModel *model, const unsigned char *image_data, unsign
 						}
 						break;
 					case 7: 
-						if ((model->width - 1) <= i) 
+                        if (((int)model->width - 1) <= i)
 						{
 						}
 						else

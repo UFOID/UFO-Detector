@@ -26,14 +26,13 @@
 #include <QDesktopServices>
 #include <QSettings>
 
-ImageExplorer::ImageExplorer(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::ImageExplorer)
+ImageExplorer::ImageExplorer(QWidget *parent, Config *config) :
+    QDialog(parent), ui(new Ui::ImageExplorer), m_config(config)
 {
     ui->setupUi(this);
 
     QSettings mySettings("UFOID","Detector");
-    mainDir = mySettings.value("imagespath").toString();
+    mainDir = m_config->resultImageDir();
     if(mySettings.value("saveimages",false).toBool())
 	{
         ui->labelFolder->setText(mainDir);

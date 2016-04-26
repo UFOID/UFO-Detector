@@ -20,6 +20,7 @@
 #include "mainwindow.h"
 #include "actualdetector.h"
 #include "camera.h"
+#include "config.h"
 #include <iostream>
 
 int main(int argc, char *argv[])
@@ -27,9 +28,10 @@ int main(int argc, char *argv[])
 	try 
 	{
 		QApplication a(argc, argv);
+        Config myConfig;
 		Camera myCam;
-		MainWindow w(0, &myCam);
-		ActualDetector detector(&w, &myCam);
+        MainWindow w(0, &myCam, &myConfig);
+        ActualDetector detector(&w, &myCam, &myConfig);
 		w.setSignalsAndSlots(&detector);
 		w.show();
 
