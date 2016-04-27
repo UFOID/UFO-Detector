@@ -458,59 +458,16 @@ void MainWindow::on_buttonImageExpl_clicked()
  */
 bool MainWindow::checkAndSetResolution(const int WIDTH, const int HEIGHT)
 {
-    int aspectRatio = (double)WIDTH/HEIGHT * 10000;
-    qDebug() << "aspect ratio of web camera is" << aspectRatio;
-    if (aspectRatio==17777)
-	{
-        ui->webcamView->resize(QSize(640,360));
-        this->setFixedSize(1060,620);
-        displayResolution=Size(640,360);
-        return true;
-    }
-    else if (aspectRatio==13333)
-	{
-        ui->webcamView->resize(QSize(640,480));
-        displayResolution=Size(640,480);
-        //qDebug() << "web cam view size is" << ui->webcamView->size();
-        this->setFixedSize(1060,740);
-        ui->outputText->move(395,570);
-        ui->statusLabel->move(270,505);
-        ui->buttonClear->move(275,605);
-        ui->checkBox->move(395,545);
-        ui->startButton->move(945,610);
-        ui->stopButton->move(945,645);
-        ui->recordingTestButton->move(275,560);
-        ui->buttonImageExpl->move(275,640);
-        ui->myList->resize(QSize(240,686));
-        ui->progressBar->move(580,505);        
-        ui->sliderNoise->resize(ui->sliderNoise->width(),130);
-        ui->lineNoise->move(ui->lineNoise->x(),ui->lineNoise->y()+42);
-        //ui->label_8->move(ui->label_8->x(),ui->label_8->y()+40);
-        ui->label_9->move(ui->label_9->x(),ui->label_9->y()+40);
-        ui->toolButtonNoise->move(ui->toolButtonNoise->x(),ui->toolButtonNoise->y()+42);
-        ui->sliderThresh->move(ui->sliderThresh->x(),ui->sliderThresh->y()+40);
-        ui->sliderThresh->resize(ui->sliderThresh->width(),130);
-        //ui->label_10->move(ui->label_10->x(),ui->label_10->y()+83);
-        ui->label_11->move(ui->label_11->x(),ui->label_11->y()+83);
-        ui->toolButtonThresh->move(ui->toolButtonThresh->x(),ui->toolButtonThresh->y()+83);
-        ui->lineThresh->move(ui->lineThresh->x(),ui->lineThresh->y()+85);
-        ui->lineCount->move(ui->lineCount->x(),ui->lineCount->y()+85);
-        ui->label_2->move(ui->label_2->x(),ui->label_2->y()+85);
-        //ui->label_3->move(ui->label_3->x(),ui->label_3->y()+85);
-        return true;
-    }
-    else if (aspectRatio==15000)
-	{
-        ui->webcamView->resize(QSize(480,320));
-        displayResolution=Size(480,320);
-        return true;
-    }
-    else
-	{
-        ui->outputText->append("ERROR: Wrong webcam resolution");
-        return false;
-    }
-    return false;
+    double aspectRatio = (double)WIDTH / (double)HEIGHT;
+    int maxWebcamWidth = 640;
+    int webcamHeight = (int)(maxWebcamWidth / aspectRatio);
+    this->setFixedSize(1060, 740);
+    ui->webcamView->resize(QSize(maxWebcamWidth, webcamHeight));
+    displayResolution = Size(maxWebcamWidth, webcamHeight);
+    qDebug() << "Aspect ratio of web camera:" << aspectRatio;
+    qDebug() << "Requested web cam size:" << QSize(WIDTH, HEIGHT);
+    qDebug() << "Web cam view size:" << ui->webcamView->size();
+    return true;
 }
 
 
