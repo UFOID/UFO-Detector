@@ -24,6 +24,8 @@ Config::Config(QObject *parent) : QObject(parent)
 
     m_defaultResultVideoDir = m_defaultResultDocumentDir + "/Videos";
     m_defaultResultImageDir = m_defaultResultDocumentDir + "/Images";
+
+    m_defaultCheckApplicationUpdates = true;
 }
 
 QString Config::videoEncoderLocation() {
@@ -48,6 +50,10 @@ QString Config::resultVideoDir() {
 
 QString Config::resultImageDir() {
     return m_settings->value("imagespath", m_defaultResultImageDir).toString();
+}
+
+bool Config::checkApplicationUpdates() {
+    return m_settings->value("checkapplicationupdates", m_defaultCheckApplicationUpdates).toBool();
 }
 
 void Config::setDetectionAreaFile(QString fileName) {

@@ -116,12 +116,15 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
     }
 
     //Check for new version
-    manager = new QNetworkAccessManager();
-    connect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(checkForUpdate(QNetworkReply*)) );
-    QNetworkRequest request;
-    request.setUrl(QUrl("http://ufoid.net/version.xml"));
-    request.setRawHeader( "User-Agent" , "Mozilla Firefox" );
-    manager->get(request);
+    if (m_config->checkApplicationUpdates())
+    {
+        manager = new QNetworkAccessManager();
+        connect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(checkForUpdate(QNetworkReply*)) );
+        QNetworkRequest request;
+        request.setUrl(QUrl("http://ufoid.net/version.xml"));
+        request.setRawHeader( "User-Agent" , "Mozilla Firefox" );
+        manager->get(request);
+    }
 
     qDebug() << "mainwindow constructed" ;
 }
