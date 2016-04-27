@@ -37,17 +37,20 @@ VideoWidget::VideoWidget(QWidget *parent, QString filepath, QString theDateTime,
 {
 
     myParent = qobject_cast<MainWindow*>(parent);
+    /// @todo take full file path from result data file
     fullFilePath = filepath+QString("/Capture--")+theDateTime+QString(".avi");
     dateTime = theDateTime;
+    /// @todo take full thumbnail path from result data file
     thumbnailPath=filepath+QString("/thumbnails/")+theDateTime+QString(".jpg");
 
-    QLabel *largeRed = new QLabel(this);
+    QLabel *thumbnailLabel = new QLabel(this);
     QLabel *lbl1 = new QLabel(dateTime, this);
     QLabel *lbl2 = new QLabel(videoLength, this);
 
     QImage thumbnail;
     thumbnail.load(thumbnailPath);
-    largeRed->setPixmap(QPixmap::fromImage(thumbnail));
+    thumbnailLabel->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+    thumbnailLabel->setPixmap(QPixmap::fromImage(thumbnail));
 
     QVBoxLayout *vLayout = new QVBoxLayout;
     vLayout->addWidget(lbl1);
@@ -55,7 +58,7 @@ VideoWidget::VideoWidget(QWidget *parent, QString filepath, QString theDateTime,
     vLayout->addStretch(3);
 
     QHBoxLayout *hLayout = new QHBoxLayout;
-    hLayout->addWidget(largeRed);
+    hLayout->addWidget(thumbnailLabel);
     hLayout->addLayout(vLayout);
 
     QHBoxLayout *hLayout2 = new QHBoxLayout;
