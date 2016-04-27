@@ -22,6 +22,7 @@ public:
     QString resultDataFile();   ///< XML file for result data (detection log)
     QString resultVideoDir();   ///< directory for result videos
     QString resultImageDir();   ///< directory for result images
+    bool checkApplicationUpdates(); ///< whether to automatically check application updates
 
     void setDetectionAreaFile(QString fileName);
     void setResultVideoDir(QString dirName);
@@ -42,6 +43,8 @@ private:
     QString m_defaultResultDocumentDir; ///< default root directory for result images and videos
     QString m_defaultResultVideoDir;    ///< default directory for result videos
     QString m_defaultResultImageDir;    ///< default directory for result images
+
+    bool m_defaultCheckApplicationUpdates; ///< default setting for automatic app updates check
 
     QString m_videoEncoderLocation; /// @todo put video encoder location to settings, too
 
