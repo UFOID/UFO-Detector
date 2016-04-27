@@ -132,12 +132,13 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
  */
 void MainWindow::updateWebcamFrame()
 {
+    cv::Mat resizedFrame;
     while (isUpdating)
-	{
+    {
         webcamFrame = CamPtr->getWebcamFrame();
-        cv::resize(webcamFrame,webcamFrame, displayResolution,0, 0, INTER_CUBIC);
-        cv::cvtColor(webcamFrame, webcamFrame, CV_BGR2RGB);
-        QImage qWebcam((uchar*)webcamFrame.data, webcamFrame.cols, webcamFrame.rows, webcamFrame.step, QImage::Format_RGB888);
+        cv::resize(webcamFrame,resizedFrame, displayResolution,0, 0, INTER_CUBIC);
+        cv::cvtColor(resizedFrame, resizedFrame, CV_BGR2RGB);
+        QImage qWebcam((uchar*)resizedFrame.data, resizedFrame.cols, resizedFrame.rows, resizedFrame.step, QImage::Format_RGB888);
         emit updatePixmap(qWebcam);
     }
 }
