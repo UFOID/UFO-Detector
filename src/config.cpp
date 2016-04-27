@@ -9,7 +9,7 @@ Config::Config(QObject *parent) : QObject(parent)
 #if defined (Q_OS_WIN)
     m_videoEncoderLocation = QCoreApplication::applicationDirPath()+"/ffmpeg.exe";
     /// @todo change data directory to something else than app directory also in Windows, because using writable files
-    m_defaultDetectionDataDir = QCoreApplication::applicationDirPath();
+    m_defaultDetectionDataDir = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)+"/UFO ID";
 
 #elif defined (Q_OS_LINUX) || defined (Q_OS_UNIX)
     /// @todo use which(1) to find if ffmpeg and avconv are present. Prefer avconv at least in *ubuntu.
@@ -19,7 +19,7 @@ Config::Config(QObject *parent) : QObject(parent)
 #endif
 
     m_defaultDetectionAreaFileName = m_defaultDetectionDataDir + "/detectionArea.xml";
-    m_defaultBirdClassifierFileName = m_defaultDetectionDataDir + "/cascade.xml";
+    m_defaultBirdClassifierFileName = QCoreApplication::applicationDirPath() + "/cascade.xml";
     m_defaultResultDataFileName = m_defaultDetectionDataDir + "/logs.xml";
 
     m_defaultResultVideoDir = m_defaultResultDocumentDir + "/Videos";
