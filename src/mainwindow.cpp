@@ -50,7 +50,7 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
 
     m_config = configPtr;
 
-    programVersion = "0.6.0";
+    programVersion = "0.6.1";
 
     this->setWindowTitle("UFO Detector | BETA " + programVersion);
 
@@ -384,6 +384,7 @@ void MainWindow::on_startButton_clicked()
     ui->progressBar->show();
     ui->progressBar->repaint();
 
+    disconnect(this,SIGNAL(updatePixmap(QImage)),this,SLOT(displayPixmap(QImage)));
     if(theDetector->start())
 	{
         theDetector->setNoiseLevel(ui->sliderNoise->value());
@@ -393,14 +394,19 @@ void MainWindow::on_startButton_clicked()
 		{
 			threadWebcam->join(); threadWebcam.reset(); 
 		}
-        disconnect(this,SIGNAL(updatePixmap(QImage)),this,SLOT(displayPixmap(QImage)));
         connect(theDetector,SIGNAL(updatePixmap(QImage)),this,SLOT(displayPixmap(QImage)));
         isDetecting=true;
         ui->statusLabel->setStyleSheet("QLabel { color : green; }");
         ui->statusLabel->setText("Detection started on " + QTime::currentTime().toString());
         ui->progressBar->hide();
     }
-    else ui->statusLabel->setText("Failed to start");
+    else
+    {
+        ui->statusLabel->setText("Failed to start");
+        connect(this,SIGNAL(updatePixmap(QImage)),this,SLOT(displayPixmap(QImage)));
+
+    }
+
 
 }
 
