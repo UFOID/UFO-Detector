@@ -42,7 +42,7 @@ private:
     QString filepath;
     QFile* file;
     QString dateAndTime;
-    QString succesURL;
+    QString successURL;
     QString errorURL;
     QString userToken;
 

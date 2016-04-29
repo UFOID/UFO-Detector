@@ -60,7 +60,7 @@ void Uploader::uploadFinish(QNetworkReply *r)
     disconnect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(uploadFinish(QNetworkReply*)));
     connect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(successReply(QNetworkReply*)));
     QNetworkRequest req;
-    req.setUrl(QUrl(succesURL));
+    req.setUrl(QUrl(successURL));
     manager->get(req);
 }
 
@@ -105,14 +105,14 @@ void Uploader::callAPI(QNetworkReply* reply)
         QJsonDocument jsonResponse = QJsonDocument::fromJson(strReply.toUtf8());
         QJsonObject jsonObject = jsonResponse.object().value("params").toObject().value("ftp").toObject();
         QString videoID = jsonResponse.object().value("params").toObject().value("videoId").toString();
-        succesURL = jsonResponse.object().value("params").toObject().value("success").toString();
+        successURL = jsonResponse.object().value("params").toObject().value("success").toString();
         errorURL = jsonResponse.object().value("params").toObject().value("error").toString();
 
         QFileInfo fileInfo(file->fileName());
         QString filename(fileInfo.fileName());
         disconnect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(callAPI(QNetworkReply*)) );
         //connect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(uploadFinish(QNetworkReply*)));
-        qDebug() << succesURL;
+        qDebug() << successURL;
         QString host = jsonObject["host"].toString();
         QString user = jsonObject["user"].toString();
         QString pass = jsonObject["pass"].toString();

@@ -119,7 +119,7 @@ void DetectionAreaEditDialog::savePointsAsXML(vector<Point2f> & contour)
         stream << doc.toString();
         ui->progressBar->setValue(100);
         file.close();
-        ui->labelInfo->setText("XML file saved succesfully");
+        ui->labelInfo->setText("XML file saved successfully");
 
     }
     else

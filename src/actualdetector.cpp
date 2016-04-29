@@ -77,7 +77,7 @@ bool ActualDetector::initialize()
     imageCount = 0;
     ext =".jpg";
 
-    bool succes = parseDetectionAreaFile(detectionAreaFile, region);
+    bool success = parseDetectionAreaFile(detectionAreaFile, region);
 
     willDisplayImage= qobject_cast <MainWindow*>(parent())->getCheckboxState();
     willParseRectangle=false;
@@ -98,7 +98,7 @@ bool ActualDetector::initialize()
     rect = Rect(Point(0,0),Point(WIDTH,HEIGHT));
     treshImg = result.clone();
     treshImg.setTo(Scalar(0,0,0));
-    return succes;
+    return success;
 }
 
 /*

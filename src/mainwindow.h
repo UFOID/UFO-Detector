@@ -71,7 +71,7 @@ private:
 
     void updateWebcamFrame();
     bool checkAndSetResolution(const int WIDTH, const int HEIGHT);
-    void initializeStylsheet();
+    void initializeStylesheet();
 
     /**
      * @brief readLogFileAndGetRootElement Read logfile containing existing video info

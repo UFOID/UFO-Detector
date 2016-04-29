@@ -100,7 +100,7 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
     checkFolders();
     readLogFileAndGetRootElement();
     checkDetectionAreaFile();
-    initializeStylsheet();
+    initializeStylesheet();
 
     if (checkCameraAndCodec(WIDTH,HEIGHT,CODEC))
     {
@@ -498,7 +498,7 @@ bool MainWindow::getCheckboxState()
 /*
  * Set Stylesheet for UI
  */
-void MainWindow::initializeStylsheet()
+void MainWindow::initializeStylesheet()
 {
     this->setStyleSheet("background-color:#515C65; color: white");
     ui->buttonClear->setStyleSheet("background-color:#3C4A62;");
