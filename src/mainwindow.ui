@@ -436,9 +436,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>20</y>
-      <width>1057</width>
-      <height>538</height>
+      <y>40</y>
+      <width>1059</width>
+      <height>571</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="mainWindowLayout">
@@ -624,46 +624,6 @@
           <number>0</number>
          </property>
          <item>
-          <layout class="QVBoxLayout" name="verticalLayout">
-           <property name="leftMargin">
-            <number>10</number>
-           </property>
-           <property name="topMargin">
-            <number>10</number>
-           </property>
-           <property name="rightMargin">
-            <number>10</number>
-           </property>
-           <property name="bottomMargin">
-            <number>10</number>
-           </property>
-           <item>
-            <widget class="QPushButton" name="recordingTestButton">
-             <property name="enabled">
-              <bool>true</bool>
-             </property>
-             <property name="text">
-              <string>PushButton</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="buttonClear">
-             <property name="text">
-              <string>Clear Messages</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="buttonImageExpl">
-             <property name="text">
-              <string>Upload Images</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
           <layout class="QVBoxLayout" name="verticalLayout_2">
            <item>
             <widget class="QCheckBox" name="checkBox">
@@ -706,13 +666,6 @@
         <widget class="QPushButton" name="aboutButton">
          <property name="text">
           <string>About</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="settingsButton">
-         <property name="text">
-          <string>Settings</string>
          </property>
         </widget>
        </item>
@@ -953,17 +906,73 @@
        </item>
        <item>
         <widget class="QPushButton" name="startButton">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>27</height>
+          </size>
+         </property>
          <property name="text">
-          <string>Detect</string>
+          <string>Start detection</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="stopButton">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>27</height>
+          </size>
+         </property>
          <property name="text">
-          <string>Stop</string>
+          <string>Stop detection</string>
          </property>
         </widget>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <property name="leftMargin">
+          <number>5</number>
+         </property>
+         <property name="topMargin">
+          <number>10</number>
+         </property>
+         <property name="rightMargin">
+          <number>5</number>
+         </property>
+         <item>
+          <widget class="QPushButton" name="settingsButton">
+           <property name="text">
+            <string>Settings</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="buttonClear">
+           <property name="text">
+            <string>Clear messages</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="buttonImageExpl">
+           <property name="text">
+            <string>Upload images</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="recordingTestButton">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="text">
+            <string>PushButton</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
       </layout>
      </item>
