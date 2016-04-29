@@ -89,6 +89,14 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
     counterPositive_=0;
     recordingCounter_=0;
 
+    m_allowedWebcamAspectRatios << 12222;  // 11:9
+
+    m_allowedWebcamAspectRatios << 15000;  // 3:2
+    m_allowedWebcamAspectRatios << 17777;  // 16:9
+    m_allowedWebcamAspectRatios << 13333;  // 4:3
+
+    this->setFixedSize(1060, 740);  /// @todo change to resizable main view
+
     checkFolders();
     readLogFileAndGetRootElement();
     checkDetectionAreaFile();
@@ -461,13 +469,21 @@ bool MainWindow::checkAndSetResolution(const int WIDTH, const int HEIGHT)
     double aspectRatio = (double)WIDTH / (double)HEIGHT;
     int maxWebcamWidth = 640;
     int webcamHeight = (int)(maxWebcamWidth / aspectRatio);
-    this->setFixedSize(1060, 740);
-    ui->webcamView->resize(QSize(maxWebcamWidth, webcamHeight));
-    displayResolution = Size(maxWebcamWidth, webcamHeight);
-    qDebug() << "Aspect ratio of web camera:" << aspectRatio;
+
     qDebug() << "Requested web cam size:" << QSize(WIDTH, HEIGHT);
-    qDebug() << "Web cam view size:" << ui->webcamView->size();
-    return true;
+    qDebug() << "Requested aspect ratio of web camera:" << aspectRatio;
+    for (int i=0; i < m_allowedWebcamAspectRatios.size(); i++)
+    {
+        if (m_allowedWebcamAspectRatios[i] == (int)(aspectRatio*10000))
+        {
+            qDebug() << "Aspect ratio of web camera is ok";
+            ui->webcamView->resize(QSize(maxWebcamWidth, webcamHeight));
+            displayResolution = Size(maxWebcamWidth, webcamHeight);
+            return true;
+        }
+    }
+    qDebug() << "Aspect ratio of web camera is not ok";
+    return false;
 }
 
 

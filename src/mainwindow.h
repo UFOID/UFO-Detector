@@ -60,6 +60,7 @@ private:
     Camera* CamPtr;
     std::unique_ptr<std::thread> threadWebcam;
     cv::Size displayResolution;
+    QList<int> m_allowedWebcamAspectRatios; ///< currently allowed webcam aspect ratios
 
     Config* m_config;
 
