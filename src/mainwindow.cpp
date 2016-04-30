@@ -90,10 +90,9 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
     recordingCounter_=0;
 
     m_allowedWebcamAspectRatios << 12222;  // 11:9
-
+    m_allowedWebcamAspectRatios << 13333;  // 4:3
     m_allowedWebcamAspectRatios << 15000;  // 3:2
     m_allowedWebcamAspectRatios << 17777;  // 16:9
-    m_allowedWebcamAspectRatios << 13333;  // 4:3
 
     this->setFixedSize(1060, 740);  /// @todo change to resizable main view
 
