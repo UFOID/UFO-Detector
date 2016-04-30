@@ -310,6 +310,7 @@ void ActualDetector::detectingThread()
                     }
                 }
 
+                /// @todo use actual view size, not hardcoded value
                 cv::resize(result,result, Size(640,360) ,0, 0, INTER_CUBIC);
                 cv::cvtColor(result, result, CV_BGR2RGB);
                 QImage qimOriginal((uchar*)result.data, result.cols, result.rows, result.step, QImage::Format_RGB888);
@@ -317,7 +318,6 @@ void ActualDetector::detectingThread()
             }
     }
     delete detector;
-
 }
 
 

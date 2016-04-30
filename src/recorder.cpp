@@ -67,13 +67,20 @@ Recorder::Recorder(ActualDetector *parent, Camera *cameraPtr, Config *configPtr)
      color = Scalar(255,0,0);
      resolutionRecording = Size(WIDTH,HEIGHT);
      int aspectRatio = (double)WIDTH/HEIGHT * 10000;
-     if (aspectRatio==17777)
-	 {
-         resolutionThumbnail=Size((640/10)+15,(360/10)+15);
-     }
-     else if (aspectRatio==13333)
-	 {
-         resolutionThumbnail=Size((640/10)+15,(480/10)+15);
+     switch (aspectRatio)
+     {
+        case 12222:
+            resolutionThumbnail = Size((640/10) + 15, (524/10) + 15);
+            break;
+        case 13333:
+            resolutionThumbnail = Size((640/10) + 15, (480/10) + 15);
+            break;
+        case 17777:
+            resolutionThumbnail = Size((640/10) + 15, (360/10) + 15);
+            break;
+        default:
+            qDebug() << "Recorder::Recorder(): got unknown webcam aspect ratio, problems ahead";
+            break;
      }
 
 	 if (codecSetting == 2)
@@ -135,7 +142,7 @@ void Recorder::recordThread(){
     QTime timer;
     timer.start();
 	if (firstFrame.data)
-	{
+    {
 		theVideoWriter.write(firstFrame);
 	}
 	
@@ -148,7 +155,7 @@ void Recorder::recordThread(){
         }
 
         if (frameToRecord.data) 
-		{
+        {
             theVideoWriter.write(frameToRecord);
         }
 
@@ -320,6 +327,7 @@ void Recorder::stopRecording(bool b)
 {
     if(recThread)
 	{
+
         willBeSaved=b;
         recording = false;
         recThread->join(); recThread.reset();
