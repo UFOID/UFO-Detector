@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1060</width>
-    <height>630</height>
+    <height>590</height>
    </rect>
   </property>
   <property name="palette">
@@ -436,7 +436,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>40</y>
+      <y>10</y>
       <width>1059</width>
       <height>571</height>
      </rect>
@@ -914,19 +914,6 @@
          </property>
          <property name="text">
           <string>Start detection</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="stopButton">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>27</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Stop detection</string>
          </property>
         </widget>
        </item>

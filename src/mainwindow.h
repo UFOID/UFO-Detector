@@ -88,6 +88,7 @@ private:
      * Check that the folder for the images and videos exist
      */
     void checkFolders();
+    void on_stopButton_clicked();
 
 signals:
     void elementWasRemoved();
@@ -103,7 +104,6 @@ public slots:
 
 private slots:
     void on_startButton_clicked();
-    void on_stopButton_clicked();
     void on_checkBox_stateChanged(int arg1);
     void on_buttonClear_clicked();
     void on_sliderNoise_sliderMoved(int position);

@@ -94,7 +94,7 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
     m_allowedWebcamAspectRatios << 15000;  // 3:2
     m_allowedWebcamAspectRatios << 17777;  // 16:9
 
-    this->setFixedSize(1060, 740);  /// @todo change to resizable main view
+    this->setFixedSize(1060, 590);  /// @todo change to resizable main view
 
     checkFolders();
     readLogFileAndGetRootElement();
@@ -388,38 +388,47 @@ void MainWindow::on_settingsButton_clicked()
     }
     else
 	{
-        QMessageBox::warning(this,"Error","Stop the detecting process first");
+        QMessageBox::warning(this,"Error","Stop the detection process first");
     }    
 }
 
 
 void MainWindow::on_startButton_clicked()
 {
-    ui->progressBar->show();
-    ui->progressBar->repaint();
+    if (!isDetecting)
+    {
+        ui->progressBar->show();
+        ui->progressBar->repaint();
 
-    disconnect(this,SIGNAL(updatePixmap(QImage)),this,SLOT(displayPixmap(QImage)));
-    if(theDetector->start())
-	{
-        theDetector->setNoiseLevel(ui->sliderNoise->value());
-        theDetector->setThresholdLevel(ui->sliderThresh->value());
-        isUpdating = false;
-        if (threadWebcam)
-		{
-			threadWebcam->join(); threadWebcam.reset(); 
-		}
-        connect(theDetector,SIGNAL(updatePixmap(QImage)),this,SLOT(displayPixmap(QImage)));
-        isDetecting=true;
-        ui->statusLabel->setStyleSheet("QLabel { color : green; }");
-        ui->statusLabel->setText("Detection started on " + QTime::currentTime().toString());
-        ui->progressBar->hide();
+        disconnect(this,SIGNAL(updatePixmap(QImage)),this,SLOT(displayPixmap(QImage)));
+        if(theDetector->start())
+        {
+            theDetector->setNoiseLevel(ui->sliderNoise->value());
+            theDetector->setThresholdLevel(ui->sliderThresh->value());
+            isUpdating = false;
+            if (threadWebcam)
+            {
+                threadWebcam->join(); threadWebcam.reset();
+            }
+            connect(theDetector,SIGNAL(updatePixmap(QImage)),this,SLOT(displayPixmap(QImage)));
+            isDetecting=true;
+            ui->statusLabel->setStyleSheet("QLabel { color : green; }");
+            ui->statusLabel->setText("Detection started on " + QTime::currentTime().toString());
+            ui->progressBar->hide();
+            ui->startButton->setText("Stop Detection");
+        }
+        else
+        {
+            ui->statusLabel->setText("Failed to start");
+            connect(this,SIGNAL(updatePixmap(QImage)),this,SLOT(displayPixmap(QImage)));
+
+        }
     }
     else
     {
-        ui->statusLabel->setText("Failed to start");
-        connect(this,SIGNAL(updatePixmap(QImage)),this,SLOT(displayPixmap(QImage)));
-
+        on_stopButton_clicked();
     }
+
 
 
 }
@@ -437,6 +446,8 @@ void MainWindow::on_stopButton_clicked()
         isUpdating=true;
         threadWebcam.reset(new std::thread(&MainWindow::updateWebcamFrame, this));
     }
+    ui->startButton->setText("Start Detection");
+
 }
 
 void MainWindow::on_checkBox_stateChanged(int arg1)
@@ -463,7 +474,7 @@ void MainWindow::on_aboutButton_clicked()
 
 void MainWindow::on_buttonImageExpl_clicked()
 {
-    ImageExplorer* imageExpl = new ImageExplorer();
+    ImageExplorer* imageExpl = new ImageExplorer(0,m_config);
     imageExpl->setModal(true);
     imageExpl->show();
     imageExpl->setAttribute(Qt::WA_DeleteOnClose);
@@ -514,7 +525,6 @@ void MainWindow::initializeStylesheet()
     ui->recordingTestButton->hide();
     ui->progressBar->hide();
     ui->aboutButton->setStyleSheet("background-color:#3C4A62;");
-    ui->stopButton->setStyleSheet("background-color:#3C4A62;");
     ui->startButton->setStyleSheet("background-color:#3C4A62;");
     ui->settingsButton->setStyleSheet("background-color:#3C4A62;");
     ui->outputText->setStyleSheet("background-color:#3C4A62;");
@@ -675,7 +685,6 @@ bool MainWindow::checkCameraAndCodec(const int WIDTH, const int HEIGHT, const in
     }
 
     ui->startButton->setEnabled(success);
-    ui->stopButton->setEnabled(success);
 
     return success;
 }
