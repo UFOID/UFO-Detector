@@ -46,7 +46,11 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
     QMainWindow(parent), ui(new Ui::MainWindow), CamPtr(cameraPtr)
 {
     ui->setupUi(this);
-    qDebug() << "begin constructing mainwindow" ;
+    qDebug() << "begin constructing mainwindow";
+
+    QWidget* mainWindowCentralWidget = new QWidget(this);
+    mainWindowCentralWidget->setLayout(ui->mainWindowLayout);
+    setCentralWidget(mainWindowCentralWidget);
 
     m_config = configPtr;
 
@@ -85,10 +89,17 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
     counterPositive_=0;
     recordingCounter_=0;
 
+    m_allowedWebcamAspectRatios << 12222;  // 11:9
+    m_allowedWebcamAspectRatios << 13333;  // 4:3
+    m_allowedWebcamAspectRatios << 15000;  // 3:2
+    m_allowedWebcamAspectRatios << 17777;  // 16:9
+
+    this->setFixedSize(1060, 740);  /// @todo change to resizable main view
+
     checkFolders();
     readLogFileAndGetRootElement();
     checkDetectionAreaFile();
-    initializeStylsheet();
+    initializeStylesheet();
 
     if (checkCameraAndCodec(WIDTH,HEIGHT,CODEC))
     {
@@ -148,7 +159,7 @@ void MainWindow::updateWebcamFrame()
 
 void MainWindow::displayPixmap(QImage image)
 {
-    ui->webcam->setPixmap(QPixmap::fromImage(image));
+    ui->webcamView->setPixmap(QPixmap::fromImage(image));
 }
 
 /*
@@ -464,57 +475,23 @@ void MainWindow::on_buttonImageExpl_clicked()
  */
 bool MainWindow::checkAndSetResolution(const int WIDTH, const int HEIGHT)
 {
-    int aspectRatio = (double)WIDTH/HEIGHT * 10000;
-    //cout << aspectRatio << endl;
-    if (aspectRatio==17777)
-	{
-        ui->webcam->resize(QSize(640,360));
-        this->setFixedSize(1060,620);
-        displayResolution=Size(640,360);
-        return true;
+    double aspectRatio = (double)WIDTH / (double)HEIGHT;
+    int maxWebcamWidth = 640;
+    int webcamHeight = (int)(maxWebcamWidth / aspectRatio);
+
+    qDebug() << "Requested web cam size:" << QSize(WIDTH, HEIGHT);
+    qDebug() << "Requested aspect ratio of web camera:" << aspectRatio;
+    for (int i=0; i < m_allowedWebcamAspectRatios.size(); i++)
+    {
+        if (m_allowedWebcamAspectRatios[i] == (int)(aspectRatio*10000))
+        {
+            qDebug() << "Aspect ratio of web camera is ok";
+            ui->webcamView->resize(QSize(maxWebcamWidth, webcamHeight));
+            displayResolution = Size(maxWebcamWidth, webcamHeight);
+            return true;
+        }
     }
-    else if (aspectRatio==13333)
-	{
-        ui->webcam->resize(QSize(640,480));
-        displayResolution=Size(640,480);
-        this->setFixedSize(1060,740);
-        ui->outputText->move(395,570);
-        ui->statusLabel->move(270,505);
-        ui->buttonClear->move(275,605);
-        ui->checkBox->move(395,545);
-        ui->startButton->move(945,610);
-        ui->stopButton->move(945,645);
-        ui->recordingTestButton->move(275,560);
-        ui->buttonImageExpl->move(275,640);
-        ui->myList->resize(QSize(240,686));
-        ui->progressBar->move(580,505);        
-        ui->sliderNoise->resize(ui->sliderNoise->width(),130);
-        ui->lineNoise->move(ui->lineNoise->x(),ui->lineNoise->y()+42);
-        ui->label_8->move(ui->label_8->x(),ui->label_8->y()+40);
-        ui->label_9->move(ui->label_9->x(),ui->label_9->y()+40);
-        ui->toolButtonNoise->move(ui->toolButtonNoise->x(),ui->toolButtonNoise->y()+42);
-        ui->sliderThresh->move(ui->sliderThresh->x(),ui->sliderThresh->y()+40);
-        ui->sliderThresh->resize(ui->sliderThresh->width(),130);
-        ui->label_10->move(ui->label_10->x(),ui->label_10->y()+83);
-        ui->label_11->move(ui->label_11->x(),ui->label_11->y()+83);
-        ui->toolButtonThresh->move(ui->toolButtonThresh->x(),ui->toolButtonThresh->y()+83);
-        ui->lineThresh->move(ui->lineThresh->x(),ui->lineThresh->y()+85);
-        ui->lineCount->move(ui->lineCount->x(),ui->lineCount->y()+85);
-        ui->label_2->move(ui->label_2->x(),ui->label_2->y()+85);
-        ui->label_3->move(ui->label_3->x(),ui->label_3->y()+85);
-        return true;
-    }
-    else if (aspectRatio==15000)
-	{
-        ui->webcam->resize(QSize(480,320));
-        displayResolution=Size(480,320);
-        return true;
-    }
-    else
-	{
-        ui->outputText->append("ERROR: Wrong webcam resolution");
-        return false;
-    }
+    qDebug() << "Aspect ratio of web camera is not ok";
     return false;
 }
 
@@ -530,7 +507,7 @@ bool MainWindow::getCheckboxState()
 /*
  * Set Stylesheet for UI
  */
-void MainWindow::initializeStylsheet()
+void MainWindow::initializeStylesheet()
 {
     this->setStyleSheet("background-color:#515C65; color: white");
     ui->buttonClear->setStyleSheet("background-color:#3C4A62;");

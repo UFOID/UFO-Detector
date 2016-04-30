@@ -157,9 +157,9 @@ void Recorder::recordThread(){
     }
 	
     theVideoWriter.release();
-    int milisec = timer.elapsed();
-    QString videoLength = QString("%1:%2").arg( milisec / 60000        , 2, 10, QChar('0'))
-                                  .arg((milisec % 60000) / 1000, 2, 10, QChar('0'));
+    int millisec = timer.elapsed();
+    QString videoLength = QString("%1:%2").arg( millisec / 60000        , 2, 10, QChar('0'))
+                                  .arg((millisec % 60000) / 1000, 2, 10, QChar('0'));
     cout << videoLength.toStdString() << endl;
 
     if(willBeSaved)
