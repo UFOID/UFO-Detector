@@ -88,8 +88,6 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
     m_allowedWebcamAspectRatios << 15000;  // 3:2
     m_allowedWebcamAspectRatios << 17777;  // 16:9
 
-    this->setFixedSize(1060, 590);  /// @todo change to resizable main view
-
     checkFolders();
     readLogFileAndGetRootElement();
     checkDetectionAreaFile();
@@ -496,7 +494,8 @@ bool MainWindow::checkAndSetResolution(const int WIDTH, const int HEIGHT)
             return true;
         }
     }
-    qDebug() << "Aspect ratio of web camera is not ok";
+    qDebug() << "Aspect ratio of web camera is NOT ok";
+    ui->outputText->append("Error: Selected webcam resolution is NOT ok");
     return false;
 }
 
