@@ -39,7 +39,8 @@ SOURCES += main.cpp\
     uploader.cpp \
     settingsdialog.cpp \
     config.cpp \
-    detectionareaeditdialog.cpp
+    detectionareaeditdialog.cpp \
+    camerainfo.cpp
 
 HEADERS  += \
     recorder.h \
@@ -55,7 +56,8 @@ HEADERS  += \
     OpencvInclude.h \
     settingsdialog.h \
     config.h \
-    detectionareaeditdialog.h
+    detectionareaeditdialog.h \
+    camerainfo.h
 
 FORMS    += \
     mainwindow.ui \
