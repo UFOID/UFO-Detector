@@ -38,7 +38,6 @@ Config::Config(QObject *parent) : QObject(parent)
 
 #if defined (Q_OS_WIN)
     m_defaultVideoEncoderLocation = QCoreApplication::applicationDirPath()+"/ffmpeg.exe";
-    /// @todo change data directory to something else than app directory also in Windows, because using writable files
     m_defaultDetectionDataDir = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)+"/UFO ID";
 
 #elif defined (Q_OS_LINUX) || defined (Q_OS_UNIX)

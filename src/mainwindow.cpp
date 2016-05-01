@@ -283,7 +283,7 @@ void MainWindow::createUploadWindow()
         VideoWidget* widget = qobject_cast<VideoWidget*>(ui->myList->itemWidget(item));
         if(widget->getUploadLabel()==sender())
         {
-            Uploader* upload = new Uploader(this,widget->getPathname());
+            Uploader* upload = new Uploader(this,widget->getPathname(),m_config);
             upload->show();
             upload->setAttribute(Qt::WA_DeleteOnClose);
         }
