@@ -19,7 +19,6 @@
 #include "actualdetector.h"
 #include <iostream>
 #include <opencv2/imgproc/imgproc.hpp>
-#include <QSettings>
 #include <chrono>
 #include <stdio.h>
 #include "camera.h"
@@ -40,16 +39,13 @@ ActualDetector::ActualDetector(MainWindow *parent, Camera *cameraPtr, Config *co
     QObject(parent), theRecorder(this, cameraPtr, configPtr), camPtr(cameraPtr)
 {
     m_config = configPtr;
-
-    QSettings mySettings("UFOID","Detector");
-
     const QString DETECTION_AREA_FILE = m_config->detectionAreaFile();
     const QString IMAGEPATH = m_config->resultImageDir() + "/";
-    willSaveImages = mySettings.value("saveimages",false).toBool();
-    WIDTH = mySettings.value("camerawidth").toInt();
-    HEIGHT = mySettings.value("cameraheight").toInt();
-    willRecordWithRect = mySettings.value("recordwithrect",false).toBool();
-    minPositiveRequired = mySettings.value("minpositive", 2).toInt();
+    willSaveImages = m_config->saveResultImages();
+    WIDTH = m_config->cameraWidth();
+    HEIGHT = m_config->cameraHeight();
+    willRecordWithRect = m_config->resultVideoWithObjectRectangles();
+    minPositiveRequired = m_config->minPositiveDetections();
 
     detectionAreaFile = DETECTION_AREA_FILE.toStdString();
     pathname = IMAGEPATH.toStdString();
@@ -713,8 +709,7 @@ bool ActualDetector::parseDetectionAreaFile(string file_region, vector<Point> &r
     QFile fileXML(file_region.c_str());
     QDomDocument doc;
     QDomElement root;
-    QSettings mySettings("UFOID","Detector");
-    int size = mySettings.value("regionsize",100).toInt();
+    int size = m_config->detectionAreaSize();
     int result = 0;
 
     if(!fileXML.open(QIODevice::ReadOnly | QIODevice::Text))

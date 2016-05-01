@@ -22,7 +22,6 @@
 #include <QPainter>
 #include <opencv2/highgui/highgui.hpp>
 #include <iostream>
-#include "QSettings"
 #include <QPainter>
 #include "camera.h"
 

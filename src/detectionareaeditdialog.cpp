@@ -22,7 +22,6 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
 #include <iostream>
-#include <QSettings>
 #include <QDir>
 #include <QtXml>
 
@@ -34,9 +33,8 @@ DetectionAreaEditDialog::DetectionAreaEditDialog(QWidget *parent, Camera *camPtr
 {
     ui->setupUi(this);
 
-    QSettings mySettings("UFOID","Detector");
-    WIDTH = mySettings.value("camerawidth",640).toInt();
-    HEIGHT = mySettings.value("cameraheight",480).toInt();
+    WIDTH = m_config->cameraWidth();
+    HEIGHT = m_config->cameraHeight();
     areaFilePath = m_config->detectionAreaFile().toStdString(); /// @todo no need to use stdstrings
 
     QFile area(areaFilePath.c_str());
@@ -80,10 +78,9 @@ void DetectionAreaEditDialog::getPointsInContour(vector<Point2f> & contour)
         ui->progressBar->setValue(division);
     }
     cout << "# points inside contour: " << insideContour.size() << endl;
-    QSettings mySettings("UFOID","Detector");
     if(insideContour.size()!=0)
     {
-        mySettings.setValue("regionsize", QVariant((int)insideContour.size()));
+        m_config->setDetectionAreaSize((int)insideContour.size());
         savePointsAsXML(insideContour);
     }
     else ui->labelInfo->setText("ERROR saving detection area file. No points inside area.");

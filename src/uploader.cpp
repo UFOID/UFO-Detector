@@ -23,15 +23,14 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonDocument>
-#include <QSettings>
 
 
 /* Note:
  * manager->finished() is not emited when the file is big (200mb).
  * See work around.
  */
-Uploader::Uploader(QWidget *parent, QString pathName) :
-    QDialog(parent), ui(new Ui::Uploader), filepath(pathName)
+Uploader::Uploader(QWidget *parent, QString pathName, Config *configPtr) :
+    QDialog(parent), ui(new Ui::Uploader), filepath(pathName), m_config(configPtr)
 {
     ui->setupUi(this);
     ui->lineFile->setText(pathName);
@@ -43,8 +42,7 @@ Uploader::Uploader(QWidget *parent, QString pathName) :
     ui->textBrowser->append("The link to your video will appear here after starting the upload");
     this->setWindowTitle("Upload video");
     this->setFixedSize(604,229);
-    QSettings mySettings("UFOID","Detector");
-    userToken = mySettings.value("usertoken","").toString();
+    userToken = m_config->userTokenAtUfoId();
 
 }
 

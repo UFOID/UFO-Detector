@@ -17,7 +17,6 @@
  */
 
 #include "camera.h"
-#include <QSettings>
 #include <iostream>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <QDebug>
@@ -25,16 +24,19 @@
 /*
  * Main Camera class to handle reading of frames from multiple threads
  */
-Camera::Camera()
+Camera::Camera(int index, int width, int height)
 {
-    QSettings mySettings("UFOID","Detector");
-    const int INDEX = mySettings.value("cameraindex",0).toInt();
-    const int WIDTH = mySettings.value("camerawidth",640).toInt();
-    const int HEIGHT  = mySettings.value("cameraheight",480).toInt();
+    webcam.open(index);
+    webcam.set(CV_CAP_PROP_FRAME_WIDTH, width);
+    webcam.set(CV_CAP_PROP_FRAME_HEIGHT, height);
+    int actualWidth = webcam.get(CV_CAP_PROP_FRAME_WIDTH);
+    int actualHeight = webcam.get(CV_CAP_PROP_FRAME_HEIGHT);
 
-    webcam.open(INDEX);
-    webcam.set(CV_CAP_PROP_FRAME_WIDTH, WIDTH);
-    webcam.set(CV_CAP_PROP_FRAME_HEIGHT, HEIGHT);
+    if ((actualWidth != width) || (actualHeight != height))
+    {
+        qDebug() << "Warning: requested web camera size" << width << "x" << height <<
+                    "but got" << actualWidth << "x" << actualHeight;
+    }
 
     if(webcam.isOpened())
 	{
@@ -43,7 +45,7 @@ Camera::Camera()
         threadReadFrame.reset(new std::thread(&Camera::readWebcamFrame, this));
     }
 
-    std::cout << "Constructed camerea with index " << INDEX <<  std::endl;
+    std::cout << "Constructed camera with index " << index <<  std::endl;
 }
 
 /*

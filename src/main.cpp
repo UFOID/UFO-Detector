@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
 	{
 		QApplication a(argc, argv);
         Config myConfig;
-		Camera myCam;
+        Camera myCam(myConfig.cameraIndex(), myConfig.cameraWidth(), myConfig.cameraHeight());
         MainWindow w(0, &myCam, &myConfig);
         ActualDetector detector(&w, &myCam, &myConfig);
 		w.setSignalsAndSlots(&detector);

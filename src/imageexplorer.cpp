@@ -24,16 +24,14 @@
 #include <QDebug>
 #include <QtNetwork/QNetworkRequest>
 #include <QDesktopServices>
-#include <QSettings>
 
 ImageExplorer::ImageExplorer(QWidget *parent, Config *config) :
     QDialog(parent), ui(new Ui::ImageExplorer), m_config(config)
 {
     ui->setupUi(this);
 
-    QSettings mySettings("UFOID","Detector");
     mainDir = m_config->resultImageDir();
-    if(mySettings.value("saveimages",false).toBool())
+    if(m_config->saveResultImages())
 	{
         ui->labelFolder->setText(mainDir);
     }

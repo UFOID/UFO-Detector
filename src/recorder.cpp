@@ -20,7 +20,6 @@
 #include <iostream>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <QTime>
-#include <QSettings>
 #include <QTextStream>
 #include <QFile>
 #include "camera.h"
@@ -41,21 +40,12 @@ Recorder::Recorder(ActualDetector *parent, Camera *cameraPtr, Config *configPtr)
     QObject(parent), camPtr(cameraPtr), m_config(configPtr)
 {
     cout << "begin recorder " << endl;
-    QSettings mySettings("UFOID","Detector");
-    const int WIDTH = mySettings.value("camerawidth",640).toInt();
-    const int HEIGHT  = mySettings.value("cameraheight",480).toInt();
+    const int WIDTH = m_config->cameraWidth();
+    const int HEIGHT  = m_config->cameraHeight();
     const QString recordingPath = m_config->resultVideoDir();
-    withRectangle = mySettings.value("recordwithrect",false).toBool();
+    withRectangle = m_config->resultVideoWithObjectRectangles();
     pathDirectory = recordingPath.toLatin1().toStdString();
-    if (QSysInfo::windowsVersion()==QSysInfo::WV_WINDOWS8 || QSysInfo::windowsVersion()==QSysInfo::WV_WINDOWS8_1)
-    {
-        codecSetting = mySettings.value("videocodec",2).toInt();
-    }
-    else
-    {
-        codecSetting = mySettings.value("videocodec", 1).toInt();
-    }
-
+    codecSetting = m_config->resultVideoCodec();
 
     QDir dir(QString(recordingPath+"/thumbnails/"));
     if (!dir.exists())

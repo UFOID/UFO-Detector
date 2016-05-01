@@ -40,6 +40,7 @@ public:
     ~ImageExplorer();
 
 private:
+    Ui::ImageExplorer *ui;
     Config* m_config;
     QString mainDir;
     QString currentDir;
@@ -56,9 +57,6 @@ private slots:
     void uploadError(QNetworkReply::NetworkError state);
     void openedPHP();
     void on_commandLinkButton_clicked();
-
-private:
-    Ui::ImageExplorer *ui;
 };
 
 #endif // IMAGEEXPLORER_H

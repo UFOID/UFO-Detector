@@ -28,7 +28,7 @@
 class Camera
 {
 public:
-    Camera();
+    Camera(int index, int width, int height);
     cv::Mat getWebcamFrame();
     void stopReadingWebcam();
     bool isWebcamOpen();

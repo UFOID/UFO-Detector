@@ -19,6 +19,7 @@
 #ifndef UPLOADER_H
 #define UPLOADER_H
 
+#include "config.h"
 #include <QDialog>
 #include <QtNetwork/QNetworkReply>
 #include <QtNetwork/QNetworkAccessManager>
@@ -33,13 +34,14 @@ class Uploader : public QDialog
     Q_OBJECT
 
 public:
-    explicit Uploader(QWidget *parent = 0, QString pathName = "");
+    explicit Uploader(QWidget *parent = 0, QString pathName = "", Config *configPtr = 0);
     ~Uploader();
 
 private:
     Ui::Uploader *ui;
-    QNetworkAccessManager *manager;
     QString filepath;
+    Config *m_config;
+    QNetworkAccessManager *manager;
     QFile* file;
     QString dateAndTime;
     QString successURL;

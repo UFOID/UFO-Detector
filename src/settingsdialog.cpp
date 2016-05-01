@@ -20,7 +20,6 @@
 #include "ui_settingsdialog.h"
 #include <QFileDialog>
 #include <iostream>
-#include <QSettings>
 #include <opencv2/highgui/highgui.hpp>
 #include <QMessageBox>
 #include <QDebug>
@@ -39,32 +38,27 @@ SettingsDialog::SettingsDialog(QWidget *parent, Camera *camPtr, Config *configPt
 
     this->setLayout(ui->gridLayout);
 
-    QSettings settings("UFOID","Detector");
-    int INDEX=settings.value("cameraindex",0).toInt();
+    int INDEX = m_config->cameraIndex();
     ui->comboBoxWebcam->setCurrentIndex(INDEX);
-    ui->lineW->setText(settings.value("camerawidth",640).toString());
-    ui->lineH->setText(settings.value("cameraheight",480).toString());
+    ui->lineW->setText(QString::number(m_config->cameraWidth()));
+    ui->lineH->setText(QString::number(m_config->cameraHeight()));
     ui->lineW->setValidator(new QIntValidator(10, 1280, this));
     ui->lineH->setValidator(new QIntValidator(10, 768, this));
     ui->lineVideoPath->setText(m_config->resultVideoDir());
     ui->lineDetectionAreaFile->setText(m_config->detectionAreaFile());
-    ui->lineToken->setText(settings.value("usertoken","").toString());
-    if(settings.value("saveimages").toBool())
+    ui->lineToken->setText(m_config->userTokenAtUfoId());
+    if(m_config->saveResultImages())
 	{
         ui->checkBoxsaveImages->setChecked(true);
         emit on_checkBoxsaveImages_stateChanged(Qt::Checked);
     }
     else emit on_checkBoxsaveImages_stateChanged(Qt::Unchecked);
 	
-    ui->checkBoxRectangle->setChecked(settings.value("recordwithrect",false).toBool());
+    ui->checkBoxRectangle->setChecked(m_config->resultVideoWithObjectRectangles());
     ui->lineImagePath->setText(m_config->resultImageDir());
-    ui->lineMinPosRequired->setText(settings.value("minpositive",2).toString());
+    ui->lineMinPosRequired->setText(QString::number(m_config->minPositiveDetections()));
 
-    if (QSysInfo::windowsVersion()==QSysInfo::WV_WINDOWS8 || QSysInfo::windowsVersion()==QSysInfo::WV_WINDOWS8_1)
-	{
-        ui->comboBoxCodec->setCurrentIndex(settings.value("videocodec",2).toInt());
-    }
-    else ui->comboBoxCodec->setCurrentIndex(settings.value("videocodec",1).toInt());
+    ui->comboBoxCodec->setCurrentIndex(m_config->resultVideoCodec());
 
     setWindowFlags(Qt::FramelessWindowHint);
     setWindowFlags(Qt::WindowTitleHint);
@@ -77,18 +71,17 @@ SettingsDialog::SettingsDialog(QWidget *parent, Camera *camPtr, Config *configPt
 
 void SettingsDialog::saveSettings()
 {
-    QSettings settings("UFOID","Detector");
     m_config->setResultVideoDir(ui->lineVideoPath->text());
-    settings.setValue("cameraindex",ui->comboBoxWebcam->currentIndex()); /// @todo cameraindex may change if cameras added/removed
-    settings.setValue("camerawidth",ui->lineW->text());
-    settings.setValue("cameraheight",ui->lineH->text());
+    m_config->setCameraIndex(ui->comboBoxWebcam->currentIndex()); /// @todo cameraindex may change if cameras added/removed
+    m_config->setCameraWidth(ui->lineW->text().toInt());
+    m_config->setCameraHeight(ui->lineH->text().toInt());
     m_config->setDetectionAreaFile(ui->lineDetectionAreaFile->text());
-    settings.setValue("saveimages",ui->checkBoxsaveImages->isChecked());
+    m_config->setSaveResultImages(ui->checkBoxsaveImages->isChecked());
     m_config->setResultImageDir(ui->lineImagePath->text());
-    settings.setValue("recordwithrect",ui->checkBoxRectangle->isChecked());
-    settings.setValue("minpositive",ui->lineMinPosRequired->text());
-    settings.setValue("videocodec",ui->comboBoxCodec->currentIndex());
-    settings.setValue("usertoken",ui->lineToken->text());
+    m_config->setResultVideoWithObjectRectangles(ui->checkBoxRectangle->isChecked());
+    m_config->setMinPositiveDetections(ui->lineMinPosRequired->text().toInt());
+    m_config->setResultVideoCodec(ui->comboBoxCodec->currentIndex());
+    m_config->setUserTokenAtUfoId(ui->lineToken->text());
 }
 
 //void Settings::checkAreaFile()
