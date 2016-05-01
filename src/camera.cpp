@@ -85,11 +85,15 @@ void Camera::stopReadingWebcam()
  */
 void Camera::readWebcamFrame()
 {
+    int yieldPauseUsec = 1000;    // e.g. at 25 FPS time between frames is 40,000 us
     while(isReadingWebcam)
-	{
+    {
         mutex.lock();
         webcam.read(videoFrame);
         mutex.unlock();
+        // give other threads better possibility to run
+        std::this_thread::yield();
+        std::this_thread::sleep_for(std::chrono::microseconds(yieldPauseUsec));
     }
 }
 
