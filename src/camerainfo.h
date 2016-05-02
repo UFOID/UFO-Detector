@@ -4,6 +4,8 @@
 #include "opencv2/highgui/highgui.hpp"
 #include <QObject>
 #include <QList>
+#include <list>     // for std::list::sort
+#include <algorithm>
 #include <QSize>
 #include <QDebug>
 
@@ -22,10 +24,19 @@ public:
     explicit CameraInfo(int cameraIndex, QObject *parent = 0);
 
     /**
-     * @brief get list of available resolutions
+     * @brief availableResolutions get list of available resolutions
      * @return list of available resolutions
      */
     QList<QSize> availableResolutions();
+
+    /**
+     * @brief compareResolutionsWidthFirst compare resolutions giving precedence to width
+     * This method is suitable to be given to std::sort as compare function
+     * @param res1
+     * @param res2
+     * @return true if res1 < res2 (precedence is on width)
+     */
+    static bool compareResolutionsWidthFirst(QSize res1, QSize res2);
 
 #ifndef _UNIT_TEST_
 private:
