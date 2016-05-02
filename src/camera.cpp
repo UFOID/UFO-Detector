@@ -26,6 +26,7 @@
  */
 Camera::Camera(int index, int width, int height)
 {
+    m_cameraInfo = new CameraInfo(index);
     webcam.open(index);
     webcam.set(CV_CAP_PROP_FRAME_WIDTH, width);
     webcam.set(CV_CAP_PROP_FRAME_HEIGHT, height);
@@ -105,3 +106,6 @@ bool Camera::isWebcamOpen()
     return webcam.isOpened();
 }
 
+QList<QSize> Camera::availableResolutions() {
+    return m_cameraInfo->availableResolutions();
+}

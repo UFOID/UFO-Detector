@@ -65,6 +65,9 @@ Recorder::Recorder(ActualDetector *parent, Camera *cameraPtr, Config *configPtr)
     case 13333:
         resolutionThumbnail = Size((640/10) + 15, (480/10) + 15);
         break;
+    case 15000:
+        resolutionThumbnail = Size((640/10) + 15, (320/10) + 15);
+        break;
     case 17777:
         resolutionThumbnail = Size((640/10) + 15, (360/10) + 15);
         break;

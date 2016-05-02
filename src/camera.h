@@ -18,6 +18,8 @@
 
 #ifndef CAMERA_H
 #define CAMERA_H
+
+#include "camerainfo.h"
 #include <opencv2/highgui/highgui.hpp>
 #include <mutex>
 #include <thread>
@@ -33,9 +35,16 @@ public:
     void stopReadingWebcam();
     bool isWebcamOpen();
 
+    /**
+     * @brief availableResolutions get list of available resolutions
+     * The list is sorted in ascending order.
+     */
+    QList<QSize> availableResolutions();
+
 private:
     std::atomic<bool> isReadingWebcam;
     cv::VideoCapture webcam;
+    CameraInfo* m_cameraInfo;   ///< camera info to get available resolutions
     cv::Mat videoFrame;
     cv::Mat frameToReturn;
     std::mutex mutex;

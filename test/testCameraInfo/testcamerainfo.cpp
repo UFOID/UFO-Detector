@@ -44,7 +44,7 @@ void TestCameraInfo::cleanupTestCase()
 
 void TestCameraInfo::queryResolutions()
 {
-    QVERIFY(m_cameraInfo->queryResolutions());
+    //QVERIFY(m_cameraInfo->queryResolutions());    // this is already done in constructor
     QVERIFY(!m_cameraInfo->m_availableResolutions.isEmpty());
     QListIterator<QSize> listIt(m_cameraInfo->m_availableResolutions);
     qDebug() << "Resolutions found in unit test:";

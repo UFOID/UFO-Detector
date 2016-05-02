@@ -11,6 +11,8 @@
 
 /**
  * @brief Get information of web camera
+ * NOTE: web camera must not be reserved when creating this object, so create
+ * this before using camera
  */
 class CameraInfo : public QObject
 {
@@ -42,13 +44,13 @@ public:
 private:
 #endif
     int m_cameraIndex;  ///< index of camera as used by OpenCV
-    cv::VideoCapture m_webCamera;
+    cv::VideoCapture* m_webCamera;
     QList<QSize> m_commonResolutions;   ///< common resolutions from Wikipedia
     QList<QSize> m_availableResolutions;    ///< results of resolution querying
 
     /**
      * @brief queryResolutions query available resolutions from web camera
-     * @return
+     * @return true if querying succeeded, false if it failed
      */
     bool queryResolutions();
 

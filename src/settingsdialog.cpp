@@ -40,10 +40,25 @@ SettingsDialog::SettingsDialog(QWidget *parent, Camera *camPtr, Config *configPt
 
     int INDEX = m_config->cameraIndex();
     ui->comboBoxWebcam->setCurrentIndex(INDEX);
-    ui->lineW->setText(QString::number(m_config->cameraWidth()));
-    ui->lineH->setText(QString::number(m_config->cameraHeight()));
-    ui->lineW->setValidator(new QIntValidator(10, 1280, this));
-    ui->lineH->setValidator(new QIntValidator(10, 768, this));
+
+    QSize currentResolution(m_config->cameraWidth(), m_config->cameraHeight());
+    QListIterator<QSize> resolutionListIt(cameraPtr->availableResolutions());
+    bool currentResolutionInList = false;
+    while (resolutionListIt.hasNext())
+    {
+        QSize resolution = resolutionListIt.next();
+        QString itemStr = QString::number(resolution.width()) + " x " + QString::number(resolution.height());
+        ui->comboBoxResolution->addItem(itemStr, QVariant(resolution));
+        if (resolution == currentResolution) {
+            currentResolutionInList = true;
+            ui->comboBoxResolution->setCurrentIndex(ui->comboBoxResolution->count() - 1);
+        }
+    }
+    if (!currentResolutionInList) {
+        // show user nothing if incorrect resolution given in settings
+        ui->comboBoxResolution->setCurrentIndex(ui->comboBoxResolution->count());
+    }
+
     ui->lineVideoPath->setText(m_config->resultVideoDir());
     ui->lineDetectionAreaFile->setText(m_config->detectionAreaFile());
     ui->lineToken->setText(m_config->userTokenAtUfoId());
@@ -73,8 +88,9 @@ void SettingsDialog::saveSettings()
 {
     m_config->setResultVideoDir(ui->lineVideoPath->text());
     m_config->setCameraIndex(ui->comboBoxWebcam->currentIndex()); /// @todo cameraindex may change if cameras added/removed
-    m_config->setCameraWidth(ui->lineW->text().toInt());
-    m_config->setCameraHeight(ui->lineH->text().toInt());
+    QSize selectedResolution = ui->comboBoxResolution->currentData().toSize();
+    m_config->setCameraWidth(selectedResolution.width());
+    m_config->setCameraHeight(selectedResolution.height());
     m_config->setDetectionAreaFile(ui->lineDetectionAreaFile->text());
     m_config->setSaveResultImages(ui->checkBoxsaveImages->isChecked());
     m_config->setResultImageDir(ui->lineImagePath->text());

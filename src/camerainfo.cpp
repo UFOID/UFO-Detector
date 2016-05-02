@@ -183,10 +183,19 @@ CameraInfo::CameraInfo(int cameraIndex, QObject *parent) : QObject(parent)
     m_commonResolutions << QSize(7680, 4320);	// 4320p
     m_commonResolutions << QSize(8192, 4608);
     m_commonResolutions << QSize(8192, 8192);
+
+    m_webCamera = new cv::VideoCapture(m_cameraIndex);
+    if (m_webCamera && m_webCamera->open(m_cameraIndex)) {
+        if (!queryResolutions()) {
+            qDebug() << "Querying web camera resolutions failed";
+        }
+        m_webCamera->release();
+    } else {
+        qDebug() << "Problem creating and opening web camera" << m_cameraIndex;
+    }
 }
 
 QList<QSize> CameraInfo::availableResolutions() {
-    queryResolutions();
     return m_availableResolutions;
 }
 
@@ -198,19 +207,15 @@ bool CameraInfo::queryResolutions() {
     QSize largestResolution;
     int smallestIndex;
     int largestIndex;
-    if (!m_webCamera.open(m_cameraIndex)) {
-        qDebug() << "Couldn't connect to web camera" << m_cameraIndex;
-        return false;
-    }
 
     qDebug() << "Querying web camera for supported resolutions";
 
     // find smallest supported resolution
     testRes = m_commonResolutions.at(0);
-    m_webCamera.set(CV_CAP_PROP_FRAME_WIDTH, testRes.width());
-    m_webCamera.set(CV_CAP_PROP_FRAME_HEIGHT, testRes.height());
-    width = m_webCamera.get(CV_CAP_PROP_FRAME_WIDTH);
-    height = m_webCamera.get(CV_CAP_PROP_FRAME_HEIGHT);
+    m_webCamera->set(CV_CAP_PROP_FRAME_WIDTH, testRes.width());
+    m_webCamera->set(CV_CAP_PROP_FRAME_HEIGHT, testRes.height());
+    width = m_webCamera->get(CV_CAP_PROP_FRAME_WIDTH);
+    height = m_webCamera->get(CV_CAP_PROP_FRAME_HEIGHT);
     smallestResolution.setWidth(width);
     smallestResolution.setHeight(height);
     smallestIndex = m_commonResolutions.indexOf(smallestResolution);
@@ -218,15 +223,14 @@ bool CameraInfo::queryResolutions() {
         /// @todo find out the nearest index at lower side if resolution not in list
         smallestIndex = 0;
     }
-    qDebug() << "Smallest supported resolution is" << width << "x" << height;
 
     // find largest supported resolution
     // Actually this test can be done in query loop below: just wait until size is larger than the last found
     testRes = m_commonResolutions.at(m_commonResolutions.size() - 1);
-    m_webCamera.set(CV_CAP_PROP_FRAME_WIDTH, testRes.width());
-    m_webCamera.set(CV_CAP_PROP_FRAME_HEIGHT, testRes.height());
-    width = m_webCamera.get(CV_CAP_PROP_FRAME_WIDTH);
-    height = m_webCamera.get(CV_CAP_PROP_FRAME_HEIGHT);
+    m_webCamera->set(CV_CAP_PROP_FRAME_WIDTH, testRes.width());
+    m_webCamera->set(CV_CAP_PROP_FRAME_HEIGHT, testRes.height());
+    width = m_webCamera->get(CV_CAP_PROP_FRAME_WIDTH);
+    height = m_webCamera->get(CV_CAP_PROP_FRAME_HEIGHT);
     largestResolution.setWidth(width);
     largestResolution.setHeight(height);
     largestIndex = m_commonResolutions.indexOf(largestResolution);
@@ -234,15 +238,15 @@ bool CameraInfo::queryResolutions() {
         /// @todo find out the nearest index at higher side if resolution not in list
         largestIndex = m_commonResolutions.size() - 1;
     }
-    qDebug() << "Largest supported resolution is" << width << "x" << height;
 
     for (int i = smallestIndex; i < (largestIndex + 1); i++) {
         testRes = m_commonResolutions.at(i);
-        m_webCamera.set(CV_CAP_PROP_FRAME_WIDTH, testRes.width());
-        m_webCamera.set(CV_CAP_PROP_FRAME_HEIGHT, testRes.height());
-        width = m_webCamera.get(CV_CAP_PROP_FRAME_WIDTH);
-        height = m_webCamera.get(CV_CAP_PROP_FRAME_HEIGHT);
+        m_webCamera->set(CV_CAP_PROP_FRAME_WIDTH, testRes.width());
+        m_webCamera->set(CV_CAP_PROP_FRAME_HEIGHT, testRes.height());
+        width = m_webCamera->get(CV_CAP_PROP_FRAME_WIDTH);
+        height = m_webCamera->get(CV_CAP_PROP_FRAME_HEIGHT);
         if ((testRes.width() == width) && (testRes.height() == height)) {
+            qDebug() << "Web camera supports resolution" << width << "x" << height;
             m_availableResolutions << testRes;
         } else {
             QSize newRes(width, height);
