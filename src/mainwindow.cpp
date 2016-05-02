@@ -53,7 +53,7 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
 
     m_config = configPtr;
 
-    programVersion = "0.6.1";
+    programVersion = "0.6.2";
 
     this->setWindowTitle("UFO Detector | BETA " + programVersion);
 

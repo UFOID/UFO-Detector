@@ -10,11 +10,10 @@ The UFO Detector is a software that allows the autonomous video recording of pos
   - (Planned) Cross-platform support
   
 ### Requirements:
-  - Windows
   - USB Webcam
   - OpenCV 3.0
   - Qt 5.6.0
-  - FFmpeg
+  - FFmpeg / avconv
   
 ### ToDo:
   - Interface to support more video devices
