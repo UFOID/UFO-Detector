@@ -33,7 +33,12 @@ TestCameraInfo::TestCameraInfo()
 
 void TestCameraInfo::initTestCase()
 {
+    QTime duration;
+    int msec;
+    duration.start();
     m_cameraInfo = new CameraInfo(0);
+    msec = duration.elapsed();
+    qDebug() << "Querying web camera resolutions took" << (double)msec/1000 << "s";
 }
 
 void TestCameraInfo::cleanupTestCase()

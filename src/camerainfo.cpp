@@ -6,6 +6,8 @@ CameraInfo::CameraInfo(int cameraIndex, QObject *parent) : QObject(parent)
 
     // Source: https://en.wikipedia.org/wiki/List_of_common_resolutions (referenced 2016-05-02)
     // Used sections Common display formats, Video conferencing standards, Post-production
+
+#ifndef Q_OS_WINDOWS
     m_commonResolutions << QSize(32, 32);
     m_commonResolutions << QSize(40, 30);
     m_commonResolutions << QSize(42, 11);
@@ -183,6 +185,18 @@ CameraInfo::CameraInfo(int cameraIndex, QObject *parent) : QObject(parent)
     m_commonResolutions << QSize(7680, 4320);	// 4320p
     m_commonResolutions << QSize(8192, 4608);
     m_commonResolutions << QSize(8192, 8192);
+#else
+    m_commonResolutions << QSize(320, 240);	// QVGA
+    m_commonResolutions << QSize(352, 288);	// CIF
+    m_commonResolutions << QSize(640, 480);	// VGA
+    m_commonResolutions << QSize(704, 576);	// 4CIF
+    m_commonResolutions << QSize(800, 600);	// SVGA
+    m_commonResolutions << QSize(1024, 768);	// XGA
+    m_commonResolutions << QSize(1280, 720);	// 720p
+    m_commonResolutions << QSize(1408, 1152);	// 16CIF
+    m_commonResolutions << QSize(1600, 900);	// 900p
+    m_commonResolutions << QSize(1920, 1080);	// HD 1080, 1080i, 1080p
+#endif
 
     m_webCamera = new cv::VideoCapture(m_cameraIndex);
     if (m_webCamera && m_webCamera->open(m_cameraIndex)) {
@@ -249,6 +263,7 @@ bool CameraInfo::queryResolutions() {
             qDebug() << "Web camera supports resolution" << width << "x" << height;
             m_availableResolutions << testRes;
         } else {
+            qDebug() << "No support for resolution" << testRes.width() << "x" << testRes.height() <<"-- got " << width << "x" << height << "instead";
             QSize newRes(width, height);
             if (!m_commonResolutions.contains(newRes) && !m_availableResolutions.contains(newRes)) {
                 m_availableResolutions << newRes;
