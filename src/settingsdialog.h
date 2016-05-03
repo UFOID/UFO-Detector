@@ -20,6 +20,7 @@
 #define SETTINGS_H
 
 #include "config.h"
+#include "camera.h"
 #include <QDialog>
 #include <vector>
 #include <opencv2/opencv.hpp>
