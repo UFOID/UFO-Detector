@@ -21,6 +21,7 @@ private Q_SLOTS:
     void queryResolutions();
     void compareResolutionsWidthFirst();
     void testListSorting();
+    void testQueryPerformance();
 
 private:
     CameraInfo* m_cameraInfo;
@@ -43,8 +44,10 @@ void TestCameraInfo::initTestCase()
 
 void TestCameraInfo::cleanupTestCase()
 {
-    delete m_cameraInfo;
-    m_cameraInfo = NULL;
+    if (m_cameraInfo) {
+        delete m_cameraInfo;
+        m_cameraInfo = NULL;
+    }
 }
 
 void TestCameraInfo::queryResolutions()
@@ -141,6 +144,41 @@ void TestCameraInfo::testListSorting() {
     QVERIFY(testList.at(2) == QSize(20, 30));
     QVERIFY(testList.at(3) == QSize(20, 40));
     QVERIFY(testList.at(4) == QSize(50, 10));
+}
+
+void TestCameraInfo::testQueryPerformance() {
+    QList<int> backendList;
+    QList<QString> backendStringList;
+    QList<int> durationMsecList;
+    QTime duration;
+#ifdef Q_OS_WINDOWS
+    backendList << CV_CAP_MSMF;
+    backendList << CV_CAP_QT;
+    backendList << CV_CAP_WINRT;
+    backendStringList << "CV_CAP_MSMF";
+    backendStringList << "CV_CAP_QT";
+    backendStringList << "CV_CAP_WINRT";
+#else
+    backendList << CV_CAP_ANY;
+    backendStringList << "CV_CAP_ANY";
+#endif
+    QListIterator<int> backendIt(backendList);
+    while (backendIt.hasNext()) {
+        int backend = backendIt.next();
+        delete m_cameraInfo;
+        duration.start();
+        m_cameraInfo = new CameraInfo(0, 0, backend);
+        durationMsecList << duration.elapsed();
+    }
+    backendIt.toFront();
+    QListIterator<int> durationIt(durationMsecList);
+    QListIterator<QString> backendStringIt(backendStringList);
+    while (backendIt.hasNext()) {
+        int backend = backendIt.next();
+        int msec = durationIt.next();
+        QString backendStr = backendStringIt.next();
+        qDebug() << "VideoCapture backend" << backendStr << "query duration" << (double)msec/1000 << "s";
+    }
 }
 
 QTEST_APPLESS_MAIN(TestCameraInfo)

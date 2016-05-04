@@ -22,8 +22,9 @@ public:
      * @brief CameraInfo
      * @param cameraIndex index of camera as used by OpenCV
      * @param parent
+     * @param openCvBackend backend for OpenCV VideoCapture object which is used by this class. Refer to VideoCapture::VideoCapture(int) for details.
      */
-    explicit CameraInfo(int cameraIndex, QObject *parent = 0);
+    explicit CameraInfo(int cameraIndex, QObject *parent = 0, int openCvBackend = CV_CAP_ANY);
 
     /**
      * @brief availableResolutions get list of available resolutions

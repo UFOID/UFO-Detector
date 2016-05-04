@@ -1,6 +1,6 @@
 #include "camerainfo.h"
 
-CameraInfo::CameraInfo(int cameraIndex, QObject *parent) : QObject(parent)
+CameraInfo::CameraInfo(int cameraIndex, QObject *parent, int openCvBackend) : QObject(parent)
 {
     m_cameraIndex = cameraIndex;
 
@@ -198,7 +198,7 @@ CameraInfo::CameraInfo(int cameraIndex, QObject *parent) : QObject(parent)
     m_commonResolutions << QSize(1920, 1080);	// HD 1080, 1080i, 1080p
 #endif
 
-    m_webCamera = new cv::VideoCapture(m_cameraIndex);
+    m_webCamera = new cv::VideoCapture(m_cameraIndex + openCvBackend);
     if (m_webCamera && m_webCamera->open(m_cameraIndex)) {
         if (!queryResolutions()) {
             qDebug() << "Querying web camera resolutions failed";
