@@ -108,7 +108,10 @@ void SettingsDialog::saveSettings()
 void SettingsDialog::on_toolButtonVideoPath_clicked()
 {
     QString videoFilePath=QFileDialog::getExistingDirectory(this,tr("Select Directory"),QDir::currentPath(),QFileDialog::ShowDirsOnly);
-    ui->lineVideoPath->setText(videoFilePath);
+    if (!videoFilePath.isEmpty())
+    {
+        ui->lineVideoPath->setText(videoFilePath);
+    }
 }
 
 SettingsDialog::~SettingsDialog()
@@ -169,14 +172,20 @@ void SettingsDialog::on_toolButtonDetectionAreaFile_clicked()
     /// @todo use previous detection area file name if user cancels file selection
     QString detectionAreaFileName = QFileDialog::getOpenFileName(this,
         tr("Select the detection area file"),QDir::currentPath(), tr("XML file (*.xml)"));
-    ui->lineDetectionAreaFile->setText(detectionAreaFileName);
+    if (!detectionAreaFileName.isEmpty())
+    {
+        ui->lineDetectionAreaFile->setText(detectionAreaFileName);
+    }
 }
 
 void SettingsDialog::on_toolButtonImagePath_clicked()
 {
     QString imagePath = QFileDialog::getExistingDirectory(this, tr("Select Directory"),
         QDir::currentPath(), QFileDialog::ShowDirsOnly);
-    ui->lineImagePath->setText(imagePath);
+    if (!imagePath.isEmpty())
+    {
+        ui->lineImagePath->setText(imagePath);
+    }
 }
 
 void SettingsDialog::on_buttonSelectDetectionArea_clicked()
