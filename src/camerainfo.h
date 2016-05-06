@@ -27,6 +27,12 @@ public:
     explicit CameraInfo(int cameraIndex, QObject *parent = 0, int openCvBackend = CV_CAP_ANY);
 
     /**
+     * @brief init initialize
+     * @return true if initialization was successful, false otherwise
+     */
+    bool init();
+
+    /**
      * @brief availableResolutions get list of available resolutions
      * @return list of available resolutions
      */
@@ -45,6 +51,7 @@ public:
 private:
 #endif
     int m_cameraIndex;  ///< index of camera as used by OpenCV
+    int m_cameraBackend;    ///< camera backend as used by OpenCV
     cv::VideoCapture* m_webCamera;
     QList<QSize> m_commonResolutions;   ///< common resolutions from Wikipedia
     QList<QSize> m_availableResolutions;    ///< results of resolution querying
@@ -56,6 +63,11 @@ private:
     bool queryResolutions();
 
 signals:
+    /**
+     * @brief queryProgressChanged emitted when querying progresses
+     * @param percent percent of query ready
+     */
+    void queryProgressChanged(int percent);
 
 public slots:
 

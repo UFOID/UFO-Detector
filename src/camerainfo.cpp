@@ -3,6 +3,7 @@
 CameraInfo::CameraInfo(int cameraIndex, QObject *parent, int openCvBackend) : QObject(parent)
 {
     m_cameraIndex = cameraIndex;
+    m_cameraBackend = openCvBackend;
 
     // Source: https://en.wikipedia.org/wiki/List_of_common_resolutions (referenced 2016-05-02)
     // Used sections Common display formats, Video conferencing standards, Post-production
@@ -197,16 +198,21 @@ CameraInfo::CameraInfo(int cameraIndex, QObject *parent, int openCvBackend) : QO
     m_commonResolutions << QSize(1600, 900);	// 900p
     m_commonResolutions << QSize(1920, 1080);	// HD 1080, 1080i, 1080p
 #endif
+}
 
-    m_webCamera = new cv::VideoCapture(m_cameraIndex + openCvBackend);
+bool CameraInfo::init() {
+    bool ok = false;
+    m_webCamera = new cv::VideoCapture(m_cameraIndex + m_cameraBackend);
     if (m_webCamera && m_webCamera->open(m_cameraIndex)) {
-        if (!queryResolutions()) {
+        ok = queryResolutions();
+        if (!ok) {
             qDebug() << "Querying web camera resolutions failed";
         }
         m_webCamera->release();
     } else {
         qDebug() << "Problem creating and opening web camera" << m_cameraIndex;
     }
+    return ok;
 }
 
 QList<QSize> CameraInfo::availableResolutions() {
@@ -237,6 +243,7 @@ bool CameraInfo::queryResolutions() {
         /// @todo find out the nearest index at lower side if resolution not in list
         smallestIndex = 0;
     }
+    emit queryProgressChanged(1);
 
     // find largest supported resolution
     // Actually this test can be done in query loop below: just wait until size is larger than the last found
@@ -252,8 +259,10 @@ bool CameraInfo::queryResolutions() {
         /// @todo find out the nearest index at higher side if resolution not in list
         largestIndex = m_commonResolutions.size() - 1;
     }
+    emit queryProgressChanged(2);
 
     for (int i = smallestIndex; i < (largestIndex + 1); i++) {
+        int queryPercent = ((double)(i - smallestIndex) / (double)(largestIndex - smallestIndex)) * (100 - 4) + 3;
         testRes = m_commonResolutions.at(i);
         m_webCamera->set(CV_CAP_PROP_FRAME_WIDTH, testRes.width());
         m_webCamera->set(CV_CAP_PROP_FRAME_HEIGHT, testRes.height());
@@ -269,10 +278,12 @@ bool CameraInfo::queryResolutions() {
                 m_availableResolutions << newRes;
             }
         }
+        emit queryProgressChanged(queryPercent);
     }
 
     // finally sort the available resolutions first by width, then by height
     std::sort(m_availableResolutions.begin(), m_availableResolutions.end(), CameraInfo::compareResolutionsWidthFirst);
+    emit queryProgressChanged(100);
 
     return true;
 }

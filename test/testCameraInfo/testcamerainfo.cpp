@@ -15,45 +15,57 @@ class TestCameraInfo : public QObject
 public:
     TestCameraInfo();
 
+public slots:
+    void onQueryProgressChanged(int progress);
+
 private Q_SLOTS:
     void initTestCase();
     void cleanupTestCase();
-    void queryResolutions();
+    void cameraInfoInit();  // "init" seems to be a reserved word in QTest so using other name
     void compareResolutionsWidthFirst();
     void testListSorting();
     void testQueryPerformance();
 
 private:
     CameraInfo* m_cameraInfo;
+    int m_lastQueryProgress;
 };
 
 TestCameraInfo::TestCameraInfo()
 {
     qDebug() << "NOTE: THIS UNIT TEST REQUIRES A WEB CAMERA";
+    m_cameraInfo = NULL;
+    m_lastQueryProgress = 0;
+}
+
+void TestCameraInfo::onQueryProgressChanged(int progress) {
+    m_lastQueryProgress = progress;
 }
 
 void TestCameraInfo::initTestCase()
 {
-    QTime duration;
-    int msec;
-    duration.start();
     m_cameraInfo = new CameraInfo(0);
-    msec = duration.elapsed();
-    qDebug() << "Querying web camera resolutions took" << (double)msec/1000 << "s";
+    QVERIFY(NULL != m_cameraInfo);
+    QVERIFY(m_cameraInfo->m_commonResolutions.size() > 0);
+    QVERIFY(m_cameraInfo->m_availableResolutions.isEmpty());
+    connect(m_cameraInfo, SIGNAL(queryProgressChanged(int)), this, SLOT(onQueryProgressChanged(int)));
 }
 
 void TestCameraInfo::cleanupTestCase()
 {
     if (m_cameraInfo) {
-        delete m_cameraInfo;
-        m_cameraInfo = NULL;
+        m_cameraInfo->deleteLater();
     }
 }
 
-void TestCameraInfo::queryResolutions()
+void TestCameraInfo::cameraInfoInit()
 {
-    //QVERIFY(m_cameraInfo->queryResolutions());    // this is already done in constructor
+    QVERIFY(m_cameraInfo->m_availableResolutions.isEmpty());
+    QVERIFY(0 == m_lastQueryProgress);
+    QVERIFY(m_cameraInfo->init());
     QVERIFY(!m_cameraInfo->m_availableResolutions.isEmpty());
+    QVERIFY(100 == m_lastQueryProgress);
+
     QListIterator<QSize> listIt(m_cameraInfo->m_availableResolutions);
     qDebug() << "Resolutions found in unit test:";
     while (listIt.hasNext()) {
@@ -166,17 +178,17 @@ void TestCameraInfo::testQueryPerformance() {
     while (backendIt.hasNext()) {
         int backend = backendIt.next();
         delete m_cameraInfo;
-        duration.start();
         m_cameraInfo = new CameraInfo(0, 0, backend);
+        duration.start();
+        m_cameraInfo->init();
         durationMsecList << duration.elapsed();
     }
     backendIt.toFront();
     QListIterator<int> durationIt(durationMsecList);
     QListIterator<QString> backendStringIt(backendStringList);
-    while (backendIt.hasNext()) {
-        int backend = backendIt.next();
-        int msec = durationIt.next();
+    while (backendStringIt.hasNext()) {
         QString backendStr = backendStringIt.next();
+        int msec = durationIt.next();
         qDebug() << "VideoCapture backend" << backendStr << "query duration" << (double)msec/1000 << "s";
     }
 }

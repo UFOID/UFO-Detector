@@ -40,25 +40,10 @@ SettingsDialog::SettingsDialog(QWidget *parent, Camera *camPtr, Config *configPt
 
     int INDEX = m_config->cameraIndex();
     ui->comboBoxWebcam->setCurrentIndex(INDEX);
-
-    QSize currentResolution(m_config->cameraWidth(), m_config->cameraHeight());
-    QListIterator<QSize> resolutionListIt(cameraPtr->availableResolutions());
-    bool currentResolutionInList = false;
-    while (resolutionListIt.hasNext())
-    {
-        QSize resolution = resolutionListIt.next();
-        QString itemStr = QString::number(resolution.width()) + " x " + QString::number(resolution.height());
-        ui->comboBoxResolution->addItem(itemStr, QVariant(resolution));
-        if (resolution == currentResolution) {
-            currentResolutionInList = true;
-            ui->comboBoxResolution->setCurrentIndex(ui->comboBoxResolution->count() - 1);
-        }
-    }
-    if (!currentResolutionInList) {
-        // show user nothing if incorrect resolution given in settings
-        ui->comboBoxResolution->setCurrentIndex(ui->comboBoxResolution->count());
-    }
-
+    ui->lineEditCameraWidth->setText(QString::number(m_config->cameraWidth()));
+    ui->lineEditCameraHeight->setText(QString::number(m_config->cameraHeight()));
+    ui->lineEditCameraWidth->setValidator(new QIntValidator());
+    ui->lineEditCameraHeight->setValidator(new QIntValidator());
     ui->lineVideoPath->setText(m_config->resultVideoDir());
     ui->lineDetectionAreaFile->setText(m_config->detectionAreaFile());
     ui->lineToken->setText(m_config->userTokenAtUfoId());
@@ -77,7 +62,7 @@ SettingsDialog::SettingsDialog(QWidget *parent, Camera *camPtr, Config *configPt
 
     setWindowFlags(Qt::FramelessWindowHint);
     setWindowFlags(Qt::WindowTitleHint);
-    dialogIsOpened=false;
+    m_detectionAreaDialogIsOpen=false;
     wasSaved=false;
 
 //    connect(this,SIGNAL(finishedCheckingXML()),this,SLOT(cleanupThreadCheckXML()));
@@ -88,9 +73,8 @@ void SettingsDialog::saveSettings()
 {
     m_config->setResultVideoDir(ui->lineVideoPath->text());
     m_config->setCameraIndex(ui->comboBoxWebcam->currentIndex()); /// @todo cameraindex may change if cameras added/removed
-    QSize selectedResolution = ui->comboBoxResolution->currentData().toSize();
-    m_config->setCameraWidth(selectedResolution.width());
-    m_config->setCameraHeight(selectedResolution.height());
+    m_config->setCameraWidth(ui->lineEditCameraWidth->text().toInt());
+    m_config->setCameraHeight(ui->lineEditCameraHeight->text().toInt());
     m_config->setDetectionAreaFile(ui->lineDetectionAreaFile->text());
     m_config->setSaveResultImages(ui->checkBoxsaveImages->isChecked());
     m_config->setResultImageDir(ui->lineImagePath->text());
@@ -139,15 +123,16 @@ void SettingsDialog::on_buttonSave_clicked()
 {
     saveSettings();
     wasSaved=true;
+    /// @todo apply settings on-the-fly
     QMessageBox::information(this,"Information","Restart the application to apply the changes");
 }
 
 void SettingsDialog::on_buttonCancel_clicked()
 {
-    if(dialogIsOpened)
+    if(m_detectionAreaDialogIsOpen)
     {
-        myDialog->close();
-        delete myDialog;
+        m_detectionAreaDialog->close();
+        delete m_detectionAreaDialog;
     }
     this->close();
 //    if(!threadXMLfile)
@@ -202,12 +187,25 @@ void SettingsDialog::on_buttonSelectDetectionArea_clicked()
     }
     else
 	{
-        dialogIsOpened=true;
-        myDialog = new DetectionAreaEditDialog(0, cameraPtr, m_config);
-        myDialog->setModal(true);
-        myDialog->show();
+        m_detectionAreaDialogIsOpen=true;
+        m_detectionAreaDialog = new DetectionAreaEditDialog(0, cameraPtr, m_config);
+        m_detectionAreaDialog->setModal(true);
+        m_detectionAreaDialog->show();
         //connect(myDialog,SIGNAL(savedFile()),this,SLOT(startThreadCheckXML()));
     }
+}
+
+void SettingsDialog::on_toolButtonResolutionDialog_clicked()
+{
+    m_resolutionDialog = new CameraResolutionDialog(cameraPtr, m_config, this);
+    connect(m_resolutionDialog, SIGNAL(resolutionAccepted(QSize)), this, SLOT(onResolutionAcceptedInDialog(QSize)));
+    m_resolutionDialog->show();
+}
+
+void SettingsDialog::onResolutionAcceptedInDialog(QSize resolution)
+{
+    ui->lineEditCameraWidth->setText(QString::number(resolution.width()));
+    ui->lineEditCameraHeight->setText(QString::number(resolution.height()));
 }
 
 //void Settings::startThreadCheckXML()
@@ -226,12 +224,12 @@ void SettingsDialog::on_buttonSelectDetectionArea_clicked()
 //    }
 //}
 
-void SettingsDialog::on_toolButton_clicked()
+void SettingsDialog::on_toolButtonCodecHelp_clicked()
 {
     QMessageBox::information(this,"Codec Information","Raw Video results is big file sizes \nA lossless codec is recommended \nWindows 8 users should use the Lagarith Codec");
 }
 
-void SettingsDialog::on_toolButtonToken_clicked()
+void SettingsDialog::on_toolButtonTokenHelp_clicked()
 {
     QMessageBox::information(this,"UFOID.net User Token","Copy the User Token from your UFOID account in to this field to enable the upload feature\nThe code can be found at http://ufoid.net/profile/edit");
 }

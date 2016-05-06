@@ -112,8 +112,8 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
             connect(mytest->getPlayLabel(), SIGNAL(clicked()),this,SLOT(playClip()));
             QListWidgetItem* item = new QListWidgetItem;
             item->setSizeHint(QSize(150,100));
-            ui->myList->addItem(item);
-            ui->myList->setItemWidget(item,mytest);
+            ui->videoList->addItem(item);
+            ui->videoList->setItemWidget(item,mytest);
         }
         node = node.nextSibling();
     }
@@ -183,8 +183,8 @@ void MainWindow::updateWidgets(QString filename, QString datetime, QString video
     connect(newWidget->getPlayLabel(), SIGNAL(clicked()),this,SLOT(playClip()));
     QListWidgetItem* item = new QListWidgetItem;
     item->setSizeHint(QSize(150,100));
-    ui->myList->addItem(item);
-    ui->myList->setItemWidget(item,newWidget);
+    ui->videoList->addItem(item);
+    ui->videoList->setItemWidget(item,newWidget);
 
     recordingCounter_++;
     ui->lineCount->setText(QString::number(recordingCounter_));
@@ -197,10 +197,10 @@ void MainWindow::updateWidgets(QString filename, QString datetime, QString video
 void MainWindow::playClip()
 {
     if(!isRecording){
-        for(int row = 0; row < ui->myList->count(); row++)
+        for(int row = 0; row < ui->videoList->count(); row++)
         {
-            QListWidgetItem *item = ui->myList->item(row);
-            VideoWidget* widget = qobject_cast<VideoWidget*>(ui->myList->itemWidget(item));
+            QListWidgetItem *item = ui->videoList->item(row);
+            VideoWidget* widget = qobject_cast<VideoWidget*>(ui->videoList->itemWidget(item));
 
             if(widget->getPlayLabel()==sender())
             {
@@ -220,17 +220,17 @@ void MainWindow::playClip()
 void MainWindow::deletingFileAndRemovingItem()
 {
     QString dateToRemove;
-    for(int row = 0; row < ui->myList->count(); row++)
+    for(int row = 0; row < ui->videoList->count(); row++)
     {
-        QListWidgetItem *item = ui->myList->item(row);
-        VideoWidget* widget = qobject_cast<VideoWidget*>(ui->myList->itemWidget(item));
+        QListWidgetItem *item = ui->videoList->item(row);
+        VideoWidget* widget = qobject_cast<VideoWidget*>(ui->videoList->itemWidget(item));
 
         if(widget->getClickableLabel()==sender())
         {
             qDebug() << "remove widget " << widget->getDateTime();
             dateToRemove = widget->getDateTime();
-            QListWidgetItem *itemToRemove = ui->myList->takeItem(row);
-            ui->myList->removeItemWidget(itemToRemove);
+            QListWidgetItem *itemToRemove = ui->videoList->takeItem(row);
+            ui->videoList->removeItemWidget(itemToRemove);
             QFile::remove(widget->getPathname());
         }
     }
@@ -264,10 +264,7 @@ void MainWindow::deletingFileAndRemovingItem()
     }
     logFile.close();
     emit elementWasRemoved();
-
 }
-
-
 
 /*
  * Display the Upload Window
@@ -275,10 +272,10 @@ void MainWindow::deletingFileAndRemovingItem()
 void MainWindow::createUploadWindow()
 {
 
-    for(int row = 0; row < ui->myList->count(); row++)
+    for(int row = 0; row < ui->videoList->count(); row++)
     {
-        QListWidgetItem *item = ui->myList->item(row);
-        VideoWidget* widget = qobject_cast<VideoWidget*>(ui->myList->itemWidget(item));
+        QListWidgetItem *item = ui->videoList->item(row);
+        VideoWidget* widget = qobject_cast<VideoWidget*>(ui->videoList->itemWidget(item));
         if(widget->getUploadLabel()==sender())
         {
             Uploader* upload = new Uploader(this,widget->getPathname(),m_config);
