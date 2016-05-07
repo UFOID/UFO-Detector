@@ -107,9 +107,9 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
         {
             QDomElement element = node.toElement();
             VideoWidget* mytest = new VideoWidget(this, element.attribute("Pathname", "NULL"), element.attribute("DateTime", "NULL"),element.attribute("Length", "NULL")  );
-            connect(mytest->getClickableLabel(), SIGNAL(clicked()),this,SLOT(deletingFileAndRemovingItem()));
-            connect(mytest->getUploadLabel(), SIGNAL(clicked()),this,SLOT(createUploadWindow()));
-            connect(mytest->getPlayLabel(), SIGNAL(clicked()),this,SLOT(playClip()));
+            connect(mytest->deleteButton(), SIGNAL(clicked()),this,SLOT(deletingFileAndRemovingItem()));
+            connect(mytest->uploadButton(), SIGNAL(clicked()),this,SLOT(createUploadWindow()));
+            connect(mytest->playButton(), SIGNAL(clicked()),this,SLOT(playClip()));
             QListWidgetItem* item = new QListWidgetItem;
             item->setSizeHint(QSize(150,100));
             ui->videoList->addItem(item);
@@ -178,9 +178,9 @@ void MainWindow::setSignalsAndSlots(ActualDetector* ptrDetector)
 void MainWindow::updateWidgets(QString filename, QString datetime, QString videoLength)
 {
     VideoWidget* newWidget = new VideoWidget(this, filename, datetime, videoLength);
-    connect(newWidget->getClickableLabel(), SIGNAL(clicked()),this,SLOT(deletingFileAndRemovingItem()));
-    connect(newWidget->getUploadLabel(), SIGNAL(clicked()),this,SLOT(createUploadWindow()));
-    connect(newWidget->getPlayLabel(), SIGNAL(clicked()),this,SLOT(playClip()));
+    connect(newWidget->deleteButton(), SIGNAL(clicked()),this,SLOT(deletingFileAndRemovingItem()));
+    connect(newWidget->uploadButton(), SIGNAL(clicked()),this,SLOT(createUploadWindow()));
+    connect(newWidget->playButton(), SIGNAL(clicked()),this,SLOT(playClip()));
     QListWidgetItem* item = new QListWidgetItem;
     item->setSizeHint(QSize(150,100));
     ui->videoList->addItem(item);
@@ -202,9 +202,9 @@ void MainWindow::playClip()
             QListWidgetItem *item = ui->videoList->item(row);
             VideoWidget* widget = qobject_cast<VideoWidget*>(ui->videoList->itemWidget(item));
 
-            if(widget->getPlayLabel()==sender())
+            if(widget->playButton()==sender())
             {
-                QDesktopServices::openUrl(QUrl::fromUserInput(widget->getPathname()));
+                QDesktopServices::openUrl(QUrl::fromUserInput(widget->videoFileName()));
             }
         }
     }
@@ -225,13 +225,14 @@ void MainWindow::deletingFileAndRemovingItem()
         QListWidgetItem *item = ui->videoList->item(row);
         VideoWidget* widget = qobject_cast<VideoWidget*>(ui->videoList->itemWidget(item));
 
-        if(widget->getClickableLabel()==sender())
+        if(widget->deleteButton()==sender())
         {
-            qDebug() << "remove widget " << widget->getDateTime();
-            dateToRemove = widget->getDateTime();
+            dateToRemove = widget->dateTime();
             QListWidgetItem *itemToRemove = ui->videoList->takeItem(row);
             ui->videoList->removeItemWidget(itemToRemove);
-            QFile::remove(widget->getPathname());
+            qDebug() << "Removing" << widget->videoFileName() << "and its thumbnail";
+            QFile::remove(widget->videoFileName());
+            QFile::remove(widget->thumbnailFileName());
         }
     }
 
@@ -276,9 +277,9 @@ void MainWindow::createUploadWindow()
     {
         QListWidgetItem *item = ui->videoList->item(row);
         VideoWidget* widget = qobject_cast<VideoWidget*>(ui->videoList->itemWidget(item));
-        if(widget->getUploadLabel()==sender())
+        if(widget->uploadButton()==sender())
         {
-            Uploader* upload = new Uploader(this,widget->getPathname(),m_config);
+            Uploader* upload = new Uploader(this,widget->videoFileName(),m_config);
             upload->show();
             upload->setAttribute(Qt::WA_DeleteOnClose);
         }
