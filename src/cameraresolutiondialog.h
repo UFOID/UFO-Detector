@@ -42,7 +42,8 @@ private:
     Ui::CameraResolutionDialog *ui;
     Config* m_config;
     Camera* m_camera;
-    CameraInfo* m_cameraInfo;
+
+    void updateResolutionComboBox();
 };
 
 #endif // CAMERARESOLUTIONDIALOG_H
