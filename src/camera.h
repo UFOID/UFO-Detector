@@ -25,10 +25,17 @@
 #include <thread>
 #include <atomic>
 #include <memory>
+#include <QObject>
 
-
-class Camera
+/**
+ * @brief Main Camera class to handle reading of frames from multiple threads
+ *
+ * @todo add setResolution(width, height) method to apply resolution change on-the-fly
+ */
+class Camera : public QObject
 {
+    Q_OBJECT
+
 public:
     /**
      * @brief Camera create camera. You need to call Camera::init() to actually start using the camera.
@@ -65,7 +72,27 @@ public:
      */
     int index();
 
+    /**
+     * @brief queryAvailableResolutions run web camera resolution query
+     * @return
+     */
+    bool queryAvailableResolutions();
+
+    /**
+     * @brief availableResolutions list of available web camera resolutions
+     * @return list of resolutions, or an empty list if queryAvailableResolutions() was not called previously
+     */
+    QList<QSize> availableResolutions();
+
+    /**
+     * @brief knownAspectRatios list of known aspect ratios. List may grow on queryAvailableResolutions().
+     * @return
+     */
+    QList<int> knownAspectRatios();
+
+#ifndef _UNIT_TEST_
 private:
+#endif
     int m_index;    ///< camera index as used by OpenCV
     int m_width;
     int m_height;
@@ -76,6 +103,15 @@ private:
     std::mutex mutex;
     void readWebcamFrame();     ///< thread method for continuous reading of frames
     std::unique_ptr<std::thread> threadReadFrame;
+    CameraInfo* m_cameraInfo;
+
+signals:
+    /**
+     * @brief queryProgressChanged emitted when querying available resolutions progresses
+     * @param percent percent of querying ready
+     */
+    void queryProgressChanged(int percent);
+
 };
 
 #endif // CAMERA_H

@@ -21,14 +21,14 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <QDebug>
 
-/*
- * Main Camera class to handle reading of frames from multiple threads
- */
 Camera::Camera(int index, int width, int height)
 {
     m_index = index;
     m_width = width;
     m_height = height;
+
+    m_cameraInfo = new CameraInfo(m_index);
+    connect(m_cameraInfo, SIGNAL(queryProgressChanged(int)), this, SIGNAL(queryProgressChanged(int)));
 
     std::cout << "Constructed camera with index " << m_index <<  std::endl;
 }
@@ -132,4 +132,28 @@ bool Camera::isWebcamOpen()
 int Camera::index()
 {
     return m_index;
+}
+
+bool Camera::queryAvailableResolutions()
+{
+    if (!m_cameraInfo->isInitialized())
+    {
+        // first release current cv::VideoCapture & stop frame grab thread
+        this->release();
+        // CameraInfo::init() will reserve cv::VideoCapture and do the query
+        m_cameraInfo->init();
+        // now can continue using own cv::VideoCapture and restart frame grab thread
+        this->init();
+    }
+    return true;
+}
+
+QList<QSize> Camera::availableResolutions()
+{
+    return m_cameraInfo->availableResolutions();
+}
+
+QList<int> Camera::knownAspectRatios()
+{
+    return m_cameraInfo->knownAspectRatios();
 }

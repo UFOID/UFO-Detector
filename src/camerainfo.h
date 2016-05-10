@@ -11,8 +11,6 @@
 
 /**
  * @brief Get information of web camera
- * NOTE: web camera must not be reserved when creating this object, so create
- * this before using camera
  */
 class CameraInfo : public QObject
 {
@@ -28,6 +26,10 @@ public:
 
     /**
      * @brief init initialize
+     *
+     * NOTE: web camera must not be reserved when calling this method so release
+     * the camera first
+     *
      * @return true if initialization was successful, false otherwise
      */
     bool init();
