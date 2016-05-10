@@ -33,16 +33,22 @@ public:
     bool init();
 
     /**
+     * @brief isInitialized check whether this instance of CameraInfo is initialized
+     * @return true if initialized, false otherwise
+     */
+    bool isInitialized();
+
+    /**
      * @brief availableResolutions get list of available resolutions
      * @return list of available resolutions
      */
     QList<QSize> availableResolutions();
 
     /**
-     * @brief aspectRatios list of known web camera aspect ratios
+     * @brief knownAspectRatios list of known web camera aspect ratios
      * @return
      */
-    QList<int> aspectRatios();
+    QList<int> knownAspectRatios();
 
     /**
      * @brief compareResolutionsWidthFirst compare resolutions giving precedence to width
@@ -60,8 +66,9 @@ private:
     int m_cameraBackend;    ///< camera backend as used by OpenCV
     cv::VideoCapture* m_webCamera;
     QList<QSize> m_commonResolutions;   ///< common resolutions from Wikipedia
-    QList<int> m_aspectRatios;          ///< aspect ratios (*10,000) for common and available resolutions
+    QList<int> m_knownAspectRatios;          ///< aspect ratios (*10,000) for common and available resolutions
     QList<QSize> m_availableResolutions;    ///< results of resolution querying
+    bool m_initialized;
 
     /**
      * @brief queryResolutions query available resolutions from web camera

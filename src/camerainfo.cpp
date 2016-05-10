@@ -199,6 +199,9 @@ CameraInfo::CameraInfo(int cameraIndex, QObject *parent, int openCvBackend) : QO
     m_commonResolutions << QSize(1600, 900);	// 900p
     m_commonResolutions << QSize(1920, 1080);	// HD 1080, 1080i, 1080p
 #endif
+
+    m_initialized = false;
+    updateAspectRatios();
 }
 
 bool CameraInfo::init() {
@@ -214,11 +217,20 @@ bool CameraInfo::init() {
         qDebug() << "Problem creating and opening web camera" << m_cameraIndex;
     }
     updateAspectRatios();
+    m_initialized = ok;
     return ok;
+}
+
+bool CameraInfo::isInitialized() {
+    return m_initialized;
 }
 
 QList<QSize> CameraInfo::availableResolutions() {
     return m_availableResolutions;
+}
+
+QList<int> CameraInfo::knownAspectRatios() {
+    return m_knownAspectRatios;
 }
 
 bool CameraInfo::queryResolutions() {
@@ -299,19 +311,20 @@ void CameraInfo::updateAspectRatios() {
     while (resIt.hasNext()) {
         res = resIt.next();
         aspectRatio = (double)res.width() / (double)res.height() * 10000;
-        if (!m_aspectRatios.contains(aspectRatio)) {
-            m_aspectRatios << aspectRatio;
+        if (!m_knownAspectRatios.contains(aspectRatio)) {
+            m_knownAspectRatios << aspectRatio;
         }
     }
 
     while (availableResIt.hasNext()) {
         res = availableResIt.next();
         aspectRatio = (double)res.width() / (double)res.height() * 10000;
-        if (!m_aspectRatios.contains(aspectRatio)) {
-            m_aspectRatios << aspectRatio;
+        if (!m_knownAspectRatios.contains(aspectRatio)) {
+            m_knownAspectRatios << aspectRatio;
         }
     }
-    std::sort(m_aspectRatios.begin(), m_aspectRatios.end(), std::less<int>());
+    // sort aspect ratios in ascending order
+    std::sort(m_knownAspectRatios.begin(), m_knownAspectRatios.end(), std::less<int>());
 }
 
 // static

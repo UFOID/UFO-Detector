@@ -47,6 +47,7 @@ void TestCameraInfo::initTestCase()
     QVERIFY(NULL != m_cameraInfo);
     QVERIFY(m_cameraInfo->m_commonResolutions.size() > 0);
     QVERIFY(m_cameraInfo->m_availableResolutions.isEmpty());
+    QVERIFY(!m_cameraInfo->m_knownAspectRatios.isEmpty());
     connect(m_cameraInfo, SIGNAL(queryProgressChanged(int)), this, SLOT(onQueryProgressChanged(int)));
 }
 
@@ -60,13 +61,21 @@ void TestCameraInfo::cleanupTestCase()
 void TestCameraInfo::cameraInfoInit()
 {
     QVERIFY(m_cameraInfo->m_availableResolutions.isEmpty());
-    QVERIFY(m_cameraInfo->m_aspectRatios.isEmpty());
+    QVERIFY(m_cameraInfo->availableResolutions().isEmpty());
+    QVERIFY(!m_cameraInfo->m_knownAspectRatios.isEmpty());
+    QVERIFY(!m_cameraInfo->knownAspectRatios().isEmpty());
+    QVERIFY(!m_cameraInfo->m_initialized);
+    QVERIFY(!m_cameraInfo->isInitialized());
     QVERIFY(m_queryProgressEmitted.isEmpty());
 
     QVERIFY(m_cameraInfo->init());
 
     QVERIFY(!m_cameraInfo->m_availableResolutions.isEmpty());
-    QVERIFY(!m_cameraInfo->m_aspectRatios.isEmpty());
+    QVERIFY(!m_cameraInfo->availableResolutions().isEmpty());
+    QVERIFY(!m_cameraInfo->m_knownAspectRatios.isEmpty());
+    QVERIFY(!m_cameraInfo->knownAspectRatios().isEmpty());
+    QVERIFY(m_cameraInfo->m_initialized);
+    QVERIFY(m_cameraInfo->isInitialized());
     QVERIFY(m_queryProgressEmitted.contains(1));    // lowest resolution
     QVERIFY(m_queryProgressEmitted.contains(2));    // highest resolution
     QVERIFY(m_queryProgressEmitted.contains(100));  // query done
@@ -74,7 +83,7 @@ void TestCameraInfo::cameraInfoInit()
     /// @todo check aspect ratio is found for each common and available resolution
 
     qDebug() << "Web camera aspect ratios known by CameraInfo:";
-    QListIterator<int> aspIt(m_cameraInfo->m_aspectRatios);
+    QListIterator<int> aspIt(m_cameraInfo->m_knownAspectRatios);
     while (aspIt.hasNext()) {
         qDebug() << aspIt.next();
     }
