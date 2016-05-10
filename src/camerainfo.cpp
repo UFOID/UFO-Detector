@@ -151,6 +151,7 @@ CameraInfo::CameraInfo(int cameraIndex, QObject *parent, int openCvBackend) : QO
     m_commonResolutions << QSize(2048, 1536);
     m_commonResolutions << QSize(2048, 1556);
     m_commonResolutions << QSize(2160, 1440);
+    m_commonResolutions << QSize(2304, 1296);   // e.g. Logitech c920 undocumented resolution
     m_commonResolutions << QSize(2304, 1440);
     m_commonResolutions << QSize(2304, 1728);
     m_commonResolutions << QSize(2538, 1080);
@@ -212,6 +213,7 @@ bool CameraInfo::init() {
     } else {
         qDebug() << "Problem creating and opening web camera" << m_cameraIndex;
     }
+    updateAspectRatios();
     return ok;
 }
 
@@ -286,6 +288,30 @@ bool CameraInfo::queryResolutions() {
     emit queryProgressChanged(100);
 
     return true;
+}
+
+void CameraInfo::updateAspectRatios() {
+    int aspectRatio = 0;
+    QSize res(0, 0);
+    QListIterator<QSize> resIt(m_commonResolutions);
+    QListIterator<QSize> availableResIt(m_availableResolutions);
+
+    while (resIt.hasNext()) {
+        res = resIt.next();
+        aspectRatio = (double)res.width() / (double)res.height() * 10000;
+        if (!m_aspectRatios.contains(aspectRatio)) {
+            m_aspectRatios << aspectRatio;
+        }
+    }
+
+    while (availableResIt.hasNext()) {
+        res = availableResIt.next();
+        aspectRatio = (double)res.width() / (double)res.height() * 10000;
+        if (!m_aspectRatios.contains(aspectRatio)) {
+            m_aspectRatios << aspectRatio;
+        }
+    }
+    std::sort(m_aspectRatios.begin(), m_aspectRatios.end(), std::less<int>());
 }
 
 // static

@@ -28,18 +28,17 @@ private Q_SLOTS:
 
 private:
     CameraInfo* m_cameraInfo;
-    int m_lastQueryProgress;
+    QList<int> m_queryProgressEmitted;  ///< list of resolution query progress percentages emitted
 };
 
 TestCameraInfo::TestCameraInfo()
 {
     qDebug() << "NOTE: THIS UNIT TEST REQUIRES A WEB CAMERA";
     m_cameraInfo = NULL;
-    m_lastQueryProgress = 0;
 }
 
 void TestCameraInfo::onQueryProgressChanged(int progress) {
-    m_lastQueryProgress = progress;
+    m_queryProgressEmitted << progress;
 }
 
 void TestCameraInfo::initTestCase()
@@ -61,16 +60,23 @@ void TestCameraInfo::cleanupTestCase()
 void TestCameraInfo::cameraInfoInit()
 {
     QVERIFY(m_cameraInfo->m_availableResolutions.isEmpty());
-    QVERIFY(0 == m_lastQueryProgress);
-    QVERIFY(m_cameraInfo->init());
-    QVERIFY(!m_cameraInfo->m_availableResolutions.isEmpty());
-    QVERIFY(100 == m_lastQueryProgress);
+    QVERIFY(m_cameraInfo->m_aspectRatios.isEmpty());
+    QVERIFY(m_queryProgressEmitted.isEmpty());
 
-    QListIterator<QSize> listIt(m_cameraInfo->m_availableResolutions);
-    qDebug() << "Resolutions found in unit test:";
-    while (listIt.hasNext()) {
-        QSize resolution = (QSize)listIt.next();
-        qDebug() << resolution.width() << "x" << resolution.height();
+    QVERIFY(m_cameraInfo->init());
+
+    QVERIFY(!m_cameraInfo->m_availableResolutions.isEmpty());
+    QVERIFY(!m_cameraInfo->m_aspectRatios.isEmpty());
+    QVERIFY(m_queryProgressEmitted.contains(1));    // lowest resolution
+    QVERIFY(m_queryProgressEmitted.contains(2));    // highest resolution
+    QVERIFY(m_queryProgressEmitted.contains(100));  // query done
+
+    /// @todo check aspect ratio is found for each common and available resolution
+
+    qDebug() << "Web camera aspect ratios known by CameraInfo:";
+    QListIterator<int> aspIt(m_cameraInfo->m_aspectRatios);
+    while (aspIt.hasNext()) {
+        qDebug() << aspIt.next();
     }
 }
 

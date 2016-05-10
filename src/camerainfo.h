@@ -39,6 +39,12 @@ public:
     QList<QSize> availableResolutions();
 
     /**
+     * @brief aspectRatios list of known web camera aspect ratios
+     * @return
+     */
+    QList<int> aspectRatios();
+
+    /**
      * @brief compareResolutionsWidthFirst compare resolutions giving precedence to width
      * This method is suitable to be given to std::sort as compare function
      * @param res1
@@ -54,6 +60,7 @@ private:
     int m_cameraBackend;    ///< camera backend as used by OpenCV
     cv::VideoCapture* m_webCamera;
     QList<QSize> m_commonResolutions;   ///< common resolutions from Wikipedia
+    QList<int> m_aspectRatios;          ///< aspect ratios (*10,000) for common and available resolutions
     QList<QSize> m_availableResolutions;    ///< results of resolution querying
 
     /**
@@ -61,6 +68,11 @@ private:
      * @return true if querying succeeded, false if it failed
      */
     bool queryResolutions();
+
+    /**
+     * @brief updateAspectRatios update aspect ratio list based on common and available resolutions
+     */
+    void updateAspectRatios();
 
 signals:
     /**
