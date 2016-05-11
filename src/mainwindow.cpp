@@ -272,7 +272,6 @@ void MainWindow::deletingFileAndRemovingItem()
  */
 void MainWindow::createUploadWindow()
 {
-
     for(int row = 0; row < ui->videoList->count(); row++)
     {
         QListWidgetItem *item = ui->videoList->item(row);
@@ -284,7 +283,6 @@ void MainWindow::createUploadWindow()
             upload->setAttribute(Qt::WA_DeleteOnClose);
         }
     }
-
 }
 
 /*
@@ -307,7 +305,6 @@ void MainWindow::setPositiveMessage()
     else ui->outputText->append(message + " - " + "Positive detection " + QString::number(++counterPositive_));
     lastWasPositive=true;
     lastWasInfo=false;
-
 }
 
 /*
@@ -411,16 +408,12 @@ void MainWindow::on_startButton_clicked()
         {
             ui->statusLabel->setText("Failed to start");
             connect(this,SIGNAL(updatePixmap(QImage)),this,SLOT(displayPixmap(QImage)));
-
         }
     }
     else
     {
         on_stopButton_clicked();
     }
-
-
-
 }
 
 void MainWindow::on_stopButton_clicked()
@@ -437,7 +430,6 @@ void MainWindow::on_stopButton_clicked()
         threadWebcam.reset(new std::thread(&MainWindow::updateWebcamFrame, this));
     }
     ui->startButton->setText("Start Detection");
-
 }
 
 void MainWindow::on_checkBox_stateChanged(int arg1)
@@ -477,20 +469,28 @@ void MainWindow::on_buttonImageExpl_clicked()
 bool MainWindow::checkAndSetResolution(const int WIDTH, const int HEIGHT)
 {
     double aspectRatio = (double)WIDTH / (double)HEIGHT;
+    /// @todo use actual maximum web camera view width AND height -- main window is resizable so view size changes
     int maxWebcamWidth = 640;
     int webcamHeight = (int)(maxWebcamWidth / aspectRatio);
+    bool aspectRatioOk = false;
 
     qDebug() << "Requested web cam size:" << QSize(WIDTH, HEIGHT);
     qDebug() << "Requested aspect ratio of web camera:" << aspectRatio;
-    for (int i=0; i < m_allowedWebcamAspectRatios.size(); i++)
+    if (m_config->checkCameraAspectRatio())
     {
-        if (m_allowedWebcamAspectRatios[i] == (int)(aspectRatio*10000))
+        if (CamPtr->knownAspectRatios().contains((int)(aspectRatio * 10000)))
         {
-            qDebug() << "Aspect ratio of web camera is ok";
-            ui->webcamView->resize(QSize(maxWebcamWidth, webcamHeight));
-            displayResolution = Size(maxWebcamWidth, webcamHeight);
-            return true;
+            aspectRatioOk = true;
         }
+    } else {
+        aspectRatioOk = true;
+    }
+    if (aspectRatioOk)
+    {
+        qDebug() << "Aspect ratio of web camera is ok";
+        ui->webcamView->resize(QSize(maxWebcamWidth, webcamHeight));
+        displayResolution = Size(maxWebcamWidth, webcamHeight);
+        return true;
     }
     qDebug() << "Aspect ratio of web camera is NOT ok";
     ui->outputText->append("Error: Selected webcam resolution is NOT ok");

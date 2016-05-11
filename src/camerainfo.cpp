@@ -151,7 +151,6 @@ CameraInfo::CameraInfo(int cameraIndex, QObject *parent, int openCvBackend) : QO
     m_commonResolutions << QSize(2048, 1536);
     m_commonResolutions << QSize(2048, 1556);
     m_commonResolutions << QSize(2160, 1440);
-    m_commonResolutions << QSize(2304, 1296);   // e.g. Logitech c920 undocumented resolution
     m_commonResolutions << QSize(2304, 1440);
     m_commonResolutions << QSize(2304, 1728);
     m_commonResolutions << QSize(2538, 1080);

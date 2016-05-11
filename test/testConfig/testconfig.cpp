@@ -12,6 +12,7 @@ public:
 private Q_SLOTS:
     void init();
     void cleanup();
+    void testDefaultValues();
     void testMotionThreshold();
 
 private:
@@ -34,9 +35,39 @@ void TestConfig::init() {
 
 void TestConfig::cleanup() {
     QFile settingsFile(m_config->m_settings->fileName());
-    QVERIFY(settingsFile.remove());
+    if (settingsFile.exists()) {
+        QVERIFY(settingsFile.remove());
+    }
     delete m_config;
     m_config = NULL;
+}
+
+void TestConfig::testDefaultValues() {
+    QVERIFY(m_config->applicationVersion() == "");
+    QVERIFY(m_config->checkApplicationUpdates() == true);
+
+    QVERIFY(m_config->cameraIndex() == 0);
+    QVERIFY(m_config->cameraWidth() == 640);
+    QVERIFY(m_config->cameraHeight() == 480);
+    QVERIFY(m_config->checkCameraAspectRatio() == true);
+
+    //QVERIFY(m_config->detectionAreaFile());
+    QVERIFY(m_config->detectionAreaSize() == 0);
+
+    QVERIFY(m_config->noiseFilterPixelSize() == 2);
+    QVERIFY(m_config->motionThreshold() == 10);
+    QVERIFY(m_config->minPositiveDetections() == 2);
+    //QVERIFY(m_config->birdClassifierTrainingFile());
+
+    //QVERIFY(m_config->resultDataFile());
+    //QVERIFY(m_config->resultVideoDir());
+    QVERIFY(m_config->resultVideoCodec() == 1);
+    QVERIFY(m_config->resultVideoWithObjectRectangles() == false);
+    //QVERIFY(m_config->videoEncoderLocation());
+    //QVERIFY(m_config->resultImageDir());
+    QVERIFY(m_config->saveResultImages() == false);
+
+    QVERIFY(m_config->userTokenAtUfoId() == "");
 }
 
 void TestConfig::testMotionThreshold() {
