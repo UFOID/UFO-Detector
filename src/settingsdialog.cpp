@@ -124,10 +124,19 @@ SettingsDialog::~SettingsDialog()
 
 void SettingsDialog::on_buttonSave_clicked()
 {
+    // check camera frame aspect ratio
+    int cameraWidth = ui->lineEditCameraWidth->text().toInt();
+    int cameraHeight = ui->lineEditCameraHeight->text().toInt();
+    int cameraAspectRatio =  (double)cameraWidth / (double)cameraHeight * 10000;
+    if (!cameraPtr->knownAspectRatios().contains(cameraAspectRatio))
+    {
+        QMessageBox::warning(this, "Error", "Unknown camera aspect ratio. Please change camera width and/or height. Settings are not saved.");
+        return;
+    }
     saveSettings();
     wasSaved=true;
     /// @todo apply settings on-the-fly
-    QMessageBox::information(this,"Information","Restart the application to apply the changes");
+    QMessageBox::information(this, "Information", "Settings saved successfully. Restart the application to apply the changes.");
 }
 
 void SettingsDialog::on_buttonCancel_clicked()
