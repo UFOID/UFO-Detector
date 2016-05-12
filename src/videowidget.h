@@ -45,7 +45,6 @@ public:
     ClickableLabel* uploadButton();
     ClickableLabel* playButton();
 
-
 private:
     Ui::VideoWidget *ui;
     void paintEvent(QPaintEvent *);
@@ -62,10 +61,7 @@ signals:
 
 public slots:
 
-
 protected:
-    //void mousePressEvent ( QMouseEvent * event ) ;
-
 };
 
 #endif // VIDEOWIDGET_H

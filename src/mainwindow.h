@@ -21,10 +21,12 @@
 #include <QMainWindow>
 #include "actualdetector.h"
 #include "config.h"
+#include "messageupdate.h"
 #include <QModelIndex>
 #include <QDomDocument>
 #include <QFile>
-#include <messageupdate.h>
+#include <QListWidgetItem>
+
 
 
 namespace Ui {
@@ -35,6 +37,7 @@ class QNetworkReply;
 class Camera;
 class SettingsDialog;
 class QNetworkAccessManager;
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -60,6 +63,8 @@ private:
     Camera* CamPtr;
     std::unique_ptr<std::thread> threadWebcam;
     cv::Size displayResolution;
+    QString m_detectionStatusStyleOn;  ///< detection status indicator style when detection on
+    QString m_detectionStatusStyleOff; ///< detection status indicator style when detection off
 
     Config* m_config;
 
@@ -70,7 +75,6 @@ private:
 
     void updateWebcamFrame();
     bool checkAndSetResolution(const int WIDTH, const int HEIGHT);
-    void initializeStylesheet();
 
     /**
      * @brief readLogFileAndGetRootElement Read logfile containing existing video info
@@ -108,9 +112,9 @@ private slots:
     void on_sliderNoise_sliderMoved(int position);
     void on_settingsButton_clicked();
     void on_recordingTestButton_clicked();
-    void playClip();
-    void deletingFileAndRemovingItem();
-    void createUploadWindow();
+    void onVideoPlayClicked();
+    void onVideoDeleteClicked();
+    void onVideoUploadClicked();
     void setPositiveMessage();
     void setNegativeMessage();
     void setErrorReadingDetectionAreaFile();

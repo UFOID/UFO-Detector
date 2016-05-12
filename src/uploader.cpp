@@ -36,9 +36,6 @@ Uploader::Uploader(QWidget *parent, QString pathName, Config *configPtr) :
     ui->lineFile->setText(pathName);
     manager = new QNetworkAccessManager(this);
     file = new QFile(filepath, this);
-    ui->textBrowser->setStyleSheet("background-color:#3C4A62;");
-    ui->lineFile->setStyleSheet("background-color:#3C4A62;");
-    ui->buttonUpload->setStyleSheet("background-color:#3C4A62;");
     ui->textBrowser->append("The link to your video will appear here after starting the upload");
     this->setWindowTitle("Upload video");
     this->setFixedSize(604,229);

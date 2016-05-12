@@ -77,7 +77,6 @@ VideoWidget::VideoWidget(QWidget *parent, QString filepath, QString theDateTime,
     mainLayout->addLayout(hLayout);
     mainLayout->addLayout(hLayout2);
 
-    this->setStyleSheet("background-color:#3C4A62; border: 1px solid #515C65;color: white;");
     this->setLayout(mainLayout);
     this->resize(250,100);
 
@@ -127,3 +126,4 @@ void VideoWidget::paintEvent(QPaintEvent *)
     QPainter p(this);
     style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
 }
+

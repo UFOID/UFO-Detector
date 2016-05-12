@@ -54,14 +54,8 @@ ImageExplorer::ImageExplorer(QWidget *parent, Config *config) :
     connect(ui->listWidget,SIGNAL(clicked(QModelIndex)),this,SLOT(displayFolder(QModelIndex)));
     manager = new QNetworkAccessManager(this);
 
-
     this->setWindowTitle("Upload Images");
-    this->setStyleSheet("background-color:#515C65; color: white");
     this->setFixedSize(611,631);
-    ui->buttonBack->setStyleSheet("background-color:#3C4A62;");
-    ui->buttonClear->setStyleSheet("background-color:#3C4A62;");
-    ui->buttonUpload->setStyleSheet("background-color:#3C4A62;");
-    ui->output->setStyleSheet("background-color:#3C4A62;");
 
 }
 

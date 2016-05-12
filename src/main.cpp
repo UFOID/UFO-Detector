@@ -22,19 +22,31 @@
 #include "camera.h"
 #include "config.h"
 #include <iostream>
+#include <QDebug>
 
 int main(int argc, char *argv[])
 {
 	try 
 	{
 		QApplication a(argc, argv);
+
+        QFile styleFile(":/detector.qss");
+        if (styleFile.open(QFile::ReadOnly))
+        {
+            QString styleSheet = styleFile.readAll();
+            a.setStyleSheet(styleSheet);
+            styleFile.close();
+        } else {
+            qDebug() << "Missing stylesheet file:" << styleFile.fileName();
+        }
+
         Config myConfig;
         Camera myCam(myConfig.cameraIndex(), myConfig.cameraWidth(), myConfig.cameraHeight());
         myCam.init();
-        MainWindow w(0, &myCam, &myConfig);
-        ActualDetector detector(&w, &myCam, &myConfig);
-		w.setSignalsAndSlots(&detector);
-		w.show();
+        MainWindow mainWindow(0, &myCam, &myConfig);
+        ActualDetector detector(&mainWindow, &myCam, &myConfig);
+        mainWindow.setSignalsAndSlots(&detector);
+        mainWindow.show();
 
 		return a.exec();
 	}

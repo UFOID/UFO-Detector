@@ -99,3 +99,9 @@ unix {
     #LIBS += -lopencv_videoio
     #LIBS += -lopencv_imgcodecs
 }
+
+RESOURCES = detector.qrc
+
+DISTFILES += \
+    detector.qrc \
+    detector.qss

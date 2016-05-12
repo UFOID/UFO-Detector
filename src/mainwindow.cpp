@@ -23,7 +23,6 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <QMessageBox>
 #include <QDebug>
-#include <QListWidgetItem>
 #include "clickablelabel.h"
 #include "videowidget.h"
 #include "camera.h"
@@ -83,10 +82,17 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
     counterPositive_=0;
     recordingCounter_=0;
 
+    m_detectionStatusStyleOn = "color: #55FF55;";
+    m_detectionStatusStyleOff = "color: #FF5555;";
+
     checkFolders();
     readLogFileAndGetRootElement();
     checkDetectionAreaFile();
-    initializeStylesheet();
+
+    ui->statusLabel->setStyleSheet(m_detectionStatusStyleOff);
+    ui->recordingTestButton->hide();
+    ui->progressBar->hide();
+    ui->outputText->append("For feedback and bug reports contact the developer at contact@ufoid.net");
 
     if (checkCameraAndCodec(WIDTH,HEIGHT,CODEC))
     {
@@ -102,9 +108,9 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
         {
             QDomElement element = node.toElement();
             VideoWidget* mytest = new VideoWidget(this, element.attribute("Pathname", "NULL"), element.attribute("DateTime", "NULL"),element.attribute("Length", "NULL")  );
-            connect(mytest->deleteButton(), SIGNAL(clicked()),this,SLOT(deletingFileAndRemovingItem()));
-            connect(mytest->uploadButton(), SIGNAL(clicked()),this,SLOT(createUploadWindow()));
-            connect(mytest->playButton(), SIGNAL(clicked()),this,SLOT(playClip()));
+            connect(mytest->deleteButton(), SIGNAL(clicked()),this,SLOT(onVideoDeleteClicked()));
+            connect(mytest->uploadButton(), SIGNAL(clicked()),this,SLOT(onVideoUploadClicked()));
+            connect(mytest->playButton(), SIGNAL(clicked()),this,SLOT(onVideoPlayClicked()));
             QListWidgetItem* item = new QListWidgetItem;
             item->setSizeHint(QSize(150,100));
             ui->videoList->addItem(item);
@@ -173,9 +179,9 @@ void MainWindow::setSignalsAndSlots(ActualDetector* ptrDetector)
 void MainWindow::updateWidgets(QString filename, QString datetime, QString videoLength)
 {
     VideoWidget* newWidget = new VideoWidget(this, filename, datetime, videoLength);
-    connect(newWidget->deleteButton(), SIGNAL(clicked()),this,SLOT(deletingFileAndRemovingItem()));
-    connect(newWidget->uploadButton(), SIGNAL(clicked()),this,SLOT(createUploadWindow()));
-    connect(newWidget->playButton(), SIGNAL(clicked()),this,SLOT(playClip()));
+    connect(newWidget->deleteButton(), SIGNAL(clicked()),this,SLOT(onVideoDeleteClicked()));
+    connect(newWidget->uploadButton(), SIGNAL(clicked()),this,SLOT(onVideoUploadClicked()));
+    connect(newWidget->playButton(), SIGNAL(clicked()),this,SLOT(onVideoPlayClicked()));
     QListWidgetItem* item = new QListWidgetItem;
     item->setSizeHint(QSize(150,100));
     ui->videoList->addItem(item);
@@ -189,7 +195,7 @@ void MainWindow::updateWidgets(QString filename, QString datetime, QString video
 /*
  * Play a video from the VideoWidget
  */
-void MainWindow::playClip()
+void MainWindow::onVideoPlayClicked()
 {
     if(!isRecording){
         for(int row = 0; row < ui->videoList->count(); row++)
@@ -212,7 +218,7 @@ void MainWindow::playClip()
 /*
  * Delete video file and remove VideoWidget element from list
  */
-void MainWindow::deletingFileAndRemovingItem()
+void MainWindow::onVideoDeleteClicked()
 {
     QString dateToRemove;
     for(int row = 0; row < ui->videoList->count(); row++)
@@ -265,7 +271,7 @@ void MainWindow::deletingFileAndRemovingItem()
 /*
  * Display the Upload Window
  */
-void MainWindow::createUploadWindow()
+void MainWindow::onVideoUploadClicked()
 {
     for(int row = 0; row < ui->videoList->count(); row++)
     {
@@ -394,7 +400,7 @@ void MainWindow::on_startButton_clicked()
             }
             connect(theDetector,SIGNAL(updatePixmap(QImage)),this,SLOT(displayPixmap(QImage)));
             isDetecting=true;
-            ui->statusLabel->setStyleSheet("QLabel { color : green; }");
+            ui->statusLabel->setStyleSheet(m_detectionStatusStyleOn);
             ui->statusLabel->setText("Detection started on " + QTime::currentTime().toString());
             ui->progressBar->hide();
             ui->startButton->setText("Stop Detection");
@@ -414,7 +420,7 @@ void MainWindow::on_startButton_clicked()
 void MainWindow::on_stopButton_clicked()
 {
     theDetector->stopThread();
-    ui->statusLabel->setStyleSheet("QLabel { color : red; }");
+    ui->statusLabel->setStyleSheet(m_detectionStatusStyleOff);
     ui->statusLabel->setText("Detection not running");
     isDetecting=false;
     disconnect(theDetector,SIGNAL(updatePixmap(QImage)),this,SLOT(displayPixmap(QImage)));
@@ -499,29 +505,6 @@ bool MainWindow::checkAndSetResolution(const int WIDTH, const int HEIGHT)
 bool MainWindow::getCheckboxState()
 {
     return ui->checkBox->isChecked();
-}
-
-/*
- * Set Stylesheet for UI
- */
-void MainWindow::initializeStylesheet()
-{
-    this->setStyleSheet("background-color:#515C65; color: white");
-    ui->buttonClear->setStyleSheet("background-color:#3C4A62;");
-    ui->recordingTestButton->hide();
-    ui->progressBar->hide();
-    ui->aboutButton->setStyleSheet("background-color:#3C4A62;");
-    ui->startButton->setStyleSheet("background-color:#3C4A62;");
-    ui->settingsButton->setStyleSheet("background-color:#3C4A62;");
-    ui->outputText->setStyleSheet("background-color:#3C4A62;");
-    ui->lineCount->setStyleSheet("background-color:#3C4A62;");
-    ui->lineNoise->setStyleSheet("background-color:#3C4A62;");
-    ui->lineThresh->setStyleSheet("background-color:#3C4A62;");
-    ui->toolButtonNoise->setStyleSheet("background-color:#3C4A62;");
-    ui->toolButtonThresh->setStyleSheet("background-color:#3C4A62;");
-    ui->buttonImageExpl->setStyleSheet("background-color:#3C4A62;");
-    ui->checkBox->setStyleSheet("QToolTip { color: #3C4A62; }");
-    ui->outputText->append("For feedback and bug reports contact the developer at contact@ufoid.net");
 }
 
 void MainWindow::readLogFileAndGetRootElement()

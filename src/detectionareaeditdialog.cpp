@@ -51,11 +51,6 @@ DetectionAreaEditDialog::DetectionAreaEditDialog(QWidget *parent, Camera *camPtr
     ui->buttonClear->setEnabled(false);
     ui->buttonConnect->setEnabled(false);
     this->setWindowTitle("Select area of detection");
-    this->setStyleSheet("background-color:#515C65; color: white");
-    ui->buttonClear->setStyleSheet("background-color:#3C4A62;");
-    ui->buttonConnect->setStyleSheet("background-color:#3C4A62;");
-    ui->buttonSave->setStyleSheet("background-color:#3C4A62;");
-    ui->buttonTakePicture->setStyleSheet("background-color:#3C4A62;");
     ui->progressBar->hide();
     this->setFixedSize(830,570);
 }
