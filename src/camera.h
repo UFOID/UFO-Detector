@@ -54,6 +54,12 @@ public:
     bool init();
 
     /**
+     * @brief isInitialized whether the camera is initialized
+     * @return true if camera is initialized, false if not
+     */
+    bool isInitialized();
+
+    /**
      * @brief release stop and close camera
      */
     void release();
@@ -104,6 +110,7 @@ private:
     void readWebcamFrame();     ///< thread method for continuous reading of frames
     std::unique_ptr<std::thread> threadReadFrame;
     CameraInfo* m_cameraInfo;
+    bool m_initialized;     ///< whether camera is initialized or not
 
 signals:
     /**

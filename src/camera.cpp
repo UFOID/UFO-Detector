@@ -26,6 +26,7 @@ Camera::Camera(int index, int width, int height)
     m_index = index;
     m_width = width;
     m_height = height;
+    m_initialized = false;
 
     m_cameraInfo = new CameraInfo(m_index);
     connect(m_cameraInfo, SIGNAL(queryProgressChanged(int)), this, SIGNAL(queryProgressChanged(int)));
@@ -56,7 +57,13 @@ bool Camera::init()
     } else {
         return false;
     }
+    m_initialized = true;
     return true;
+}
+
+bool Camera::isInitialized()
+{
+    return m_initialized;
 }
 
 void Camera::release()
@@ -67,6 +74,7 @@ void Camera::release()
     }
     stopReadingWebcam();
     m_webcam->release();
+    m_initialized = false;
 }
 
 /*

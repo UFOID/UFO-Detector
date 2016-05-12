@@ -10,6 +10,8 @@ CameraResolutionDialog::CameraResolutionDialog(Camera *camera, Config *config, Q
     connect(m_camera, SIGNAL(queryProgressChanged(int)), this, SLOT(onQueryProgressChanged(int)));
     m_config = config;
 
+    ui->startQueryPushButton->setEnabled(m_camera->isInitialized());
+
     updateResolutionComboBox();
 }
 
