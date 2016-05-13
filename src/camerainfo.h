@@ -11,8 +11,6 @@
 
 /**
  * @brief Get information of web camera
- * NOTE: web camera must not be reserved when creating this object, so create
- * this before using camera
  */
 class CameraInfo : public QObject
 {
@@ -22,14 +20,37 @@ public:
      * @brief CameraInfo
      * @param cameraIndex index of camera as used by OpenCV
      * @param parent
+     * @param openCvBackend backend for OpenCV VideoCapture object which is used by this class. Refer to VideoCapture::VideoCapture(int) for details.
      */
-    explicit CameraInfo(int cameraIndex, QObject *parent = 0);
+    explicit CameraInfo(int cameraIndex, QObject *parent = 0, int openCvBackend = CV_CAP_ANY);
+
+    /**
+     * @brief init initialize
+     *
+     * NOTE: web camera must not be reserved when calling this method so release
+     * the camera first
+     *
+     * @return true if initialization was successful, false otherwise
+     */
+    bool init();
+
+    /**
+     * @brief isInitialized check whether this instance of CameraInfo is initialized
+     * @return true if initialized, false otherwise
+     */
+    bool isInitialized();
 
     /**
      * @brief availableResolutions get list of available resolutions
      * @return list of available resolutions
      */
     QList<QSize> availableResolutions();
+
+    /**
+     * @brief knownAspectRatios list of known web camera aspect ratios
+     * @return
+     */
+    QList<int> knownAspectRatios();
 
     /**
      * @brief compareResolutionsWidthFirst compare resolutions giving precedence to width
@@ -44,9 +65,12 @@ public:
 private:
 #endif
     int m_cameraIndex;  ///< index of camera as used by OpenCV
+    int m_cameraBackend;    ///< camera backend as used by OpenCV
     cv::VideoCapture* m_webCamera;
     QList<QSize> m_commonResolutions;   ///< common resolutions from Wikipedia
+    QList<int> m_knownAspectRatios;          ///< aspect ratios (*10,000) for common and available resolutions
     QList<QSize> m_availableResolutions;    ///< results of resolution querying
+    bool m_initialized;
 
     /**
      * @brief queryResolutions query available resolutions from web camera
@@ -54,7 +78,17 @@ private:
      */
     bool queryResolutions();
 
+    /**
+     * @brief updateAspectRatios update aspect ratio list based on common and available resolutions
+     */
+    void updateAspectRatios();
+
 signals:
+    /**
+     * @brief queryProgressChanged emitted when querying progresses
+     * @param percent percent of query ready
+     */
+    void queryProgressChanged(int percent);
 
 public slots:
 

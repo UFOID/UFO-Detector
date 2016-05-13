@@ -15,47 +15,77 @@ class TestCameraInfo : public QObject
 public:
     TestCameraInfo();
 
+public slots:
+    void onQueryProgressChanged(int progress);
+
 private Q_SLOTS:
     void initTestCase();
     void cleanupTestCase();
-    void queryResolutions();
+    void cameraInfoInit();  // "init" seems to be a reserved word in QTest so using other name
     void compareResolutionsWidthFirst();
     void testListSorting();
+    void testQueryPerformance();
 
 private:
     CameraInfo* m_cameraInfo;
+    QList<int> m_queryProgressEmitted;  ///< list of resolution query progress percentages emitted
 };
 
 TestCameraInfo::TestCameraInfo()
 {
     qDebug() << "NOTE: THIS UNIT TEST REQUIRES A WEB CAMERA";
+    m_cameraInfo = NULL;
+}
+
+void TestCameraInfo::onQueryProgressChanged(int progress) {
+    m_queryProgressEmitted << progress;
 }
 
 void TestCameraInfo::initTestCase()
 {
-    QTime duration;
-    int msec;
-    duration.start();
     m_cameraInfo = new CameraInfo(0);
-    msec = duration.elapsed();
-    qDebug() << "Querying web camera resolutions took" << (double)msec/1000 << "s";
+    QVERIFY(NULL != m_cameraInfo);
+    QVERIFY(m_cameraInfo->m_commonResolutions.size() > 0);
+    QVERIFY(m_cameraInfo->m_availableResolutions.isEmpty());
+    QVERIFY(!m_cameraInfo->m_knownAspectRatios.isEmpty());
+    connect(m_cameraInfo, SIGNAL(queryProgressChanged(int)), this, SLOT(onQueryProgressChanged(int)));
 }
 
 void TestCameraInfo::cleanupTestCase()
 {
-    delete m_cameraInfo;
-    m_cameraInfo = NULL;
+    if (m_cameraInfo) {
+        m_cameraInfo->deleteLater();
+    }
 }
 
-void TestCameraInfo::queryResolutions()
+void TestCameraInfo::cameraInfoInit()
 {
-    //QVERIFY(m_cameraInfo->queryResolutions());    // this is already done in constructor
+    QVERIFY(m_cameraInfo->m_availableResolutions.isEmpty());
+    QVERIFY(m_cameraInfo->availableResolutions().isEmpty());
+    QVERIFY(!m_cameraInfo->m_knownAspectRatios.isEmpty());
+    QVERIFY(!m_cameraInfo->knownAspectRatios().isEmpty());
+    QVERIFY(!m_cameraInfo->m_initialized);
+    QVERIFY(!m_cameraInfo->isInitialized());
+    QVERIFY(m_queryProgressEmitted.isEmpty());
+
+    QVERIFY(m_cameraInfo->init());
+
     QVERIFY(!m_cameraInfo->m_availableResolutions.isEmpty());
-    QListIterator<QSize> listIt(m_cameraInfo->m_availableResolutions);
-    qDebug() << "Resolutions found in unit test:";
-    while (listIt.hasNext()) {
-        QSize resolution = (QSize)listIt.next();
-        qDebug() << resolution.width() << "x" << resolution.height();
+    QVERIFY(!m_cameraInfo->availableResolutions().isEmpty());
+    QVERIFY(!m_cameraInfo->m_knownAspectRatios.isEmpty());
+    QVERIFY(!m_cameraInfo->knownAspectRatios().isEmpty());
+    QVERIFY(m_cameraInfo->m_initialized);
+    QVERIFY(m_cameraInfo->isInitialized());
+    QVERIFY(m_queryProgressEmitted.contains(1));    // lowest resolution
+    QVERIFY(m_queryProgressEmitted.contains(2));    // highest resolution
+    QVERIFY(m_queryProgressEmitted.contains(100));  // query done
+
+    /// @todo check aspect ratio is found for each common and available resolution
+
+    qDebug() << "Web camera aspect ratios known by CameraInfo:";
+    QListIterator<int> aspIt(m_cameraInfo->m_knownAspectRatios);
+    while (aspIt.hasNext()) {
+        qDebug() << aspIt.next();
     }
 }
 
@@ -141,6 +171,41 @@ void TestCameraInfo::testListSorting() {
     QVERIFY(testList.at(2) == QSize(20, 30));
     QVERIFY(testList.at(3) == QSize(20, 40));
     QVERIFY(testList.at(4) == QSize(50, 10));
+}
+
+void TestCameraInfo::testQueryPerformance() {
+    QList<int> backendList;
+    QList<QString> backendStringList;
+    QList<int> durationMsecList;
+    QTime duration;
+#ifdef Q_OS_WINDOWS
+    backendList << CV_CAP_MSMF;
+    backendList << CV_CAP_QT;
+    backendList << CV_CAP_WINRT;
+    backendStringList << "CV_CAP_MSMF";
+    backendStringList << "CV_CAP_QT";
+    backendStringList << "CV_CAP_WINRT";
+#else
+    backendList << CV_CAP_ANY;
+    backendStringList << "CV_CAP_ANY";
+#endif
+    QListIterator<int> backendIt(backendList);
+    while (backendIt.hasNext()) {
+        int backend = backendIt.next();
+        delete m_cameraInfo;
+        m_cameraInfo = new CameraInfo(0, 0, backend);
+        duration.start();
+        m_cameraInfo->init();
+        durationMsecList << duration.elapsed();
+    }
+    backendIt.toFront();
+    QListIterator<int> durationIt(durationMsecList);
+    QListIterator<QString> backendStringIt(backendStringList);
+    while (backendStringIt.hasNext()) {
+        QString backendStr = backendStringIt.next();
+        int msec = durationIt.next();
+        qDebug() << "VideoCapture backend" << backendStr << "query duration" << (double)msec/1000 << "s";
+    }
 }
 
 QTEST_APPLESS_MAIN(TestCameraInfo)

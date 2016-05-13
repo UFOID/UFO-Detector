@@ -24,6 +24,7 @@ public:
         CameraIndex,        // camera
         CameraWidth,
         CameraHeight,
+        CheckCameraAspectRatio,
         DetectionAreaFile,  // detection parameters
         DetectionAreaSize,
         NoiseFilterPixelSize,
@@ -51,9 +52,10 @@ public:
 
     /**
      * @brief checkApplicationUpdates whether to automatically check application updates on startup
+     * This is a developer setting and needs to be added manually into the settings file.
      * @return true: check, false: don't check
      */
-    bool checkApplicationUpdates(); ///< whether to automatically check application updates
+    bool checkApplicationUpdates();
 
     /**
      * @brief cameraIndex web camera index as defined by OpenCV
@@ -69,6 +71,13 @@ public:
      * @brief cameraHeight web camera height in pixels
      */
     int cameraHeight();
+
+    /**
+     * @brief checkCameraAspectRatio checking web camera aspect ratio
+     * This is a developer setting and needs to be added manually into the settings file.
+     * @return true if checking, false if not
+     */
+    bool checkCameraAspectRatio();
 
     /**
      * @brief detectionAreaFile full name of file containing detection area definition
@@ -257,6 +266,7 @@ private:
     int m_defaultCameraIndex;
     int m_defaultCameraWidth;
     int m_defaultCameraHeight;
+    bool m_defaultCheckCameraAspectRatio;
 
     QString m_defaultDetectionDataDir; ///< default directory for data (detection area and result data / log)
     QString m_defaultDetectionAreaFileName; ///< default file name for detection area file

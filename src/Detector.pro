@@ -40,7 +40,8 @@ SOURCES += main.cpp\
     settingsdialog.cpp \
     config.cpp \
     detectionareaeditdialog.cpp \
-    camerainfo.cpp
+    camerainfo.cpp \
+    cameraresolutiondialog.cpp
 
 HEADERS  += \
     recorder.h \
@@ -57,7 +58,8 @@ HEADERS  += \
     settingsdialog.h \
     config.h \
     detectionareaeditdialog.h \
-    camerainfo.h
+    camerainfo.h \
+    cameraresolutiondialog.h
 
 FORMS    += \
     mainwindow.ui \
@@ -65,7 +67,8 @@ FORMS    += \
     imageexplorer.ui \
     uploader.ui \
     settingsdialog.ui \
-    detectionareaeditdialog.ui
+    detectionareaeditdialog.ui \
+    cameraresolutiondialog.ui
 
 windows {
     INCLUDEPATH += C:\own\install\include

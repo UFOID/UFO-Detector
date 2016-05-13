@@ -21,10 +21,11 @@
 
 #include "config.h"
 #include "camera.h"
+#include "detectionareaeditdialog.h"
+#include "cameraresolutiondialog.h"
 #include <QDialog>
 #include <vector>
 #include <opencv2/opencv.hpp>
-#include "detectionareaeditdialog.h"
 #include <memory>
 #include <thread>
 
@@ -47,9 +48,11 @@ private:
     Camera* cameraPtr;
     Config* m_config;
     void saveSettings();
-    bool dialogIsOpened;
+    bool m_detectionAreaDialogIsOpen;
     bool wasSaved;
-    DetectionAreaEditDialog* myDialog;
+    DetectionAreaEditDialog* m_detectionAreaDialog;
+    CameraResolutionDialog* m_resolutionDialog;
+
     //std::unique_ptr<std::thread> threadXMLfile;
     //void checkAreaFile();
 
@@ -62,10 +65,12 @@ private slots:
     void on_toolButtonDetectionAreaFile_clicked();
     void on_toolButtonImagePath_clicked();
     void on_buttonSelectDetectionArea_clicked();
+    void on_toolButtonResolutionDialog_clicked();
+    void onResolutionAcceptedInDialog(QSize resolution);
     //void startThreadCheckXML();
     //void cleanupThreadCheckXML();
-    void on_toolButton_clicked();
-    void on_toolButtonToken_clicked();
+    void on_toolButtonCodecHelp_clicked();
+    void on_toolButtonTokenHelp_clicked();
 
 public slots:
 
