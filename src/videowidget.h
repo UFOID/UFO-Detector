@@ -28,6 +28,9 @@ namespace Ui {
 class VideoWidget;
 }
 
+/**
+ * @brief video widget to be used as list item
+ */
 class VideoWidget : public QWidget
 {
     Q_OBJECT
@@ -35,23 +38,24 @@ class VideoWidget : public QWidget
 public:
     explicit VideoWidget(QWidget *parent = 0, QString filepath = "", QString theDateTime = "", QString videoLength="");
     ~VideoWidget();
-    ClickableLabel* getClickableLabel();
-    QString getPathname();
-    QString getDateTime();
-    ClickableLabel* getUploadLabel();
-    ClickableLabel* getPlayLabel();
+    ClickableLabel* deleteButton();
+    QString videoFileName();
+    QString thumbnailFileName();
+    QString dateTime();
+    ClickableLabel* uploadButton();
+    ClickableLabel* playButton();
 
 
 private:
     Ui::VideoWidget *ui;
     void paintEvent(QPaintEvent *);
-    QString dateTime;
-    QString thumbnailPath;
-    QString fullFilePath;
+    QString m_dateTime;
+    QString m_thumbnailFileName;
+    QString m_videoFileName;
     MainWindow* myParent;
-    ClickableLabel *smallRed;
-    ClickableLabel *smallUpload;
-    ClickableLabel *smallPlay;
+    ClickableLabel *m_deleteButton;
+    ClickableLabel *m_uploadButton;
+    ClickableLabel *m_playButton;
 
 
 signals:

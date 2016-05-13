@@ -83,11 +83,6 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
     counterPositive_=0;
     recordingCounter_=0;
 
-    m_allowedWebcamAspectRatios << 12222;  // 11:9
-    m_allowedWebcamAspectRatios << 13333;  // 4:3
-    m_allowedWebcamAspectRatios << 15000;  // 3:2
-    m_allowedWebcamAspectRatios << 17777;  // 16:9
-
     checkFolders();
     readLogFileAndGetRootElement();
     checkDetectionAreaFile();
@@ -107,13 +102,13 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
         {
             QDomElement element = node.toElement();
             VideoWidget* mytest = new VideoWidget(this, element.attribute("Pathname", "NULL"), element.attribute("DateTime", "NULL"),element.attribute("Length", "NULL")  );
-            connect(mytest->getClickableLabel(), SIGNAL(clicked()),this,SLOT(deletingFileAndRemovingItem()));
-            connect(mytest->getUploadLabel(), SIGNAL(clicked()),this,SLOT(createUploadWindow()));
-            connect(mytest->getPlayLabel(), SIGNAL(clicked()),this,SLOT(playClip()));
+            connect(mytest->deleteButton(), SIGNAL(clicked()),this,SLOT(deletingFileAndRemovingItem()));
+            connect(mytest->uploadButton(), SIGNAL(clicked()),this,SLOT(createUploadWindow()));
+            connect(mytest->playButton(), SIGNAL(clicked()),this,SLOT(playClip()));
             QListWidgetItem* item = new QListWidgetItem;
             item->setSizeHint(QSize(150,100));
-            ui->myList->addItem(item);
-            ui->myList->setItemWidget(item,mytest);
+            ui->videoList->addItem(item);
+            ui->videoList->setItemWidget(item,mytest);
         }
         node = node.nextSibling();
     }
@@ -178,13 +173,13 @@ void MainWindow::setSignalsAndSlots(ActualDetector* ptrDetector)
 void MainWindow::updateWidgets(QString filename, QString datetime, QString videoLength)
 {
     VideoWidget* newWidget = new VideoWidget(this, filename, datetime, videoLength);
-    connect(newWidget->getClickableLabel(), SIGNAL(clicked()),this,SLOT(deletingFileAndRemovingItem()));
-    connect(newWidget->getUploadLabel(), SIGNAL(clicked()),this,SLOT(createUploadWindow()));
-    connect(newWidget->getPlayLabel(), SIGNAL(clicked()),this,SLOT(playClip()));
+    connect(newWidget->deleteButton(), SIGNAL(clicked()),this,SLOT(deletingFileAndRemovingItem()));
+    connect(newWidget->uploadButton(), SIGNAL(clicked()),this,SLOT(createUploadWindow()));
+    connect(newWidget->playButton(), SIGNAL(clicked()),this,SLOT(playClip()));
     QListWidgetItem* item = new QListWidgetItem;
     item->setSizeHint(QSize(150,100));
-    ui->myList->addItem(item);
-    ui->myList->setItemWidget(item,newWidget);
+    ui->videoList->addItem(item);
+    ui->videoList->setItemWidget(item,newWidget);
 
     recordingCounter_++;
     ui->lineCount->setText(QString::number(recordingCounter_));
@@ -197,14 +192,14 @@ void MainWindow::updateWidgets(QString filename, QString datetime, QString video
 void MainWindow::playClip()
 {
     if(!isRecording){
-        for(int row = 0; row < ui->myList->count(); row++)
+        for(int row = 0; row < ui->videoList->count(); row++)
         {
-            QListWidgetItem *item = ui->myList->item(row);
-            VideoWidget* widget = qobject_cast<VideoWidget*>(ui->myList->itemWidget(item));
+            QListWidgetItem *item = ui->videoList->item(row);
+            VideoWidget* widget = qobject_cast<VideoWidget*>(ui->videoList->itemWidget(item));
 
-            if(widget->getPlayLabel()==sender())
+            if(widget->playButton()==sender())
             {
-                QDesktopServices::openUrl(QUrl::fromUserInput(widget->getPathname()));
+                QDesktopServices::openUrl(QUrl::fromUserInput(widget->videoFileName()));
             }
         }
     }
@@ -220,18 +215,19 @@ void MainWindow::playClip()
 void MainWindow::deletingFileAndRemovingItem()
 {
     QString dateToRemove;
-    for(int row = 0; row < ui->myList->count(); row++)
+    for(int row = 0; row < ui->videoList->count(); row++)
     {
-        QListWidgetItem *item = ui->myList->item(row);
-        VideoWidget* widget = qobject_cast<VideoWidget*>(ui->myList->itemWidget(item));
+        QListWidgetItem *item = ui->videoList->item(row);
+        VideoWidget* widget = qobject_cast<VideoWidget*>(ui->videoList->itemWidget(item));
 
-        if(widget->getClickableLabel()==sender())
+        if(widget->deleteButton()==sender())
         {
-            qDebug() << "remove widget " << widget->getDateTime();
-            dateToRemove = widget->getDateTime();
-            QListWidgetItem *itemToRemove = ui->myList->takeItem(row);
-            ui->myList->removeItemWidget(itemToRemove);
-            QFile::remove(widget->getPathname());
+            dateToRemove = widget->dateTime();
+            QListWidgetItem *itemToRemove = ui->videoList->takeItem(row);
+            ui->videoList->removeItemWidget(itemToRemove);
+            qDebug() << "Removing" << widget->videoFileName() << "and its thumbnail";
+            QFile::remove(widget->videoFileName());
+            QFile::remove(widget->thumbnailFileName());
         }
     }
 
@@ -264,29 +260,24 @@ void MainWindow::deletingFileAndRemovingItem()
     }
     logFile.close();
     emit elementWasRemoved();
-
 }
-
-
 
 /*
  * Display the Upload Window
  */
 void MainWindow::createUploadWindow()
 {
-
-    for(int row = 0; row < ui->myList->count(); row++)
+    for(int row = 0; row < ui->videoList->count(); row++)
     {
-        QListWidgetItem *item = ui->myList->item(row);
-        VideoWidget* widget = qobject_cast<VideoWidget*>(ui->myList->itemWidget(item));
-        if(widget->getUploadLabel()==sender())
+        QListWidgetItem *item = ui->videoList->item(row);
+        VideoWidget* widget = qobject_cast<VideoWidget*>(ui->videoList->itemWidget(item));
+        if(widget->uploadButton()==sender())
         {
-            Uploader* upload = new Uploader(this,widget->getPathname(),m_config);
+            Uploader* upload = new Uploader(this,widget->videoFileName(),m_config);
             upload->show();
             upload->setAttribute(Qt::WA_DeleteOnClose);
         }
     }
-
 }
 
 /*
@@ -309,7 +300,6 @@ void MainWindow::setPositiveMessage()
     else ui->outputText->append(message + " - " + "Positive detection " + QString::number(++counterPositive_));
     lastWasPositive=true;
     lastWasInfo=false;
-
 }
 
 /*
@@ -413,16 +403,12 @@ void MainWindow::on_startButton_clicked()
         {
             ui->statusLabel->setText("Failed to start");
             connect(this,SIGNAL(updatePixmap(QImage)),this,SLOT(displayPixmap(QImage)));
-
         }
     }
     else
     {
         on_stopButton_clicked();
     }
-
-
-
 }
 
 void MainWindow::on_stopButton_clicked()
@@ -439,7 +425,6 @@ void MainWindow::on_stopButton_clicked()
         threadWebcam.reset(new std::thread(&MainWindow::updateWebcamFrame, this));
     }
     ui->startButton->setText("Start Detection");
-
 }
 
 void MainWindow::on_checkBox_stateChanged(int arg1)
@@ -479,20 +464,28 @@ void MainWindow::on_buttonImageExpl_clicked()
 bool MainWindow::checkAndSetResolution(const int WIDTH, const int HEIGHT)
 {
     double aspectRatio = (double)WIDTH / (double)HEIGHT;
+    /// @todo use actual maximum web camera view width AND height -- main window is resizable so view size changes
     int maxWebcamWidth = 640;
     int webcamHeight = (int)(maxWebcamWidth / aspectRatio);
+    bool aspectRatioOk = false;
 
     qDebug() << "Requested web cam size:" << QSize(WIDTH, HEIGHT);
     qDebug() << "Requested aspect ratio of web camera:" << aspectRatio;
-    for (int i=0; i < m_allowedWebcamAspectRatios.size(); i++)
+    if (m_config->checkCameraAspectRatio())
     {
-        if (m_allowedWebcamAspectRatios[i] == (int)(aspectRatio*10000))
+        if (CamPtr->knownAspectRatios().contains((int)(aspectRatio * 10000)))
         {
-            qDebug() << "Aspect ratio of web camera is ok";
-            ui->webcamView->resize(QSize(maxWebcamWidth, webcamHeight));
-            displayResolution = Size(maxWebcamWidth, webcamHeight);
-            return true;
+            aspectRatioOk = true;
         }
+    } else {
+        aspectRatioOk = true;
+    }
+    if (aspectRatioOk)
+    {
+        qDebug() << "Aspect ratio of web camera is ok";
+        ui->webcamView->resize(QSize(maxWebcamWidth, webcamHeight));
+        displayResolution = Size(maxWebcamWidth, webcamHeight);
+        return true;
     }
     qDebug() << "Aspect ratio of web camera is NOT ok";
     ui->outputText->append("Error: Selected webcam resolution is NOT ok");

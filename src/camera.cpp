@@ -21,32 +21,60 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <QDebug>
 
-/*
- * Main Camera class to handle reading of frames from multiple threads
- */
 Camera::Camera(int index, int width, int height)
 {
-    m_cameraInfo = new CameraInfo(index);
-    webcam.open(index);
-    webcam.set(CV_CAP_PROP_FRAME_WIDTH, width);
-    webcam.set(CV_CAP_PROP_FRAME_HEIGHT, height);
-    int actualWidth = webcam.get(CV_CAP_PROP_FRAME_WIDTH);
-    int actualHeight = webcam.get(CV_CAP_PROP_FRAME_HEIGHT);
+    m_index = index;
+    m_width = width;
+    m_height = height;
+    m_initialized = false;
 
-    if ((actualWidth != width) || (actualHeight != height))
+    m_cameraInfo = new CameraInfo(m_index);
+    connect(m_cameraInfo, SIGNAL(queryProgressChanged(int)), this, SIGNAL(queryProgressChanged(int)));
+
+    std::cout << "Constructed camera with index " << m_index <<  std::endl;
+}
+
+bool Camera::init()
+{
+    m_webcam = new cv::VideoCapture(m_index);
+    m_webcam->open(m_index);
+    m_webcam->set(CV_CAP_PROP_FRAME_WIDTH, m_width);
+    m_webcam->set(CV_CAP_PROP_FRAME_HEIGHT, m_height);
+    int actualWidth = m_webcam->get(CV_CAP_PROP_FRAME_WIDTH);
+    int actualHeight = m_webcam->get(CV_CAP_PROP_FRAME_HEIGHT);
+
+    if ((actualWidth != m_width) || (actualHeight != m_height))
     {
-        qDebug() << "Warning: requested web camera size" << width << "x" << height <<
+        qDebug() << "Warning: requested web camera size" << m_width << "x" << m_height <<
                     "but got" << actualWidth << "x" << actualHeight;
     }
 
-    if(webcam.isOpened())
-	{
-        webcam.read(frameToReturn);
+    if(m_webcam->isOpened())
+    {
+        m_webcam->read(frameToReturn);
         isReadingWebcam=true;
         threadReadFrame.reset(new std::thread(&Camera::readWebcamFrame, this));
+    } else {
+        return false;
     }
+    m_initialized = true;
+    return true;
+}
 
-    std::cout << "Constructed camera with index " << index <<  std::endl;
+bool Camera::isInitialized()
+{
+    return m_initialized;
+}
+
+void Camera::release()
+{
+    if (!m_webcam)
+    {
+        return;
+    }
+    stopReadingWebcam();
+    m_webcam->release();
+    m_initialized = false;
 }
 
 /*
@@ -54,8 +82,7 @@ Camera::Camera(int index, int width, int height)
  */
 cv::Mat Camera::getWebcamFrame()
 {
-
-    if (videoFrame.data && videoFrame.isContinuous())
+    if (m_webcam && videoFrame.data && videoFrame.isContinuous())
 	{
         mutex.lock();
         frameToReturn = videoFrame.clone();
@@ -87,10 +114,10 @@ void Camera::stopReadingWebcam()
 void Camera::readWebcamFrame()
 {
     int yieldPauseUsec = 1000;    // e.g. at 25 FPS time between frames is 40,000 us
-    while(isReadingWebcam)
+    while(m_webcam && isReadingWebcam && isWebcamOpen())
     {
         mutex.lock();
-        webcam.read(videoFrame);
+        m_webcam->read(videoFrame);
         mutex.unlock();
         // give other threads better possibility to run
         std::this_thread::yield();
@@ -103,9 +130,38 @@ void Camera::readWebcamFrame()
  */
 bool Camera::isWebcamOpen()
 {
-    return webcam.isOpened();
+    if (!m_webcam)
+    {
+        return false;
+    }
+    return m_webcam->isOpened();
 }
 
-QList<QSize> Camera::availableResolutions() {
+int Camera::index()
+{
+    return m_index;
+}
+
+bool Camera::queryAvailableResolutions()
+{
+    if (!m_cameraInfo->isInitialized())
+    {
+        // first release current cv::VideoCapture & stop frame grab thread
+        this->release();
+        // CameraInfo::init() will reserve cv::VideoCapture and do the query
+        m_cameraInfo->init();
+        // now can continue using own cv::VideoCapture and restart frame grab thread
+        this->init();
+    }
+    return true;
+}
+
+QList<QSize> Camera::availableResolutions()
+{
     return m_cameraInfo->availableResolutions();
+}
+
+QList<int> Camera::knownAspectRatios()
+{
+    return m_cameraInfo->knownAspectRatios();
 }

@@ -37,18 +37,16 @@ VideoWidget::VideoWidget(QWidget *parent, QString filepath, QString theDateTime,
 {
 
     myParent = qobject_cast<MainWindow*>(parent);
-    /// @todo take full file path from result data file
-    fullFilePath = filepath+QString("/Capture--")+theDateTime+QString(".avi");
-    dateTime = theDateTime;
-    /// @todo take full thumbnail path from result data file
-    thumbnailPath=filepath+QString("/thumbnails/")+theDateTime+QString(".jpg");
+    m_dateTime = theDateTime;
+    m_videoFileName = filepath + QString("/Capture--") + m_dateTime + QString(".avi");
+    m_thumbnailFileName=filepath + QString("/thumbnails/") + m_dateTime + QString(".jpg");
 
     QLabel *thumbnailLabel = new QLabel(this);
-    QLabel *lbl1 = new QLabel(dateTime, this);
+    QLabel *lbl1 = new QLabel(m_dateTime, this);
     QLabel *lbl2 = new QLabel(videoLength, this);
 
     QImage thumbnail;
-    thumbnail.load(thumbnailPath);
+    thumbnail.load(m_thumbnailFileName);
     thumbnailLabel->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     thumbnailLabel->setPixmap(QPixmap::fromImage(thumbnail));
 
@@ -62,18 +60,18 @@ VideoWidget::VideoWidget(QWidget *parent, QString filepath, QString theDateTime,
     hLayout->addLayout(vLayout);
 
     QHBoxLayout *hLayout2 = new QHBoxLayout;
-    smallPlay = new ClickableLabel(this);
-    smallPlay->setText("Play");
-    hLayout2->addWidget(smallPlay, 22, Qt::AlignRight);
+    m_playButton = new ClickableLabel(this);
+    m_playButton->setText("Play");
+    hLayout2->addWidget(m_playButton, 22, Qt::AlignRight);
 
-    smallUpload = new ClickableLabel(this);
-    smallUpload->setText("Share");
-    hLayout2->addWidget(smallUpload, 0, Qt::AlignRight);
+    m_uploadButton = new ClickableLabel(this);
+    m_uploadButton->setText("Share");
+    hLayout2->addWidget(m_uploadButton, 0, Qt::AlignRight);
 
-    smallRed = new ClickableLabel(this);
-    smallRed->setToolTip("Delete file from system and remove item from list");
-    smallRed->setText("Delete");
-    hLayout2->addWidget(smallRed, 0, Qt::AlignRight);
+    m_deleteButton = new ClickableLabel(this);
+    m_deleteButton->setToolTip("Delete file from system and remove item from list");
+    m_deleteButton->setText("Delete");
+    hLayout2->addWidget(m_deleteButton, 0, Qt::AlignRight);
 
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
     mainLayout->addLayout(hLayout);
@@ -88,33 +86,38 @@ VideoWidget::VideoWidget(QWidget *parent, QString filepath, QString theDateTime,
 VideoWidget::~VideoWidget()
 {
     this->destroy(true,true);
-    delete smallRed;
+    delete m_deleteButton;
     delete this->layout();
 }
 
-ClickableLabel *VideoWidget::getClickableLabel()
+ClickableLabel *VideoWidget::deleteButton()
 {
-    return smallRed;
+    return m_deleteButton;
 }
 
-QString VideoWidget::getPathname()
+QString VideoWidget::videoFileName()
 {
-    return fullFilePath;
+    return m_videoFileName;
 }
 
-QString VideoWidget::getDateTime()
+QString VideoWidget::thumbnailFileName()
 {
-    return dateTime;
+    return m_thumbnailFileName;
 }
 
-ClickableLabel *VideoWidget::getUploadLabel()
+QString VideoWidget::dateTime()
 {
-    return smallUpload;
+    return m_dateTime;
 }
 
-ClickableLabel *VideoWidget::getPlayLabel()
+ClickableLabel *VideoWidget::uploadButton()
 {
-    return smallPlay;
+    return m_uploadButton;
+}
+
+ClickableLabel *VideoWidget::playButton()
+{
+    return m_playButton;
 }
 
 void VideoWidget::paintEvent(QPaintEvent *)

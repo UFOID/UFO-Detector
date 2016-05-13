@@ -458,7 +458,7 @@
       <number>10</number>
      </property>
      <item>
-      <widget class="QListWidget" name="myList">
+      <widget class="QListWidget" name="videoList">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
          <horstretch>0</horstretch>

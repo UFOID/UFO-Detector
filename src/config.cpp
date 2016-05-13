@@ -7,6 +7,7 @@ Config::Config(QObject *parent) : QObject(parent)
     m_settingKeys[Config::CameraIndex] = "cameraIndex";
     m_settingKeys[Config::CameraWidth] = "cameraWidth";
     m_settingKeys[Config::CameraHeight] = "cameraHeight";
+    m_settingKeys[Config::CheckCameraAspectRatio] = "checkCameraAspectRatio";
     m_settingKeys[Config::DetectionAreaFile] = "detectionAreaFile";
     m_settingKeys[Config::DetectionAreaSize] = "detectionAreaSize";
     m_settingKeys[Config::NoiseFilterPixelSize] = "noiseFilterPixelSize";
@@ -30,6 +31,7 @@ Config::Config(QObject *parent) : QObject(parent)
     m_defaultCameraIndex = 0;
     m_defaultCameraWidth = 640;
     m_defaultCameraHeight = 480;
+    m_defaultCheckCameraAspectRatio = true;
 
     m_defaultNoiseFilterPixelSize = 2;
     m_defaultMotionThreshold = 10;
@@ -82,6 +84,10 @@ int Config::cameraWidth() {
 
 int Config::cameraHeight() {
     return m_settings->value(m_settingKeys[Config::CameraHeight], m_defaultCameraHeight).toInt();
+}
+
+bool Config::checkCameraAspectRatio() {
+    return m_settings->value(m_settingKeys[Config::CheckCameraAspectRatio], m_defaultCheckCameraAspectRatio).toBool();
 }
 
 QString Config::detectionAreaFile() {
