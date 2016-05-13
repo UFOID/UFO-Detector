@@ -23,6 +23,7 @@
    </size>
   </property>
   <property name="windowTitle">
+   <string>Check supported web camera resolutions</string>
   </property>
   <property name="modal">
    <bool>true</bool>
