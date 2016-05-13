@@ -26,6 +26,7 @@
 #include <QDomDocument>
 #include <QFile>
 #include <QListWidgetItem>
+#include <QMenu>
 
 
 
@@ -93,6 +94,13 @@ private:
     void checkFolders();
     void on_stopButton_clicked();
 
+    /**
+     * @brief removeVideo remove all video related data: video list item, item from result data file, video, thumbnail
+     * @param dateTime timestamp formatted as YYYY-MM-DD--hh-mm-ss
+     */
+    void removeVideo(QString dateTime);
+
+
 signals:
     void elementWasRemoved();
     void updatePixmap(QImage img);
@@ -115,6 +123,15 @@ private slots:
     void onVideoPlayClicked();
     void onVideoDeleteClicked();
     void onVideoUploadClicked();
+
+    /**
+     * @brief onVideoListContextMenuRequested
+     * @param pos
+     *
+     * @todo prevent right-click on VideoWidget small buttons to pop up context menu
+     */
+    void onVideoListContextMenuRequested(const QPoint& pos);
+    void onDeleteSelectedVideosClicked();
     void setPositiveMessage();
     void setNegativeMessage();
     void setErrorReadingDetectionAreaFile();

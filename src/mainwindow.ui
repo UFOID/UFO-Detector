@@ -458,7 +458,7 @@
       <number>10</number>
      </property>
      <item>
-      <widget class="QListWidget" name="videoList">
+      <widget class="VideoList" name="videoList">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
          <horstretch>0</horstretch>
@@ -470,6 +470,9 @@
          <width>250</width>
          <height>16777215</height>
         </size>
+       </property>
+       <property name="contextMenuPolicy">
+        <enum>Qt::CustomContextMenu</enum>
        </property>
        <property name="editTriggers">
         <set>QAbstractItemView::NoEditTriggers</set>
@@ -973,6 +976,13 @@
    </widget>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>VideoList</class>
+   <extends>QListWidget</extends>
+   <header>videolist.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

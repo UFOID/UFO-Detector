@@ -41,7 +41,8 @@ SOURCES += main.cpp\
     config.cpp \
     detectionareaeditdialog.cpp \
     camerainfo.cpp \
-    cameraresolutiondialog.cpp
+    cameraresolutiondialog.cpp \
+    videolist.cpp
 
 HEADERS  += \
     recorder.h \
@@ -59,7 +60,8 @@ HEADERS  += \
     config.h \
     detectionareaeditdialog.h \
     camerainfo.h \
-    cameraresolutiondialog.h
+    cameraresolutiondialog.h \
+    videolist.h
 
 FORMS    += \
     mainwindow.ui \

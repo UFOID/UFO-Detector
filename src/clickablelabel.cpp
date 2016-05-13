@@ -21,22 +21,23 @@
 
 ClickableLabel::ClickableLabel(QWidget * parent ) :
     QLabel(parent)
-  {
-  }
+{
+}
+
 ClickableLabel::ClickableLabel( const QString& text, QWidget * parent ) :
     QLabel(parent)
+{
+    this->setText(text);
+}
 
-  {
-      this->setText(text);
-  }
+ClickableLabel::~ClickableLabel()
+{
 
-  ClickableLabel::~ClickableLabel()
-  {
+}
 
-  }
-
-  void ClickableLabel::mousePressEvent (QMouseEvent * event)
-  {
-      Q_UNUSED(event);
-      emit clicked();
-  }
+void ClickableLabel::mousePressEvent (QMouseEvent * event)
+{
+    if (event->button() == Qt::LeftButton) {
+        emit clicked();
+    }
+}

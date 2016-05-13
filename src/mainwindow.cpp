@@ -99,7 +99,6 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
         threadWebcam.reset(new std::thread(&MainWindow::updateWebcamFrame, this));
     }
 
-
     //Add VideoWidget to UI
     QDomNode node = documentXML.firstChildElement().firstChild();
     while( !node.isNull())
@@ -171,6 +170,7 @@ void MainWindow::setSignalsAndSlots(ActualDetector* ptrDetector)
     connect(theDetector, SIGNAL(progressValueChanged(int)), this , SLOT(on_progressBar_valueChanged(int)) );
     connect(theDetector, SIGNAL(broadcastOutputText(QString)), this, SLOT(update_output_text(QString)) );
     connect(this,SIGNAL(updatePixmap(QImage)),this,SLOT(displayPixmap(QImage)));
+    connect(ui->videoList, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(onVideoListContextMenuRequested(const QPoint&)));
 }
 
 /*
@@ -216,7 +216,7 @@ void MainWindow::onVideoPlayClicked()
 }
 
 /*
- * Delete video file and remove VideoWidget element from list
+ * Delete button on VideoWidget was clicked: delete the video
  */
 void MainWindow::onVideoDeleteClicked()
 {
@@ -229,43 +229,15 @@ void MainWindow::onVideoDeleteClicked()
         if(widget->deleteButton()==sender())
         {
             dateToRemove = widget->dateTime();
-            QListWidgetItem *itemToRemove = ui->videoList->takeItem(row);
-            ui->videoList->removeItemWidget(itemToRemove);
-            qDebug() << "Removing" << widget->videoFileName() << "and its thumbnail";
-            QFile::remove(widget->videoFileName());
-            QFile::remove(widget->thumbnailFileName());
-        }
-    }
-
-    QDomNode node = documentXML.firstChildElement().firstChild();
-    while( !node.isNull())
-    {
-        if( node.isElement())
-        {
-            QDomElement element = node.toElement();
-            QString dateInXML = element.attribute("DateTime");
-            if (dateInXML.compare(dateToRemove)==0)
+            int ret = QMessageBox::warning(this, tr("Delete video"),
+                tr("Do you really want to delete this video?"),
+                QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+            if (QMessageBox::Yes == ret)
             {
-              documentXML.firstChildElement().removeChild(node);
-              if(!logFile.open(QIODevice::WriteOnly | QIODevice::Text))
-              {
-                  qDebug() <<  "fail open xml - delete";
-                  return;
-              }
-              else
-              {
-                  QTextStream stream(&logFile);
-                  stream.setCodec("UTF-8");
-                  stream << documentXML.toString();
-                  logFile.close();
-              }
-              break;
+                this->removeVideo(dateToRemove);
             }
         }
-        node = node.nextSibling();
     }
-    logFile.close();
-    emit elementWasRemoved();
 }
 
 /*
@@ -282,6 +254,36 @@ void MainWindow::onVideoUploadClicked()
             Uploader* upload = new Uploader(this,widget->videoFileName(),m_config);
             upload->show();
             upload->setAttribute(Qt::WA_DeleteOnClose);
+        }
+    }
+}
+
+void MainWindow::onVideoListContextMenuRequested(const QPoint& pos)
+{
+    QMenu contextMenu(tr("Video list"), this);
+    QAction* deleteSelectedItemsAction = contextMenu.addAction(tr("Delete selected items"));
+    connect(deleteSelectedItemsAction, SIGNAL(triggered(bool)), this, SLOT(onDeleteSelectedVideosClicked()));
+    if (ui->videoList->selectedItems().isEmpty())
+    {
+        deleteSelectedItemsAction->setEnabled(false);
+    }
+    contextMenu.exec(QCursor::pos());
+}
+
+void MainWindow::onDeleteSelectedVideosClicked()
+{
+    int ret = QMessageBox::warning(this, tr("Delete videos"),
+        tr("Do you really want to delete the selected videos?"),
+        QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+    if (QMessageBox::Yes == ret)
+    {
+        QList<QListWidgetItem*> itemList = ui->videoList->selectedItems();
+        QListIterator<QListWidgetItem*> itemIt(itemList);
+        while (itemIt.hasNext())
+        {
+            QListWidgetItem* item = itemIt.next();
+            VideoWidget* widget = qobject_cast<VideoWidget*>(ui->videoList->itemWidget(item));
+            this->removeVideo(widget->dateTime());
         }
     }
 }
@@ -431,6 +433,54 @@ void MainWindow::on_stopButton_clicked()
         threadWebcam.reset(new std::thread(&MainWindow::updateWebcamFrame, this));
     }
     ui->startButton->setText("Start Detection");
+}
+
+void MainWindow::removeVideo(QString dateTime)
+{
+    for(int row = 0; row < ui->videoList->count(); row++)
+    {
+        QListWidgetItem *item = ui->videoList->item(row);
+        VideoWidget* widget = qobject_cast<VideoWidget*>(ui->videoList->itemWidget(item));
+
+        if(widget->dateTime() == dateTime)
+        {
+            QListWidgetItem *itemToRemove = ui->videoList->takeItem(row);
+            ui->videoList->removeItemWidget(itemToRemove);
+            qDebug() << "Removing" << widget->videoFileName() << "and its thumbnail";
+            QFile::remove(widget->videoFileName());
+            QFile::remove(widget->thumbnailFileName());
+        }
+    }
+
+    QDomNode node = documentXML.firstChildElement().firstChild();
+    while( !node.isNull())
+    {
+        if( node.isElement())
+        {
+            QDomElement element = node.toElement();
+            QString dateInXML = element.attribute("DateTime");
+            if (dateInXML.compare(dateTime)==0)
+            {
+              documentXML.firstChildElement().removeChild(node);
+              if(!logFile.open(QIODevice::WriteOnly | QIODevice::Text))
+              {
+                  qDebug() <<  "Failed to open result data file for item deletion";
+                  return;
+              }
+              else
+              {
+                  QTextStream stream(&logFile);
+                  stream.setCodec("UTF-8");
+                  stream << documentXML.toString();
+                  logFile.close();
+              }
+              break;
+            }
+        }
+        node = node.nextSibling();
+    }
+    logFile.close();
+    emit elementWasRemoved();
 }
 
 void MainWindow::on_checkBox_stateChanged(int arg1)
