@@ -2,11 +2,11 @@
 /* NOTE: detection status indicator styles are hard-coded in MainWindow.cpp */
 
 /* Can't set QWidget on top level because overrides windows/dialogs. No idea why. */
-/* QWidget { background-color: #3C4A62; color: white; } */
+/* QWidget { background-color: #3c4a62; color: white; } */
 /* neither can set QMainWindow QWidget { } because overrides again */
 
 QMainWindow, QDialog {
-    background-color: #515C65;
+    background-color: #515c65;
     color: white;
 }
 
@@ -20,22 +20,30 @@ QLabel, QCheckBox, QScrollBar {
     color: white;
 }
 
+QSlider, QProgressBar {
+    background-color: #515c65;
+}
+
 QComboBox QListView {
     background-color: #515c65;
     color: white;
 }
 
-#videoList:item {
+#videoList {
     background-color: #515c65;
-    border: 1px solid #3c4a62;
+}
+
+#videoList:item {
+    background-color: #3c4a62;
+    border: 1px solid #515c65;
 }
 
 #videoList:item:selected {
-    background-color: #495b83;
+    background-color: #4d7499;
 }
 
 VideoWidget ClickableLabel, VideoWidget QLabel {
-    background-color: #515c65;
+    background-color: #3c4a62;
     border: 1px solid #777777;
 }
 
