@@ -50,9 +50,7 @@ DetectionAreaEditDialog::DetectionAreaEditDialog(QWidget *parent, Camera *camPtr
     cout << "dialog constructed" << endl;
     ui->buttonClear->setEnabled(false);
     ui->buttonConnect->setEnabled(false);
-    this->setWindowTitle("Select area of detection");
     ui->progressBar->hide();
-    this->setFixedSize(830,570);
 }
 
 void DetectionAreaEditDialog::getPointsInContour(vector<Point2f> & contour)
