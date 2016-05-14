@@ -29,6 +29,9 @@ namespace Ui {
 class Uploader;
 }
 
+/**
+ * @brief Video uploader class
+ */
 class Uploader : public QDialog
 {
     Q_OBJECT

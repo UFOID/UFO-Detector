@@ -26,6 +26,9 @@ namespace Ui {
 class ClickableLabel;
 }
 
+/**
+ * @brief Label to get mouse click
+ */
 class ClickableLabel : public QLabel
 {
 

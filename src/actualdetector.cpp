@@ -32,9 +32,6 @@
 
 using namespace cv;
 
-/*
- * Main Detector class
- */
 ActualDetector::ActualDetector(MainWindow *parent, Camera *cameraPtr, Config *configPtr) :
     QObject(parent), theRecorder(this, cameraPtr, configPtr), camPtr(cameraPtr)
 {
@@ -626,10 +623,6 @@ void ActualDetector::stopOnlyDetecting()
     }
 }
 
-/*
- * Check if single (!) object is a bird
- * TODO Improve to only look for single objects
- */
 bool ActualDetector::checkIfBird()
 {
     std::vector<Rect> birds;

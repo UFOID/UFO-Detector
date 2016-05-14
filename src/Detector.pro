@@ -54,6 +54,12 @@ HEADERS  += \
     camera.h \
     messageupdate.h \
     imageexplorer.h \
+    Ctracker.h \
+    Detector.h \
+    Kalman.h \
+    HungarianAlg.h \
+    BackgroundSubtract.h \
+    VIBE.h \
     uploader.h \
     OpencvInclude.h \
     settingsdialog.h \

@@ -28,7 +28,7 @@
 #include <QObject>
 
 /**
- * @brief Main Camera class to handle reading of frames from multiple threads
+ * @brief Main camera class to handle reading of frames from multiple threads
  *
  * @todo add setResolution(width, height) method to apply resolution change on-the-fly
  */

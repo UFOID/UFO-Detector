@@ -35,6 +35,9 @@ namespace Ui {
 class SettingsDialog;
 }
 
+/**
+ * @brief The settings dialog class
+ */
 class SettingsDialog : public QDialog
 {
     Q_OBJECT

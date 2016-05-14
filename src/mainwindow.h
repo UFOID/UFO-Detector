@@ -39,6 +39,9 @@ class Camera;
 class SettingsDialog;
 class QNetworkAccessManager;
 
+/**
+ * @brief Main window of UFO Detector
+ */
 class MainWindow : public QMainWindow
 {
     Q_OBJECT

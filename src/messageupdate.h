@@ -26,6 +26,9 @@ namespace Ui {
 class MessageUpdate;
 }
 
+/**
+ * @brief Dialog to show availability and download new version of the application
+ */
 class MessageUpdate : public QDialog
 {
     Q_OBJECT

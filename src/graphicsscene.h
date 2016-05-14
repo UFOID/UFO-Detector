@@ -26,6 +26,9 @@
 
 class Camera;
 
+/**
+ * @brief Graphics scene for DetectionAreaEditDialog
+ */
 class GraphicsScene : public QGraphicsScene
 {
     Q_OBJECT
