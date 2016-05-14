@@ -113,3 +113,5 @@ RESOURCES = detector.qrc
 DISTFILES += \
     detector.qrc \
     detector.qss
+
+TRANSLATIONS += ../lang/detector_fi.ts
