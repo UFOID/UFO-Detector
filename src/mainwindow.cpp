@@ -92,7 +92,7 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
     ui->statusLabel->setStyleSheet(m_detectionStatusStyleOff);
     ui->recordingTestButton->hide();
     ui->progressBar->hide();
-    ui->outputText->append("For feedback and bug reports contact the developer at contact@ufoid.net");
+    ui->outputText->append(tr("For feedback and bug reports contact the developer at contact@ufoid.net"));
 
     if (checkCameraAndCodec(WIDTH,HEIGHT,CODEC))
     {
@@ -211,7 +211,7 @@ void MainWindow::onVideoPlayClicked()
     }
     else
     {
-        QMessageBox::warning(this,"Error","Playing video file while recording another video is disabled. Wait until the recording has finished");
+        QMessageBox::warning(this, tr("Error"), tr("Playing video file while recording another video is disabled. Wait until the recording has finished."));
     }
 }
 
@@ -260,6 +260,7 @@ void MainWindow::onVideoUploadClicked()
 
 void MainWindow::onVideoListContextMenuRequested(const QPoint& pos)
 {
+    Q_UNUSED(pos);
     QMenu contextMenu(tr("Video list"), this);
     QAction* deleteSelectedItemsAction = contextMenu.addAction(tr("Delete selected items"));
     connect(deleteSelectedItemsAction, SIGNAL(triggered(bool)), this, SLOT(onDeleteSelectedVideosClicked()));
@@ -294,7 +295,7 @@ void MainWindow::onDeleteSelectedVideosClicked()
 void MainWindow::setPositiveMessage()
 {
     QTime time = QTime::currentTime();
-    QString message = time.toString();
+    QString timestamp = time.toString();
 
     if (!lastWasInfo)
     {
@@ -303,9 +304,10 @@ void MainWindow::setPositiveMessage()
         ui->outputText->moveCursor( QTextCursor::End, QTextCursor::KeepAnchor );
         ui->outputText->textCursor().removeSelectedText();
         ui->outputText->textCursor().deletePreviousChar();
-        ui->outputText->append(message + " - " + "Positive: " + QString::number(++counterPositive_) + " Negative: " + QString::number(counterNegative_));
+        ui->outputText->append(tr("%1 - Positive: %2 Negative: %3").arg(
+            timestamp, QString::number(++counterPositive_), QString::number(counterNegative_)));
     }
-    else ui->outputText->append(message + " - " + "Positive detection " + QString::number(++counterPositive_));
+    else ui->outputText->append(tr("%1 - Positive detections: %2").arg(timestamp, QString::number(++counterPositive_)));
     lastWasPositive=true;
     lastWasInfo=false;
 }
@@ -316,7 +318,7 @@ void MainWindow::setPositiveMessage()
 void MainWindow::setNegativeMessage()
 {
     QTime time = QTime::currentTime();
-    QString message = time.toString();
+    QString timestamp = time.toString();
 
     if (!lastWasInfo)
     {
@@ -325,9 +327,10 @@ void MainWindow::setNegativeMessage()
         ui->outputText->moveCursor( QTextCursor::End, QTextCursor::KeepAnchor );
         ui->outputText->textCursor().removeSelectedText();
         ui->outputText->textCursor().deletePreviousChar();
-        ui->outputText->append(message + " - " + "Positive: " + QString::number(counterPositive_) + " Negative: " + QString::number(++counterNegative_));
+        ui->outputText->append(tr("%1 - Positive: %2 Negative: %3").arg(
+            timestamp, QString::number(++counterPositive_), QString::number(counterNegative_)));
     }
-    else ui->outputText->append(message + " - " + "Negative detection " + QString::number(++counterNegative_));
+    else ui->outputText->append(tr("%1 - Negative detections: %2").arg(timestamp, QString::number(++counterPositive_)));
     lastWasPositive=false;
     lastWasInfo=false;
 }
@@ -337,8 +340,8 @@ void MainWindow::setNegativeMessage()
  */
 void MainWindow::setErrorReadingDetectionAreaFile()
 {
-    ui->outputText->append("ERROR: xml file containing the detection area information was not read correctly");
-    ui->outputText->append("ERROR: Detection is not working. Select area of detection first in the settings.");
+    ui->outputText->append(tr("ERROR: XML file containing the detection area information was not read correctly."));
+    ui->outputText->append(tr("ERROR: Detection is not working. Select area of detection first in the settings."));
 }
 
 /*
@@ -378,7 +381,7 @@ void MainWindow::on_settingsButton_clicked()
     }
     else
     {
-        QMessageBox::warning(this,"Error","Stop the detection process first");
+        QMessageBox::warning(this, tr("Error"), tr("Cannot edit settings when detection process is running. Stop the detection process first."));
     }
 }
 
@@ -403,13 +406,13 @@ void MainWindow::on_startButton_clicked()
             connect(theDetector,SIGNAL(updatePixmap(QImage)),this,SLOT(displayPixmap(QImage)));
             isDetecting=true;
             ui->statusLabel->setStyleSheet(m_detectionStatusStyleOn);
-            ui->statusLabel->setText("Detection started on " + QTime::currentTime().toString());
+            ui->statusLabel->setText(tr("Detection started on %1").arg(QTime::currentTime().toString()));
             ui->progressBar->hide();
-            ui->startButton->setText("Stop Detection");
+            ui->startButton->setText(tr("Stop detection"));
         }
         else
         {
-            ui->statusLabel->setText("Failed to start");
+            ui->statusLabel->setText(tr("Failed to start detection"));
             connect(this,SIGNAL(updatePixmap(QImage)),this,SLOT(displayPixmap(QImage)));
         }
     }
@@ -423,7 +426,7 @@ void MainWindow::on_stopButton_clicked()
 {
     theDetector->stopThread();
     ui->statusLabel->setStyleSheet(m_detectionStatusStyleOff);
-    ui->statusLabel->setText("Detection not running");
+    ui->statusLabel->setText(tr("Detection not running"));
     isDetecting=false;
     disconnect(theDetector,SIGNAL(updatePixmap(QImage)),this,SLOT(displayPixmap(QImage)));
     connect(this,SIGNAL(updatePixmap(QImage)),this,SLOT(displayPixmap(QImage)));
@@ -432,7 +435,7 @@ void MainWindow::on_stopButton_clicked()
         isUpdating=true;
         threadWebcam.reset(new std::thread(&MainWindow::updateWebcamFrame, this));
     }
-    ui->startButton->setText("Start Detection");
+    ui->startButton->setText(tr("Start detection"));
 }
 
 void MainWindow::removeVideo(QString dateTime)
@@ -502,7 +505,7 @@ void MainWindow::on_recordingTestButton_clicked()
 
 void MainWindow::on_aboutButton_clicked()
 {
-    QMessageBox::information(this,"About",QString("UFO Detector | Beta " + programVersion + "\nwww.UFOID.net \ncontact@ufoid.net"));
+    QMessageBox::information(this, tr("About"), QString("UFO Detector | Beta " + programVersion + "\nwww.UFOID.net\ncontact@ufoid.net"));
 }
 
 void MainWindow::on_buttonImageExpl_clicked()
@@ -544,7 +547,7 @@ bool MainWindow::checkAndSetResolution(const int WIDTH, const int HEIGHT)
         return true;
     }
     qDebug() << "Aspect ratio of web camera is NOT ok";
-    ui->outputText->append("Error: Selected webcam resolution is NOT ok");
+    ui->outputText->append(tr("Error: Selected webcam resolution is NOT ok"));
     return false;
 }
 
@@ -637,7 +640,7 @@ bool MainWindow::checkCameraAndCodec(const int WIDTH, const int HEIGHT, const in
             const char* err_msg = e.what();
             std::cout << "exception caught: " << err_msg << std::endl;
             CamPtr->stopReadingWebcam();
-            ui->outputText->append("ERROR: Found webcam but video frame could not be read. Reconnect and check resolution in settings");
+            ui->outputText->append(tr("ERROR: Found webcam but video frame could not be read. Reconnect and check resolution in settings."));
         }
     }
     else if (!CamPtr->isWebcamOpen())
@@ -652,8 +655,8 @@ bool MainWindow::checkCameraAndCodec(const int WIDTH, const int HEIGHT, const in
         theVideoWriter.open("filename.avi",0, 25,Size(WIDTH,HEIGHT), true);
         if (!theVideoWriter.isOpened())
         {
-            ui->outputText->append("ERROR: Could not find Raw Video Codec");
-            ui->outputText->append("ERROR: Please contact the developer with the information about your system");
+            ui->outputText->append(tr("ERROR: Could not find Raw Video Codec"));
+            ui->outputText->append(tr("ERROR: Please contact the developer with the information about your system"));
         }
         else
         {
@@ -667,8 +670,8 @@ bool MainWindow::checkCameraAndCodec(const int WIDTH, const int HEIGHT, const in
         theVideoWriter.open("filename.avi",0, 25,Size(WIDTH,HEIGHT), true);
         if (!theVideoWriter.isOpened())
         {
-            ui->outputText->append("ERROR: Could not find Raw Video Codec");
-            ui->outputText->append("ERROR: Please contact the developer with the information about your system");
+            ui->outputText->append(tr("ERROR: Could not find Raw Video Codec"));
+            ui->outputText->append(tr("ERROR: Please contact the developer with the information about your system"));
         }
         else
         {
@@ -679,10 +682,10 @@ bool MainWindow::checkCameraAndCodec(const int WIDTH, const int HEIGHT, const in
         QFile ffmpegFile(m_config->videoEncoderLocation());
         if(!ffmpegFile.exists())
         {
-            ui->outputText->append("ERROR: Could not find video encoder needed for FFV1 Codec.");
-            ui->outputText->append("ERROR: Please install ffmpeg or avconv, or contact the developer.");
+            ui->outputText->append(tr("ERROR: Could not find video encoder needed for FFV1 Codec."));
+            ui->outputText->append(tr("ERROR: Please install ffmpeg or avconv, or contact the developer."));
         } else {
-            ui->outputText->append("Using video encoder "+m_config->videoEncoderLocation());
+            ui->outputText->append(tr("Using video encoder %1").arg(m_config->videoEncoderLocation()));
         }
 
     }
@@ -692,8 +695,8 @@ bool MainWindow::checkCameraAndCodec(const int WIDTH, const int HEIGHT, const in
         theVideoWriter.open("filename.avi",CV_FOURCC('L','A','G','S'), 25,Size(WIDTH,HEIGHT), true);
         if (!theVideoWriter.isOpened())
         {
-            ui->outputText->append("ERROR: Could not find Lagarith Lossless Video Codec");
-            ui->outputText->append("ERROR: Download and install from http://lags.leetcode.net/codec.html");
+            ui->outputText->append(tr("ERROR: Could not find Lagarith Lossless Video Codec"));
+            ui->outputText->append(tr("ERROR: Download and install from http://lags.leetcode.net/codec.html"));
         }
         else
         {
@@ -783,7 +786,7 @@ void MainWindow::checkForUpdate(QNetworkReply *reply)
         if(versionInXML>programVersion)
         {
             qDebug() << messageInXML.size();
-            updateWindow = new MessageUpdate(this,versionInXML,messageInXML);
+            updateWindow = new MessageUpdate(this, versionInXML, messageInXML);
             updateWindow->show();
             updateWindow->setAttribute(Qt::WA_DeleteOnClose);
         }
@@ -842,11 +845,11 @@ void MainWindow::update_output_text(QString msg)
 
 void MainWindow::on_toolButtonNoise_clicked()
 {
-    QMessageBox::information(this,"Information","Select the pixel size of noise that will be ignored in the detection. \nRecommended selection: 2");
+    QMessageBox::information(this, tr("Information"), tr("Select the pixel size of noise that will be ignored in the detection. \nRecommended value: 2"));
 }
 
 void MainWindow::on_toolButtonThresh_clicked()
 {
-    QMessageBox::information(this,"Information","Select the threshold filter value that will be used in the motion detection algorithm. \nIncrease the value if clouds are being detected\nRecommended selection: 10");
+    QMessageBox::information(this, tr("Information"), tr("Select the threshold filter value that will be used in the motion detection algorithm. \nIncrease the value if clouds are being detected. \nRecommended value: 10"));
 }
 

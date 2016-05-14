@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>ImageExplorer</string>
+   <string>Upload images</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
@@ -56,7 +56,7 @@
         </font>
        </property>
        <property name="text">
-        <string>TextLabel</string>
+        <string notr="true" extracomment="Will be set in code">TextLabel</string>
        </property>
       </widget>
      </item>

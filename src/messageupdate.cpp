@@ -25,8 +25,7 @@ MessageUpdate::MessageUpdate(QWidget *parent, QString version, std::queue<QStrin
     ui(new Ui::MessageUpdate)
 {
     ui->setupUi(this);
-    this->setWindowTitle("New Update");
-    ui->labelVersion->setText(QString("New Version: "+version));
+    ui->labelVersion->setText(tr("New version: %1").arg(version));
     while(message.size()>0)
 	{
         ui->textBrowser->append(message.front());

@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>New update</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -34,7 +34,7 @@
       </font>
      </property>
      <property name="text">
-      <string>Version:</string>
+      <string notr="true" extracomment="Will be set from code">Version:</string>
      </property>
     </widget>
    </item>

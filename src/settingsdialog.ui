@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Settings</string>
   </property>
   <widget class="QWidget" name="formLayoutWidget">
    <property name="geometry">
@@ -69,7 +69,7 @@
     <item row="13" column="0">
      <widget class="QLabel" name="label_2">
       <property name="text">
-       <string>UFOID User Token:</string>
+       <string>UFOID user token</string>
       </property>
      </widget>
     </item>
@@ -86,7 +86,7 @@
        <bool>true</bool>
       </property>
       <property name="text">
-       <string>Image Path:</string>
+       <string>Image path</string>
       </property>
      </widget>
     </item>
@@ -117,7 +117,7 @@
     <item row="3" column="0">
      <widget class="QLabel" name="labelVideoPath">
       <property name="text">
-       <string>Video Path:</string>
+       <string>Video path</string>
       </property>
      </widget>
     </item>
@@ -227,7 +227,7 @@
     <item row="0" column="0">
      <widget class="QLabel" name="labelWebcam">
       <property name="text">
-       <string>Select Webcam:</string>
+       <string>Select webcam</string>
       </property>
      </widget>
     </item>
@@ -239,7 +239,7 @@
       <item>
        <widget class="QLabel" name="labelMinPos">
         <property name="text">
-         <string>Minimum required number of positive detections:</string>
+         <string>Minimum required number of positive detections</string>
         </property>
        </widget>
       </item>
@@ -280,7 +280,7 @@
     <item row="2" column="0">
      <widget class="QLabel" name="labelCodec">
       <property name="text">
-       <string>Video Codec:</string>
+       <string>Video codec</string>
       </property>
      </widget>
     </item>
@@ -348,7 +348,7 @@
     <item row="1" column="0">
      <widget class="QLabel" name="labelResolution">
       <property name="text">
-       <string>Select Resolution:</string>
+       <string>Select resolution</string>
       </property>
      </widget>
     </item>
