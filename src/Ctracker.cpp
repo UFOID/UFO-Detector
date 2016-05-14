@@ -1,4 +1,4 @@
-﻿/**
+﻿/*
  * UFO Detector | www.UFOID.net
  *
  * Copyright (C) 2016 UFOID
