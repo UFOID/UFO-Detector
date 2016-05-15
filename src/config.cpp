@@ -157,7 +157,7 @@ bool Config::saveResultImages() {
 }
 
 int Config::detectionAreaSize() {
-    return m_settings->value(m_settingKeys[Config::MotionThreshold], m_defaultDetectionAreaSize).toInt();
+    return m_settings->value(m_settingKeys[Config::DetectionAreaSize], m_defaultDetectionAreaSize).toInt();
 }
 
 QString Config::userTokenAtUfoId() {

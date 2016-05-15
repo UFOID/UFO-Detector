@@ -39,6 +39,7 @@ QLabel, QCheckBox, QScrollBar {
 
 QSlider, QProgressBar {
     background-color: #515c65;
+    color: white;
 }
 
 QComboBox QListView {

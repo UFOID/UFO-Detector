@@ -490,7 +490,7 @@ pair<int,int> ActualDetector::checkBrightness(int totalLight)
 }
 
 /*
- * Thread that check if it is night very 300 seconds (5mins)
+ * Thread that check if it is night every 300 seconds (5mins)
  * If total brightness is less than 100 it is night. In that case we temporary stop the detection process
  * to exclude any area from the detection area which is bright (i.e. the moon and stars) in order to
  * ignore any image noise around that area
@@ -520,7 +520,6 @@ void ActualDetector::checkIfNight()
             int y = region[i].y;
             light+=static_cast<int>(frame.at<uchar>(y,x));
         }
-        qDebug() << region.size();
 
         total = light/region.size();
         qDebug() << "total light " << total;
@@ -704,7 +703,6 @@ bool ActualDetector::parseDetectionAreaFile(string file_region, vector<Point> &r
     QDomDocument doc;
     QDomElement root;
     int size = m_config->detectionAreaSize();
-    int result = 0;
 
     if(!fileXML.open(QIODevice::ReadOnly | QIODevice::Text))
     {
@@ -748,12 +746,12 @@ bool ActualDetector::parseDetectionAreaFile(string file_region, vector<Point> &r
                 }
                 node = node.nextSibling();
 
-                if (count-result==1000)
+                if (count%1000 == 0)
                 {
-                    result=count;
+
                     float division = (float)size / (float)count;
-                    int temp =  85/division;
-                    emit progressValueChanged(temp);
+                    int percentage =  85/division;
+                    emit progressValueChanged(percentage);
                 }
             }
             qDebug() << region.size();
