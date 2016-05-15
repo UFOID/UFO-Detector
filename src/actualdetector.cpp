@@ -119,6 +119,7 @@ void ActualDetector::detectingThread()
     {
         auto output_text = tr("WARNING: could not load bird detection data (cascade classifier file)");
         emit broadcastOutputText(output_text);
+        isInNightMode = true; //skip classifier usage
     }
 
     while (isActive)
