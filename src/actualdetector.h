@@ -84,9 +84,9 @@ private:
     bool isInNightMode;
     std::atomic<bool> startedRecording;
     bool willSaveImages;
+    bool isCascadeFound;
     std::unique_ptr<std::thread> pThread;
     std::unique_ptr<std::thread> threadNightChecker;
-
     std::vector <cv::Rect> detectorRectVec;
 
 

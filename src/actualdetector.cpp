@@ -83,10 +83,20 @@ bool ActualDetector::initialize()
         pathnameThresh = fileDir + "Thresh";
     }
 
-    std::cout << "initialized Detector" << endl;
-    this_thread::sleep_for(std::chrono::seconds(1));
     isInNightMode = false;
+    isCascadeFound = true;
+    if (!birds_cascade.load(m_config->birdClassifierTrainingFile().toStdString()))
+    {
+        auto output_text = tr("WARNING: could not load bird detection data (cascade classifier file)");
+        emit broadcastOutputText(output_text);
+        isInNightMode = true;
+        isCascadeFound = false;
+    }
+
+    std::cout << "initialized Detector" << endl;
+    this_thread::sleep_for(std::chrono::seconds(1));    
     startedRecording = false;
+
 
     rect = Rect(Point(0,0),Point(WIDTH,HEIGHT));
     treshImg = result.clone();
@@ -113,14 +123,6 @@ void ActualDetector::detectingThread()
     vector<Point2d> centers;
     Scalar Colors[]={Scalar(255,0,0),Scalar(0,255,0),Scalar(0,0,255),Scalar(255,255,0),Scalar(0,255,255),Scalar(255,0,255),Scalar(255,127,255),Scalar(127,0,255),Scalar(127,0,127)};
     pair < vector<Point2d>,vector<Rect> > centerAndRectPair;
-
-
-    if (!birds_cascade.load(m_config->birdClassifierTrainingFile().toStdString()))
-    {
-        auto output_text = tr("WARNING: could not load bird detection data (cascade classifier file)");
-        emit broadcastOutputText(output_text);
-        isInNightMode = true; //skip classifier usage
-    }
 
     while (isActive)
     {
@@ -530,6 +532,7 @@ void ActualDetector::checkIfNight()
             region=regionBackup;
             isInNightMode=true;
 
+
             vector<Rect> constants = getConstantRecs(total);
             if(constants.size()<=4 && constants.size()>0)
             {
@@ -574,7 +577,10 @@ void ActualDetector::checkIfNight()
             }
 
         }
-        else isInNightMode=false;
+        else if (isCascadeFound)
+        {
+            isInNightMode=false;
+        }
 
 
         //timer
