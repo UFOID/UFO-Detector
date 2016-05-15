@@ -117,7 +117,7 @@ void ActualDetector::detectingThread()
 
     if (!birds_cascade.load(m_config->birdClassifierTrainingFile().toStdString()))
     {
-        auto output_text = tr("ERROR could not load cascade classifier");
+        auto output_text = tr("WARNING: could not load bird detection data (cascade classifier file)");
         emit broadcastOutputText(output_text);
     }
 

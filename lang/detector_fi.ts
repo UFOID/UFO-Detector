@@ -5,7 +5,7 @@
     <name>ActualDetector</name>
     <message>
         <location filename="../src/actualdetector.cpp" line="120"/>
-        <source>ERROR could not load cascade classifier</source>
+        <source>WARNING: could not load cascade classifier</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -183,7 +183,7 @@
     <name>ImageExplorer</name>
     <message>
         <location filename="../src/imageexplorer.ui" line="14"/>
-        <location filename="../src/imageexplorer.ui" line="82"/>
+        <location filename="../src/imageexplorer.ui" line="105"/>
         <source>Upload images</source>
         <translation type="unfinished"></translation>
     </message>
@@ -203,7 +203,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/imageexplorer.ui" line="75"/>
+        <location filename="../src/imageexplorer.ui" line="71"/>
+        <source>Status</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/imageexplorer.ui" line="98"/>
         <source>Clear selection</source>
         <translation type="unfinished"></translation>
     </message>
@@ -494,29 +499,6 @@ Recommended value: 10</source>
     </message>
 </context>
 <context>
-    <name>MessageUpdate</name>
-    <message>
-        <location filename="../src/messageupdate.ui" line="14"/>
-        <source>New update</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/messageupdate.ui" line="25"/>
-        <source>New UFO Detector update available!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/messageupdate.ui" line="47"/>
-        <source>Download here</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/messageupdate.cpp" line="28"/>
-        <source>New version: %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>SettingsDialog</name>
     <message>
         <location filename="../src/settingsdialog.ui" line="14"/>
@@ -723,34 +705,57 @@ The code can be found at http://ufoid.net/profile/edit</source>
     </message>
 </context>
 <context>
-    <name>Uploader</name>
+    <name>UpdateApplicationDialog</name>
     <message>
-        <location filename="../src/uploader.ui" line="14"/>
+        <location filename="../src/updateapplicationdialog.ui" line="14"/>
+        <source>New update</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/updateapplicationdialog.ui" line="25"/>
+        <source>New UFO Detector update available!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/updateapplicationdialog.ui" line="47"/>
+        <source>Download here</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/updateapplicationdialog.cpp" line="28"/>
+        <source>New version: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>VideoUploaderDialog</name>
+    <message>
+        <location filename="../src/videouploaderdialog.ui" line="14"/>
         <source>Dialog</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/uploader.ui" line="27"/>
+        <location filename="../src/videouploaderdialog.ui" line="27"/>
         <source>Upload video to UFOID.net</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/uploader.ui" line="34"/>
+        <location filename="../src/videouploaderdialog.ui" line="34"/>
         <source>Submit your video and have it analyzed by other users</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/uploader.ui" line="43"/>
+        <location filename="../src/videouploaderdialog.ui" line="43"/>
         <source>Selected file:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/uploader.ui" line="57"/>
+        <location filename="../src/videouploaderdialog.ui" line="57"/>
         <source>Output:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/uploader.ui" line="71"/>
+        <location filename="../src/videouploaderdialog.ui" line="71"/>
         <source>Upload</source>
         <translation type="unfinished"></translation>
     </message>
