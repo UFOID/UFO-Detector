@@ -56,7 +56,7 @@
         </size>
        </property>
        <property name="text">
-        <string>- Checking the supported web camera resolutions causes problems with some web camera brands.</string>
+  <string>- Checking the supported web camera resolutions causes problems with some web camera brands.</string>
        </property>
        <property name="wordWrap">
         <bool>true</bool>
@@ -94,7 +94,7 @@
         </size>
        </property>
        <property name="text">
-        <string>- If you get problems, reset camera settings in the settings file and contact the developers at contact@ufoid.net.</string>
+        <string extracomment="Bullet list item">- If you get problems, reset camera settings in the settings file and contact the developers at contact@ufoid.net.</string>
        </property>
        <property name="wordWrap">
         <bool>true</bool>

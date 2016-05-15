@@ -1,4 +1,4 @@
-/**
+/*
  * UFO Detector | www.UFOID.net
  *
  * Copyright (C) 2016 UFOID
@@ -26,19 +26,22 @@
 #include <QFile>
 
 namespace Ui {
-class Uploader;
+class VideoUploaderDialog;
 }
 
-class Uploader : public QDialog
+/**
+ * @brief Video uploader dialog class
+ */
+class VideoUploaderDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit Uploader(QWidget *parent = 0, QString pathName = "", Config *configPtr = 0);
-    ~Uploader();
+    explicit VideoUploaderDialog(QWidget *parent = 0, QString pathName = "", Config *configPtr = 0);
+    ~VideoUploaderDialog();
 
 private:
-    Ui::Uploader *ui;
+    Ui::VideoUploaderDialog *ui;
     QString filepath;
     Config *m_config;
     QNetworkAccessManager *manager;

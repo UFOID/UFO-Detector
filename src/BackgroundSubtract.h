@@ -4,6 +4,9 @@
 #include "OpencvInclude.h"
 #include "VIBE.h"
 
+/**
+ * @brief Subtract background from image
+ */
 class BackgroundSubtract
 {
 public:

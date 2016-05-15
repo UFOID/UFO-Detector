@@ -1,6 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
-/**
+/*
  * UFO Detector | www.UFOID.net
  *
  * Copyright (C) 2016 UFOID
@@ -21,10 +21,13 @@
 #include <QMainWindow>
 #include "actualdetector.h"
 #include "config.h"
+#include "updateapplicationdialog.h"
 #include <QModelIndex>
 #include <QDomDocument>
 #include <QFile>
-#include <messageupdate.h>
+#include <QListWidgetItem>
+#include <QMenu>
+
 
 
 namespace Ui {
@@ -35,6 +38,10 @@ class QNetworkReply;
 class Camera;
 class SettingsDialog;
 class QNetworkAccessManager;
+
+/**
+ * @brief Main window of UFO Detector
+ */
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -50,7 +57,7 @@ private:
     Ui::MainWindow *ui;
     SettingsDialog *settingsDialog;
     ActualDetector* theDetector;
-    MessageUpdate* updateWindow;
+    UpdateApplicationDialog* updateWindow;
     std::atomic<bool> isUpdating;
     std::atomic<bool> isRecording;
     std::atomic<bool> lastWasPositive, lastWasInfo;    
@@ -60,6 +67,8 @@ private:
     Camera* CamPtr;
     std::unique_ptr<std::thread> threadWebcam;
     cv::Size displayResolution;
+    QString m_detectionStatusStyleOn;  ///< detection status indicator style when detection on
+    QString m_detectionStatusStyleOff; ///< detection status indicator style when detection off
 
     Config* m_config;
 
@@ -70,7 +79,6 @@ private:
 
     void updateWebcamFrame();
     bool checkAndSetResolution(const int WIDTH, const int HEIGHT);
-    void initializeStylesheet();
 
     /**
      * @brief readLogFileAndGetRootElement Read logfile containing existing video info
@@ -88,6 +96,13 @@ private:
      */
     void checkFolders();
     void on_stopButton_clicked();
+
+    /**
+     * @brief removeVideo remove all video related data: video list item, item from result data file, video, thumbnail
+     * @param dateTime timestamp formatted as YYYY-MM-DD--hh-mm-ss
+     */
+    void removeVideo(QString dateTime);
+
 
 signals:
     void elementWasRemoved();
@@ -108,9 +123,18 @@ private slots:
     void on_sliderNoise_sliderMoved(int position);
     void on_settingsButton_clicked();
     void on_recordingTestButton_clicked();
-    void playClip();
-    void deletingFileAndRemovingItem();
-    void createUploadWindow();
+    void onVideoPlayClicked();
+    void onVideoDeleteClicked();
+    void onVideoUploadClicked();
+
+    /**
+     * @brief onVideoListContextMenuRequested
+     * @param pos
+     *
+     * @todo prevent right-click on VideoWidget small buttons to pop up context menu
+     */
+    void onVideoListContextMenuRequested(const QPoint& pos);
+    void onDeleteSelectedVideosClicked();
     void setPositiveMessage();
     void setNegativeMessage();
     void setErrorReadingDetectionAreaFile();

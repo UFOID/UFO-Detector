@@ -1,4 +1,4 @@
-/**
+/*
  * UFO Detector | www.UFOID.net
  *
  * Copyright (C) 2016 UFOID
@@ -35,7 +35,7 @@ ImageExplorer::ImageExplorer(QWidget *parent, Config *config) :
 	{
         ui->labelFolder->setText(mainDir);
     }
-    else ui->labelFolder->setText("Activate the saving of images in the settings");
+    else ui->labelFolder->setText(tr("Activate the saving of images in the settings"));
 
     QDir dir(mainDir);
     dir.setFilter(QDir::Dirs | QDir::Hidden | QDir::NoSymLinks);
@@ -54,14 +54,7 @@ ImageExplorer::ImageExplorer(QWidget *parent, Config *config) :
     connect(ui->listWidget,SIGNAL(clicked(QModelIndex)),this,SLOT(displayFolder(QModelIndex)));
     manager = new QNetworkAccessManager(this);
 
-
-    this->setWindowTitle("Upload Images");
-    this->setStyleSheet("background-color:#515C65; color: white");
     this->setFixedSize(611,631);
-    ui->buttonBack->setStyleSheet("background-color:#3C4A62;");
-    ui->buttonClear->setStyleSheet("background-color:#3C4A62;");
-    ui->buttonUpload->setStyleSheet("background-color:#3C4A62;");
-    ui->output->setStyleSheet("background-color:#3C4A62;");
 
 }
 
@@ -99,20 +92,20 @@ void ImageExplorer::uploadFinish(QNetworkReply* r)
 {
     r->deleteLater();
     qDebug() << "finished uploading all images";
-    ui->output->append(fileList.top() + "   uploaded");
+    ui->output->append(tr("%1 uploaded").arg(fileList.top()));
     fileList.pop();
 
     if(!fileList.size())
 	{
-        ui->output->append("All images uploaded");
-        ui->output->append("Thank you for helping to improve the algorithm");
+        ui->output->append(tr("All images uploaded"));
+        ui->output->append(tr("Thank you for helping to improve the algorithm"));
     }
 }
 
 
 void ImageExplorer::uploadError(QNetworkReply::NetworkError state){
     qDebug() << "State" << state;
-    ui->output->append("ERROR cannot upload image. Contact the developer if the error persists");
+    ui->output->append(tr("ERROR cannot upload image. Contact the developer if the error persists."));
 }
 
 void ImageExplorer::openedPHP()
@@ -120,7 +113,7 @@ void ImageExplorer::openedPHP()
     qDebug()<< "called php";
     disconnect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(openedPHP()));
     connect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(uploadFinish(QNetworkReply*)));
-    ui->output->append("Upload started");
+    ui->output->append(tr("Upload started"));
     QList<QListWidgetItem*> list = ui->listWidget->selectedItems();
 
     for (int i = 0; i < list.size(); ++i)
@@ -177,7 +170,7 @@ void ImageExplorer::on_buttonUpload_clicked()
         req.setRawHeader( "User-Agent" , "Mozilla Firefox" );
         manager->get(req);
     }
-    else ui->output->append("no images selected");
+    else ui->output->append(tr("No images selected"));
 
 }
 

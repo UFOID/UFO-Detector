@@ -1,4 +1,4 @@
-/**
+/*
  * UFO Detector | www.UFOID.net
  *
  * Copyright (C) 2016 UFOID
@@ -17,6 +17,7 @@
  */
 
 #include "Detector.h"
+
 using namespace cv;
 using namespace std;
 
@@ -58,12 +59,6 @@ void CDetector::DetectContour(Mat& img, vector<Rect>& Rects,vector<Point2d>& cen
 	}
 }
 
-/*
- * Find all object in binary image
- * Return pair of vectors that contains the center point of each object and the rectangle around each object 
- * Problem: Sometimes one object is detected as two because the binary image does not show one object as a continuous area 
- * TODO: Improve the detection of objects
- */
 pair< vector<Point2d>,vector<Rect> > CDetector::Detect(Mat& gray, Rect& croppedRect){
 
         //bs->subtract(gray,fg);

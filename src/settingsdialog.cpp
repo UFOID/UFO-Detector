@@ -1,4 +1,4 @@
-/**
+/*
  * UFO Detector | www.UFOID.net
  *
  * Copyright (C) 2016 UFOID
@@ -34,7 +34,6 @@ SettingsDialog::SettingsDialog(QWidget *parent, Camera *camPtr, Config *configPt
     QDialog(parent), ui(new Ui::SettingsDialog), cameraPtr(camPtr), m_config(configPtr)
 {
     ui->setupUi(this);
-    this->setWindowTitle("Settings");
 
     this->setLayout(ui->gridLayout);
 
@@ -97,9 +96,9 @@ void SettingsDialog::saveSettings()
 //	{
 //        if(!doc.setContent(&fileXML))
 //		{
-//            ui->lineStatus->setText("File found but is empty. Select area of detection");
+//            ui->lineStatus->setText(tr("File found but is empty. Select area of detection."));
 //        }
-//        else ui->lineStatus->setText("File found and loaded correctly");
+//        else ui->lineStatus->setText(tr("File found and loaded correctly"));
 //    }
 	
 //    emit finishedCheckingXML();
@@ -130,13 +129,13 @@ void SettingsDialog::on_buttonSave_clicked()
     int cameraAspectRatio =  (double)cameraWidth / (double)cameraHeight * 10000;
     if (!cameraPtr->knownAspectRatios().contains(cameraAspectRatio))
     {
-        QMessageBox::warning(this, "Error", "Unknown camera aspect ratio. Please change camera width and/or height. Settings are not saved.");
+        QMessageBox::warning(this, tr("Error"), tr("Unknown camera aspect ratio. Please change camera width and/or height. Settings are not saved."));
         return;
     }
     saveSettings();
     wasSaved=true;
     /// @todo apply settings on-the-fly
-    QMessageBox::information(this, "Information", "Settings saved successfully. Restart the application to apply the changes.");
+    QMessageBox::information(this, tr("Information"), tr("Settings saved successfully. Restart the application to apply the changes."));
 }
 
 void SettingsDialog::on_buttonCancel_clicked()
@@ -157,7 +156,7 @@ void SettingsDialog::on_buttonCancel_clicked()
 //        }
 //        this->close();
 //    }
-//    else QMessageBox::information(this,"Information","Please wait until checking of the area file has finished");
+//    else QMessageBox::information(this, tr("Information"), tr("Please wait until checking of the area file has finished"));
 }
 
 void SettingsDialog::on_checkBoxsaveImages_stateChanged(int arg1)
@@ -180,7 +179,7 @@ void SettingsDialog::on_toolButtonDetectionAreaFile_clicked()
 {
     /// @todo use previous detection area file name if user cancels file selection
     QString detectionAreaFileName = QFileDialog::getOpenFileName(this,
-        tr("Select the detection area file"),QDir::currentPath(), tr("XML file (*.xml)"));
+        tr("Select the detection area file"),QDir::currentPath(), tr("XML files (*.xml)"));
     if (!detectionAreaFileName.isEmpty())
     {
         ui->lineDetectionAreaFile->setText(detectionAreaFileName);
@@ -201,7 +200,7 @@ void SettingsDialog::on_buttonSelectDetectionArea_clicked()
 {
     if (wasSaved)
 	{
-        QMessageBox::warning(this,"Warning","Restart the application before creating detection area file");
+        QMessageBox::warning(this, tr("Warning"), tr("Restart the application before creating detection area file"));
     }
     else
 	{
@@ -228,7 +227,7 @@ void SettingsDialog::onResolutionAcceptedInDialog(QSize resolution)
 
 //void Settings::startThreadCheckXML()
 //{
-//    ui->lineStatus->setText("Checking...");
+//    ui->lineStatus->setText(tr("Checking..."));
 //    threadXMLfile.reset(new std::thread(&Settings::checkAreaFile, this));
 //}
 
@@ -244,10 +243,10 @@ void SettingsDialog::onResolutionAcceptedInDialog(QSize resolution)
 
 void SettingsDialog::on_toolButtonCodecHelp_clicked()
 {
-    QMessageBox::information(this,"Codec Information","Raw Video results is big file sizes \nA lossless codec is recommended \nWindows 8 users should use the Lagarith Codec");
+    QMessageBox::information(this, tr("Codec Information"), tr("Raw Video results is big file sizes. \nA lossless codec is recommended. \nWindows 8 users should use the Lagarith Codec."));
 }
 
 void SettingsDialog::on_toolButtonTokenHelp_clicked()
 {
-    QMessageBox::information(this,"UFOID.net User Token","Copy the User Token from your UFOID account in to this field to enable the upload feature\nThe code can be found at http://ufoid.net/profile/edit");
+    QMessageBox::information(this, tr("UFOID.net User Token"), tr("Copy the user token from your UFOID account into this field to enable the upload feature. \nThe code can be found at http://ufoid.net/profile/edit"));
 }

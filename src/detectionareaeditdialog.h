@@ -1,4 +1,4 @@
-/**
+/*
  * UFO Detector | www.UFOID.net
  *
  * Copyright (C) 2016 UFOID
@@ -32,6 +32,8 @@ class DetectionAreaEditDialog;
 
 /**
  * @brief Dialog for the detection area selection
+ *
+ * @todo save detection area as polygon: only save the corner points. Then can edit, re-edit, scale etc. more freely.
  */
 class DetectionAreaEditDialog : public QDialog
 {

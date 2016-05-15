@@ -1,4 +1,4 @@
-/**
+/*
  * UFO Detector | www.UFOID.net
  *
  * Copyright (C) 2016 UFOID
@@ -26,6 +26,9 @@ namespace Ui {
 class ClickableLabel;
 }
 
+/**
+ * @brief Label to get mouse click
+ */
 class ClickableLabel : public QLabel
 {
 

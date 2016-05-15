@@ -1,4 +1,4 @@
-/**
+/*
  * UFO Detector | www.UFOID.net
  *
  * Copyright (C) 2016 UFOID
@@ -35,6 +35,9 @@ namespace Ui {
 class SettingsDialog;
 }
 
+/**
+ * @brief The settings dialog class
+ */
 class SettingsDialog : public QDialog
 {
     Q_OBJECT

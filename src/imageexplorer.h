@@ -1,4 +1,4 @@
-/**
+/*
  * UFO Detector | www.UFOID.net
  *
  * Copyright (C) 2016 UFOID
@@ -31,6 +31,9 @@ namespace Ui {
 class ImageExplorer;
 }
 
+/**
+ * @brief Dialog to upload images of known objects to UFOID.net
+ */
 class ImageExplorer : public QDialog
 {
     Q_OBJECT

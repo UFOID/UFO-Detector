@@ -1,4 +1,4 @@
-/**
+/*
  * UFO Detector | www.UFOID.net
  *
  * Copyright (C) 2016 UFOID
@@ -16,31 +16,26 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "messageupdate.h"
-#include "ui_messageupdate.h"
-#include <QDesktopServices>
+#ifndef VIDEOLIST_H
+#define VIDEOLIST_H
 
-MessageUpdate::MessageUpdate(QWidget *parent, QString version, std::queue<QString> message) :
-    QDialog(parent),
-    ui(new Ui::MessageUpdate)
+#include <QListWidget>
+#include <QMouseEvent>
+#include <QDebug>
+
+/**
+ * @brief Video list class
+ *
+ * Default behaviour for 2nd mouse button click on item is to change item
+ * selection on the list. This class prevents that.
+ */
+class VideoList : public QListWidget
 {
-    ui->setupUi(this);
-    this->setWindowTitle("New Update");
-    ui->labelVersion->setText(QString("New Version: "+version));
-    while(message.size()>0)
-	{
-        ui->textBrowser->append(message.front());
-        message.pop();
-    }
-}
+    Q_OBJECT
+public:
+    VideoList(QWidget* parent = 0);
 
-void MessageUpdate::on_commandLinkButton_clicked()
-{
-    QDesktopServices::openUrl(QUrl("http://ufoid.net"));
-}
+    void mousePressEvent(QMouseEvent* event);
+};
 
-MessageUpdate::~MessageUpdate()
-{
-    delete ui;
-}
-
+#endif // VIDEOLIST_H

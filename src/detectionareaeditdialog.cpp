@@ -1,4 +1,4 @@
-/**
+/*
  * UFO Detector | www.UFOID.net
  *
  * Copyright (C) 2016 UFOID
@@ -40,7 +40,7 @@ DetectionAreaEditDialog::DetectionAreaEditDialog(QWidget *parent, Camera *camPtr
     QFile area(areaFilePath.c_str());
     if(!area.exists())
 	{
-         ui->labelInfo->setText(QString("Could not find file: ") + areaFilePath.c_str() + QString(" -Check area file path in settings"));
+         ui->labelInfo->setText(tr("Could not find area file: %1 - Check area file path in settings").arg(areaFilePath.c_str()));
          ui->buttonTakePicture->setEnabled(false);
          ui->buttonConnect->setEnabled(false);
          ui->buttonSave->setEnabled(false);
@@ -50,14 +50,7 @@ DetectionAreaEditDialog::DetectionAreaEditDialog(QWidget *parent, Camera *camPtr
     cout << "dialog constructed" << endl;
     ui->buttonClear->setEnabled(false);
     ui->buttonConnect->setEnabled(false);
-    this->setWindowTitle("Select area of detection");
-    this->setStyleSheet("background-color:#515C65; color: white");
-    ui->buttonClear->setStyleSheet("background-color:#3C4A62;");
-    ui->buttonConnect->setStyleSheet("background-color:#3C4A62;");
-    ui->buttonSave->setStyleSheet("background-color:#3C4A62;");
-    ui->buttonTakePicture->setStyleSheet("background-color:#3C4A62;");
     ui->progressBar->hide();
-    this->setFixedSize(830,570);
 }
 
 void DetectionAreaEditDialog::getPointsInContour(vector<Point2f> & contour)
@@ -83,7 +76,7 @@ void DetectionAreaEditDialog::getPointsInContour(vector<Point2f> & contour)
         m_config->setDetectionAreaSize((int)insideContour.size());
         savePointsAsXML(insideContour);
     }
-    else ui->labelInfo->setText("ERROR saving detection area file. No points inside area.");
+    else ui->labelInfo->setText(tr("ERROR saving detection area file: no points inside area"));
 }
 
 void DetectionAreaEditDialog::savePointsAsXML(vector<Point2f> & contour)
@@ -118,12 +111,12 @@ void DetectionAreaEditDialog::savePointsAsXML(vector<Point2f> & contour)
 
 
        file.close();
-       ui->labelInfo->setText("XML file saved successfully");
+       ui->labelInfo->setText(tr("Detection area file saved successfully"));
 
     }
     else
     {
-        ui->labelInfo->setText("ERROR saving the XML file. Check \"Detection area file\" path in settings");
+        ui->labelInfo->setText(tr("ERROR saving the detection area file. Check \"Detection area file\" path in settings."));
     }
 
 }
@@ -131,14 +124,14 @@ void DetectionAreaEditDialog::savePointsAsXML(vector<Point2f> & contour)
 void DetectionAreaEditDialog::on_buttonConnect_clicked()
 {
     scene->connectDots();
-    ui->labelInfo->setText("3. Press the button \"Save\" to save your XML file");
+    ui->labelInfo->setText(tr("3. Press the \"Save\" button to save your detection area file"));
 }
 
 void DetectionAreaEditDialog::on_buttonClear_clicked()
 {
     scene->clearPoly();
     scene->clear();
-    ui->labelInfo->setText("1. Take a picture with the webcam");
+    ui->labelInfo->setText(tr("1. Take a picture with the webcam"));
 }
 
 void DetectionAreaEditDialog::on_buttonTakePicture_clicked()
@@ -149,7 +142,7 @@ void DetectionAreaEditDialog::on_buttonTakePicture_clicked()
     ui->image->setScene(scene);
     ui->image->show();
     isPictureTaken=true;
-    ui->labelInfo->setText("2. Click to create points around the area of the dection. Connect the first and last points using the button \"Connect\"");
+    ui->labelInfo->setText(tr("2. Click to create points around the area of the dection. Connect the first and last points using the \"Connect\" button."));
     ui->buttonClear->setEnabled(true);
     ui->buttonConnect->setEnabled(true);
 }
@@ -166,7 +159,7 @@ void DetectionAreaEditDialog::on_buttonSave_clicked()
 		{
             getPointsInContour(vecFinal);
         }
-        else ui->labelInfo->setText("ERROR not enough points. Draw at least three points around your area of detection");
+        else ui->labelInfo->setText(tr("ERROR not enough points. Draw at least three points around your area of detection."));
     }
 
 }

@@ -1,4 +1,4 @@
-/**
+/*
  * UFO Detector | www.UFOID.net
  *
  * Copyright (C) 2016 UFOID
@@ -31,6 +31,9 @@ class MainWindow;
 class Recorder;
 class Camera;
 
+/**
+ * @brief Main class to detect moving objects in video stream
+ */
 class ActualDetector : public QObject
 {
  Q_OBJECT
@@ -99,6 +102,11 @@ private:
     std::pair<int, int> checkBrightness(int totalLight);
     void checkIfNight();
     void stopOnlyDetecting();
+
+    /**
+     * Check if single (!) object is a bird
+     * @todo Improve to only look for single objects
+     */
     bool checkIfBird();
     std::vector<cv::Rect> getConstantRecs(int totalLight);
 

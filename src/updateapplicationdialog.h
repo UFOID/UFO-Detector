@@ -1,4 +1,4 @@
-/**
+/*
  * UFO Detector | www.UFOID.net
  *
  * Copyright (C) 2016 UFOID
@@ -23,22 +23,25 @@
 #include <queue>
 
 namespace Ui {
-class MessageUpdate;
+class UpdateApplicationDialog;
 }
 
-class MessageUpdate : public QDialog
+/**
+ * @brief Dialog to show availability and download new version of the application
+ */
+class UpdateApplicationDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    MessageUpdate(QWidget *parent, QString version, std::queue<QString> message);
-    ~MessageUpdate();
+    UpdateApplicationDialog(QWidget *parent, QString version, std::queue<QString> message);
+    ~UpdateApplicationDialog();
 
 private slots:
     void on_commandLinkButton_clicked();
 
 private:
-    Ui::MessageUpdate *ui;
+    Ui::UpdateApplicationDialog *ui;
 };
 
 #endif // MESSAGEUPDATE_H

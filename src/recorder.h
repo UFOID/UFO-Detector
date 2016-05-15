@@ -1,4 +1,4 @@
-/**
+/*
  * UFO Detector | www.UFOID.net
  *
  * Copyright (C) 2016 UFOID
@@ -32,6 +32,9 @@
 class ActualDetector;
 class Camera;
 
+/**
+ * @brief The class for recording videos from web camera
+ */
 class Recorder : public QObject {
 Q_OBJECT
 

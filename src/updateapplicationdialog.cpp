@@ -16,41 +16,30 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GRAPHICSSCENE_H
-#define GRAPHICSSCENE_H
+#include "updateapplicationdialog.h"
+#include "ui_updateapplicationdialog.h"
+#include <QDesktopServices>
 
-#include <QGraphicsScene>
-#include <QPoint>
-#include <QMouseEvent>
-#include <opencv2/imgproc/imgproc.hpp>
-
-class Camera;
-
-/**
- * @brief Graphics scene for DetectionAreaEditDialog
- */
-class GraphicsScene : public QGraphicsScene
+UpdateApplicationDialog::UpdateApplicationDialog(QWidget *parent, QString version, std::queue<QString> message) :
+    QDialog(parent),
+    ui(new Ui::UpdateApplicationDialog)
 {
-    Q_OBJECT
-public:
-    explicit GraphicsScene(QObject *parent = 0, Camera* camPtr =0);
-    ~GraphicsScene();
-    std::vector<cv::Point2f> getCoor();
-    void connectDots();
-    void clearPoly();
+    ui->setupUi(this);
+    ui->labelVersion->setText(tr("New version: %1").arg(version));
+    while(message.size()>0)
+	{
+        ui->textBrowser->append(message.front());
+        message.pop();
+    }
+}
 
-private:
-    QPolygon pol;
+void UpdateApplicationDialog::on_commandLinkButton_clicked()
+{
+    QDesktopServices::openUrl(QUrl("http://ufoid.net"));
+}
 
-signals:
+UpdateApplicationDialog::~UpdateApplicationDialog()
+{
+    delete ui;
+}
 
-protected:
-    void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
-
-public slots:
-    private:
-
-
-};
-
-#endif // GRAPHICSSCENE_H

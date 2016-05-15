@@ -1,3 +1,21 @@
+/*
+ * UFO Detector | www.UFOID.net
+ *
+ * Copyright (C) 2016 UFOID
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef CAMERARESOLUTIONDIALOG_H
 #define CAMERARESOLUTIONDIALOG_H
 
@@ -11,8 +29,7 @@ class CameraResolutionDialog;
 }
 
 /**
- * @brief The CameraResolutionDialog class
- * Dialog for querying supported resolutions from camera
+ * @brief Dialog for querying supported resolutions from camera
  *
  * @todo use cache so that don't need to query again when dialog is reopened; need to check camera is the same
  */

@@ -16,41 +16,19 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GRAPHICSSCENE_H
-#define GRAPHICSSCENE_H
+#include "videolist.h"
 
-#include <QGraphicsScene>
-#include <QPoint>
-#include <QMouseEvent>
-#include <opencv2/imgproc/imgproc.hpp>
-
-class Camera;
-
-/**
- * @brief Graphics scene for DetectionAreaEditDialog
- */
-class GraphicsScene : public QGraphicsScene
+VideoList::VideoList(QWidget *parent) :
+    QListWidget(parent)
 {
-    Q_OBJECT
-public:
-    explicit GraphicsScene(QObject *parent = 0, Camera* camPtr =0);
-    ~GraphicsScene();
-    std::vector<cv::Point2f> getCoor();
-    void connectDots();
-    void clearPoly();
 
-private:
-    QPolygon pol;
+}
 
-signals:
-
-protected:
-    void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
-
-public slots:
-    private:
-
-
-};
-
-#endif // GRAPHICSSCENE_H
+void VideoList::mousePressEvent(QMouseEvent* event) {
+    if (event->button() == Qt::RightButton) {
+        // don't let right button click through to VideoList item
+        event->accept();
+    } else {
+        QListWidget::mousePressEvent(event);
+    }
+}
