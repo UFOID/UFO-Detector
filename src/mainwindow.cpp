@@ -52,7 +52,7 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
 
     m_config = configPtr;
 
-    programVersion = "0.6.2";
+    programVersion = "0.6.3";
 
     this->setWindowTitle("UFO Detector | BETA " + programVersion);
 
@@ -106,14 +106,14 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
         if( node.isElement())
         {
             QDomElement element = node.toElement();
-            VideoWidget* mytest = new VideoWidget(this, element.attribute("Pathname", "NULL"), element.attribute("DateTime", "NULL"),element.attribute("Length", "NULL")  );
-            connect(mytest->deleteButton(), SIGNAL(clicked()),this,SLOT(onVideoDeleteClicked()));
-            connect(mytest->uploadButton(), SIGNAL(clicked()),this,SLOT(onVideoUploadClicked()));
-            connect(mytest->playButton(), SIGNAL(clicked()),this,SLOT(onVideoPlayClicked()));
+            VideoWidget* videoWidget = new VideoWidget(this, element.attribute("Pathname", "NULL"), element.attribute("DateTime", "NULL"),element.attribute("Length", "NULL")  );
+            connect(videoWidget->deleteButton(), SIGNAL(clicked()),this,SLOT(onVideoDeleteClicked()));
+            connect(videoWidget->uploadButton(), SIGNAL(clicked()),this,SLOT(onVideoUploadClicked()));
+            connect(videoWidget->playButton(), SIGNAL(clicked()),this,SLOT(onVideoPlayClicked()));
             QListWidgetItem* item = new QListWidgetItem;
             item->setSizeHint(QSize(150,100));
             ui->videoList->addItem(item);
-            ui->videoList->setItemWidget(item,mytest);
+            ui->videoList->setItemWidget(item,videoWidget);
         }
         node = node.nextSibling();
     }
