@@ -8,7 +8,7 @@ QT       += core gui xml network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = Detector
+TARGET = ufodetector
 TEMPLATE = app
 
 win32:CONFIG += windows
