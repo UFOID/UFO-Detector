@@ -16,13 +16,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "messageupdate.h"
-#include "ui_messageupdate.h"
+#include "updateapplicationdialog.h"
+#include "ui_updateapplicationdialog.h"
 #include <QDesktopServices>
 
-MessageUpdate::MessageUpdate(QWidget *parent, QString version, std::queue<QString> message) :
+UpdateApplicationDialog::UpdateApplicationDialog(QWidget *parent, QString version, std::queue<QString> message) :
     QDialog(parent),
-    ui(new Ui::MessageUpdate)
+    ui(new Ui::UpdateApplicationDialog)
 {
     ui->setupUi(this);
     ui->labelVersion->setText(tr("New version: %1").arg(version));
@@ -33,12 +33,12 @@ MessageUpdate::MessageUpdate(QWidget *parent, QString version, std::queue<QStrin
     }
 }
 
-void MessageUpdate::on_commandLinkButton_clicked()
+void UpdateApplicationDialog::on_commandLinkButton_clicked()
 {
     QDesktopServices::openUrl(QUrl("http://ufoid.net"));
 }
 
-MessageUpdate::~MessageUpdate()
+UpdateApplicationDialog::~UpdateApplicationDialog()
 {
     delete ui;
 }

@@ -21,7 +21,7 @@
 #include <QMainWindow>
 #include "actualdetector.h"
 #include "config.h"
-#include "messageupdate.h"
+#include "updateapplicationdialog.h"
 #include <QModelIndex>
 #include <QDomDocument>
 #include <QFile>
@@ -57,7 +57,7 @@ private:
     Ui::MainWindow *ui;
     SettingsDialog *settingsDialog;
     ActualDetector* theDetector;
-    MessageUpdate* updateWindow;
+    UpdateApplicationDialog* updateWindow;
     std::atomic<bool> isUpdating;
     std::atomic<bool> isRecording;
     std::atomic<bool> lastWasPositive, lastWasInfo;    

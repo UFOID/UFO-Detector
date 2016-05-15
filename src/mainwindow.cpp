@@ -786,7 +786,7 @@ void MainWindow::checkForUpdate(QNetworkReply *reply)
         if(versionInXML>programVersion)
         {
             qDebug() << messageInXML.size();
-            updateWindow = new MessageUpdate(this, versionInXML, messageInXML);
+            updateWindow = new UpdateApplicationDialog(this, versionInXML, messageInXML);
             updateWindow->show();
             updateWindow->setAttribute(Qt::WA_DeleteOnClose);
         }

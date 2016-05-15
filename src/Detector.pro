@@ -28,7 +28,6 @@ SOURCES += main.cpp\
     videowidget.cpp \
     clickablelabel.cpp \
     camera.cpp \
-    messageupdate.cpp \
     imageexplorer.cpp \
     Ctracker.cpp\
     Detector.cpp\
@@ -42,7 +41,8 @@ SOURCES += main.cpp\
     camerainfo.cpp \
     cameraresolutiondialog.cpp \
     videolist.cpp \
-    videouploaderdialog.cpp
+    videouploaderdialog.cpp \
+    updateapplicationdialog.cpp
 
 HEADERS  += \
     recorder.h \
@@ -52,7 +52,6 @@ HEADERS  += \
     videowidget.h \
     clickablelabel.h \
     camera.h \
-    messageupdate.h \
     imageexplorer.h \
     Ctracker.h \
     Detector.h \
@@ -67,16 +66,17 @@ HEADERS  += \
     camerainfo.h \
     cameraresolutiondialog.h \
     videolist.h \
-    videouploaderdialog.h
+    videouploaderdialog.h \
+    updateapplicationdialog.h
 
 FORMS    += \
     mainwindow.ui \
-    messageupdate.ui \
     imageexplorer.ui \
     settingsdialog.ui \
     detectionareaeditdialog.ui \
     cameraresolutiondialog.ui \
-    videouploaderdialog.ui
+    videouploaderdialog.ui \
+    updateapplicationdialog.ui
 
 windows {
     INCLUDEPATH += C:\own\install\include
