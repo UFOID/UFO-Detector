@@ -51,7 +51,9 @@ public:
     ~MainWindow();
     void addOutputText(QString msg);
     bool getCheckboxState();
+
     void setSignalsAndSlots(ActualDetector *ptrDetector);
+    cv::Size getDisplayResolution();
 
 private:
     Ui::MainWindow *ui;

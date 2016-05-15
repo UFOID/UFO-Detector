@@ -70,6 +70,7 @@ bool ActualDetector::initialize()
     imageCount = 0;
     ext =".jpg";
 
+
     bool success = parseDetectionAreaFile(detectionAreaFile, region);
 
     willDisplayImage= qobject_cast <MainWindow*>(parent())->getCheckboxState();
@@ -117,6 +118,7 @@ void ActualDetector::detectingThread()
     int counterBlackDetecor = 0;
     int counterLight = 0;
     bool isPositiveRectangle;
+    cv::Size displayResolution = qobject_cast <MainWindow*>(parent())->getDisplayResolution();
 
     CTracker tracker(0.2,0.5,60.0,15,15);
     CDetector* detector=new CDetector(current_frame);
@@ -306,8 +308,7 @@ void ActualDetector::detectingThread()
                 }
             }
 
-            /// @todo use actual view size, not hardcoded value
-            cv::resize(result,result, Size(640,360) ,0, 0, INTER_CUBIC);
+            cv::resize(result,result, displayResolution ,0, 0, INTER_CUBIC);
             cv::cvtColor(result, result, CV_BGR2RGB);
             QImage qimOriginal((uchar*)result.data, result.cols, result.rows, result.step, QImage::Format_RGB888);
             emit updatePixmap(qimOriginal);

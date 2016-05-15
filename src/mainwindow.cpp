@@ -853,3 +853,10 @@ void MainWindow::on_toolButtonThresh_clicked()
     QMessageBox::information(this, tr("Information"), tr("Select the threshold filter value that will be used in the motion detection algorithm. \nIncrease the value if clouds are being detected. \nRecommended value: 10"));
 }
 
+Size MainWindow::getDisplayResolution()
+{
+    return displayResolution;
+}
+
+
+
