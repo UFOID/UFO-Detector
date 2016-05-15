@@ -64,3 +64,8 @@ VideoWidget ClickableLabel, VideoWidget QLabel {
     border: 1px solid #777777;
 }
 
+QLineEdit:disabled
+{
+    background-color: #515c65;
+    color: grey;
+}
