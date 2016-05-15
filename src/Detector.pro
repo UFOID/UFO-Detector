@@ -36,13 +36,13 @@ SOURCES += main.cpp\
     HungarianAlg.cpp\
     BackgroundSubtract.cpp\
     VIBE.cpp \
-    uploader.cpp \
     settingsdialog.cpp \
     config.cpp \
     detectionareaeditdialog.cpp \
     camerainfo.cpp \
     cameraresolutiondialog.cpp \
-    videolist.cpp
+    videolist.cpp \
+    videouploaderdialog.cpp
 
 HEADERS  += \
     recorder.h \
@@ -60,23 +60,23 @@ HEADERS  += \
     HungarianAlg.h \
     BackgroundSubtract.h \
     VIBE.h \
-    uploader.h \
     OpencvInclude.h \
     settingsdialog.h \
     config.h \
     detectionareaeditdialog.h \
     camerainfo.h \
     cameraresolutiondialog.h \
-    videolist.h
+    videolist.h \
+    videouploaderdialog.h
 
 FORMS    += \
     mainwindow.ui \
     messageupdate.ui \
     imageexplorer.ui \
-    uploader.ui \
     settingsdialog.ui \
     detectionareaeditdialog.ui \
-    cameraresolutiondialog.ui
+    cameraresolutiondialog.ui \
+    videouploaderdialog.ui
 
 windows {
     INCLUDEPATH += C:\own\install\include

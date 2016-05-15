@@ -16,8 +16,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "uploader.h"
-#include "ui_uploader.h"
+#include "videouploaderdialog.h"
+#include "ui_videouploaderdialog.h"
 #include <QDebug>
 #include <QFileInfo>
 #include <QJsonArray>
@@ -29,8 +29,8 @@
  * manager->finished() is not emited when the file is big (200mb).
  * See work around.
  */
-Uploader::Uploader(QWidget *parent, QString pathName, Config *configPtr) :
-    QDialog(parent), ui(new Ui::Uploader), filepath(pathName), m_config(configPtr)
+VideoUploaderDialog::VideoUploaderDialog(QWidget *parent, QString pathName, Config *configPtr) :
+    QDialog(parent), ui(new Ui::VideoUploaderDialog), filepath(pathName), m_config(configPtr)
 {
     ui->setupUi(this);
     ui->lineFile->setText(pathName);
@@ -43,13 +43,13 @@ Uploader::Uploader(QWidget *parent, QString pathName, Config *configPtr) :
 
 }
 
-Uploader::~Uploader()
+VideoUploaderDialog::~VideoUploaderDialog()
 {
     qDebug() << "destroyed uploader";
     delete ui;
 }
 
-void Uploader::uploadFinish(QNetworkReply *r)
+void VideoUploaderDialog::uploadFinish(QNetworkReply *r)
 {
     Q_UNUSED(r);
     disconnect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(uploadFinish(QNetworkReply*)));
@@ -59,13 +59,13 @@ void Uploader::uploadFinish(QNetworkReply *r)
     manager->get(req);
 }
 
-void Uploader::uploadError(QNetworkReply::NetworkError state)
+void VideoUploaderDialog::uploadError(QNetworkReply::NetworkError state)
 {
     qDebug() << "State" << state;
     ui->textBrowser->append("ERROR cannot upload video. Contact the developer if the error persists");
 }
 
-void Uploader::on_buttonUpload_clicked()
+void VideoUploaderDialog::on_buttonUpload_clicked()
 {
     ui->textBrowser->clear();
     dateAndTime = QDateTime::currentDateTime().toString("yyyy-MM-dd--hh-mm-ss");
@@ -76,7 +76,7 @@ void Uploader::on_buttonUpload_clicked()
     manager->get(req);
 }
 
-void Uploader::progress(qint64 bytesSent, qint64 bytesTotal)
+void VideoUploaderDialog::progress(qint64 bytesSent, qint64 bytesTotal)
 {
     qDebug() << bytesSent << " from " << bytesTotal;
     if (bytesTotal!=0)
@@ -90,7 +90,7 @@ void Uploader::progress(qint64 bytesSent, qint64 bytesTotal)
     }
 }
 
-void Uploader::callAPI(QNetworkReply* reply)
+void VideoUploaderDialog::callAPI(QNetworkReply* reply)
 {
     qDebug() << "called API";
 
@@ -135,7 +135,7 @@ void Uploader::callAPI(QNetworkReply* reply)
     delete reply;
 }
 
-void Uploader::successReply(QNetworkReply *reply)
+void VideoUploaderDialog::successReply(QNetworkReply *reply)
 {
     if(reply->error() == QNetworkReply::NoError)
     {
@@ -168,7 +168,7 @@ void Uploader::successReply(QNetworkReply *reply)
     }
 }
 
-void Uploader::errorCall(QNetworkReply *reply)
+void VideoUploaderDialog::errorCall(QNetworkReply *reply)
 {
     qDebug() << "error";
     delete reply;

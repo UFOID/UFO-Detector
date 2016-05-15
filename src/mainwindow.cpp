@@ -34,7 +34,7 @@
 #include <QtNetwork/QNetworkRequest>
 #include <QtNetwork/QNetworkReply>
 #include <QByteArray>
-#include "uploader.h"
+#include "videouploaderdialog.h"
 #include <QJsonDocument>
 #include <QJsonObject>
 
@@ -251,7 +251,7 @@ void MainWindow::onVideoUploadClicked()
         VideoWidget* widget = qobject_cast<VideoWidget*>(ui->videoList->itemWidget(item));
         if(widget->uploadButton()==sender())
         {
-            Uploader* upload = new Uploader(this,widget->videoFileName(),m_config);
+            VideoUploaderDialog* upload = new VideoUploaderDialog(this,widget->videoFileName(),m_config);
             upload->show();
             upload->setAttribute(Qt::WA_DeleteOnClose);
         }

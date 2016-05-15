@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Uploader</class>
- <widget class="QDialog" name="Uploader">
+ <class>VideoUploaderDialog</class>
+ <widget class="QDialog" name="VideoUploaderDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
