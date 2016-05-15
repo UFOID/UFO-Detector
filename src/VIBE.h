@@ -50,9 +50,10 @@ typedef struct
 
 typedef vibeModel vibeModel_t;
 
-static unsigned int *rnd;
-static unsigned int rndSize;
-static unsigned int rndPos;
+// actually these variables are used but for some reason they give compiler warning. Why is that?
+static unsigned int *rnd __attribute__((unused));
+static unsigned int rndSize __attribute__((unused));
+static unsigned int rndPos __attribute__((unused));
 
 vibeModel *libvibeModelNew();
 unsigned char getRandPixel(const unsigned char *image_data, const unsigned int width, const unsigned int height, const unsigned int stride, const unsigned int x, const unsigned int y);
