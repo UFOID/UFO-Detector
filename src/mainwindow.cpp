@@ -76,7 +76,6 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
     isUpdating=true;
     isDetecting=false;
     isRecording=false;
-    lastWasPositive=false;
     lastWasInfo=true;
     counterNegative_=0;
     counterPositive_=0;
@@ -308,7 +307,6 @@ void MainWindow::setPositiveMessage()
             timestamp, QString::number(++counterPositive_), QString::number(counterNegative_)));
     }
     else ui->outputText->append(tr("%1 - Positive detections: %2").arg(timestamp, QString::number(++counterPositive_)));
-    lastWasPositive=true;
     lastWasInfo=false;
 }
 
@@ -328,10 +326,9 @@ void MainWindow::setNegativeMessage()
         ui->outputText->textCursor().removeSelectedText();
         ui->outputText->textCursor().deletePreviousChar();
         ui->outputText->append(tr("%1 - Positive: %2 Negative: %3").arg(
-            timestamp, QString::number(++counterPositive_), QString::number(counterNegative_)));
+            timestamp, QString::number(counterPositive_), QString::number(++counterNegative_)));
     }
-    else ui->outputText->append(tr("%1 - Negative detections: %2").arg(timestamp, QString::number(++counterPositive_)));
-    lastWasPositive=false;
+    else ui->outputText->append(tr("%1 - Negative detections: %2").arg(timestamp, QString::number(++counterNegative_)));
     lastWasInfo=false;
 }
 

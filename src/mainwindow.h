@@ -62,7 +62,7 @@ private:
     UpdateApplicationDialog* updateWindow;
     std::atomic<bool> isUpdating;
     std::atomic<bool> isRecording;
-    std::atomic<bool> lastWasPositive, lastWasInfo;    
+    std::atomic<bool> lastWasInfo;
     bool isDetecting;
     int counterPositive_, counterNegative_, recordingCounter_;
     cv::Mat webcamFrame;
