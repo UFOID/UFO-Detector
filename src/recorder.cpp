@@ -56,25 +56,12 @@ Recorder::Recorder(ActualDetector *parent, Camera *cameraPtr, Config *configPtr)
     ext=".avi";
     color = Scalar(255,0,0);
     resolutionRecording = Size(WIDTH,HEIGHT);
-    int aspectRatio = (double)WIDTH/HEIGHT * 10000;
-    switch (aspectRatio)
-    {
-    case 12222:
-        resolutionThumbnail = Size((640/10) + 15, (524/10) + 15);
-        break;
-    case 13333:
-        resolutionThumbnail = Size((640/10) + 15, (480/10) + 15);
-        break;
-    case 15000:
-        resolutionThumbnail = Size((640/10) + 15, (320/10) + 15);
-        break;
-    case 17777:
-        resolutionThumbnail = Size((640/10) + 15, (360/10) + 15);
-        break;
-    default:
-        qDebug() << "Recorder::Recorder(): got unknown webcam aspect ratio, problems ahead";
-        break;
-    }
+    double aspectRatio = (double)WIDTH / (double)HEIGHT;
+    m_defaultThumbnailSideLength = 80;
+    int thumbnailWidth = m_defaultThumbnailSideLength;
+    int thumbnailHeight = qBound(m_defaultThumbnailSideLength / 2,
+            (int)(thumbnailWidth / aspectRatio), m_defaultThumbnailSideLength);
+    resolutionThumbnail = Size(thumbnailWidth, thumbnailHeight);
 
     if (codecSetting == 2)
     {
