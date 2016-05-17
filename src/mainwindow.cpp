@@ -825,7 +825,6 @@ MainWindow::~MainWindow()
  */
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    qDebug() << "close event MainWindow";
     Q_UNUSED(event);
     theDetector->stopThread();
 
@@ -838,6 +837,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
         threadWebcam.reset();
     }
     CamPtr->stopReadingWebcam();
+    CamPtr->release();
     QApplication::quit();
 }
 
