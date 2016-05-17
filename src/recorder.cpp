@@ -94,7 +94,7 @@ Recorder::Recorder(ActualDetector *parent, Camera *cameraPtr, Config *configPtr)
 /*
  * Called from ActualDetector to start recording. Mat &f is the frame that caused the positive detection
  */
-void Recorder::setup(Mat &f)
+void Recorder::startRecording(Mat &f)
 {
     if (!recording)
     {
@@ -316,12 +316,12 @@ void Recorder::reloadResultDataFile()
 /*
  * Called from ActualDetector to stop recording. Bool b specifies if the video will be saved or deleted
  */
-void Recorder::stopRecording(bool b)
+void Recorder::stopRecording(bool willSaveVideo)
 {
     if(recThread)
     {
 
-        willBeSaved=b;
+        willBeSaved=willSaveVideo;
         recording = false;
         recThread->join(); recThread.reset();
         frameUpdateThread->join(); frameUpdateThread.reset();

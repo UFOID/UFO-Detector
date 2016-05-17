@@ -46,7 +46,7 @@ ActualDetector::ActualDetector(MainWindow *parent, Camera *cameraPtr, Config *co
 
     detectionAreaFile = DETECTION_AREA_FILE.toStdString();
     pathname = IMAGEPATH.toStdString();
-    kernel_ero = getStructuringElement(MORPH_RECT, Size(1,1));
+    noiseLevel = getStructuringElement(MORPH_RECT, Size(1,1));
 
     std::cout << "actualdetector constructed" <<endl;
 }
@@ -118,7 +118,7 @@ void ActualDetector::detectingThread()
     int counterBlackDetecor = 0;
     int counterLight = 0;
     bool isPositiveRectangle;
-    cv::Size displayResolution = qobject_cast <MainWindow*>(parent())->getDisplayResolution();
+    cv::Size viewSize = qobject_cast <MainWindow*>(parent())->getCameraViewSize();
 
     CTracker tracker(0.2,0.5,60.0,15,15);
     CDetector* detector=new CDetector(current_frame);
@@ -141,7 +141,7 @@ void ActualDetector::detectingThread()
         bitwise_and(d1, d2, motion);
         threshold(motion, motion, thresholdLevel, 255, CV_THRESH_BINARY);
 
-        erode(motion, motion, kernel_ero);
+        erode(motion, motion, noiseLevel);
 
         numberOfChanges = detectMotion(motion, result, result_cropped, region, max_deviation);
 
@@ -183,7 +183,7 @@ void ActualDetector::detectingThread()
                                 {
                                     Mat tempImg = result.clone();
                                     rectangle(tempImg,croppedRectangle,Scalar(255,0,0),1);
-                                    theRecorder.setup(tempImg);
+                                    theRecorder.startRecording(tempImg);
                                     if(willRecordWithRect) willParseRectangle=true;
                                     startedRecording=true;
                                     auto output_text = tr("Positive detection - starting video recording");
@@ -308,7 +308,7 @@ void ActualDetector::detectingThread()
                 }
             }
 
-            cv::resize(result,result, displayResolution ,0, 0, INTER_CUBIC);
+            cv::resize(result,result, viewSize ,0, 0, INTER_CUBIC);
             cv::cvtColor(result, result, CV_BGR2RGB);
             QImage qimOriginal((uchar*)result.data, result.cols, result.rows, result.step, QImage::Format_RGB888);
             emit updatePixmap(qimOriginal);
@@ -835,7 +835,7 @@ Rect ActualDetector::enlargeROI(Mat &frm, Rect &boundingBox, int padding)
 
 void ActualDetector::setNoiseLevel(int level)
 {
-    kernel_ero=getStructuringElement(MORPH_RECT, Size(level,level));
+    noiseLevel=getStructuringElement(MORPH_RECT, Size(level,level));
 }
 
 void ActualDetector::setThresholdLevel(int level)
@@ -843,15 +843,11 @@ void ActualDetector::setThresholdLevel(int level)
     thresholdLevel=level;
 }
 
-void ActualDetector::setFilename(string msg)
-{
-    filename=msg;
-}
-
 void ActualDetector::startRecording()
 {
-    theRecorder.setup(result);
+    theRecorder.startRecording(result);
 }
+
 
 Recorder* ActualDetector::getRecorder()
 {

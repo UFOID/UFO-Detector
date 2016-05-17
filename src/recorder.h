@@ -40,8 +40,8 @@ Q_OBJECT
 
 public:
     explicit Recorder(ActualDetector* parent=0, Camera* cameraPtr = 0, Config* configPtr = 0);
-    void setup(cv::Mat &f);
-    void stopRecording(bool b);
+    void startRecording(cv::Mat &f);
+    void stopRecording(bool willSaveVideo);
     void setRectangle(cv::Rect &r, bool isRed);
 
 private:

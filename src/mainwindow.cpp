@@ -497,7 +497,17 @@ void MainWindow::on_buttonClear_clicked()
 
 void MainWindow::on_recordingTestButton_clicked()
 {
-    theDetector->startRecording();
+    if (!isRecording)
+    {
+        theDetector->startRecording();
+        ui->recordingTestButton->setText("Stop rec");
+    }
+    else
+    {
+        theDetector->getRecorder()->stopRecording(true);
+        ui->recordingTestButton->setText("Start rec");
+    }
+
 }
 
 void MainWindow::on_aboutButton_clicked()
@@ -815,6 +825,7 @@ MainWindow::~MainWindow()
  */
 void MainWindow::closeEvent(QCloseEvent *event)
 {
+    qDebug() << "close event MainWindow";
     Q_UNUSED(event);
     theDetector->stopThread();
 
@@ -850,7 +861,7 @@ void MainWindow::on_toolButtonThresh_clicked()
     QMessageBox::information(this, tr("Information"), tr("Select the threshold filter value that will be used in the motion detection algorithm. \nIncrease the value if clouds are being detected. \nRecommended value: 10"));
 }
 
-Size MainWindow::getDisplayResolution()
+Size MainWindow::getCameraViewSize()
 {
     return displayResolution;
 }

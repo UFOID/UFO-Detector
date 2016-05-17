@@ -51,8 +51,6 @@ public:
     std::atomic<bool> willDisplayImage;
 
 private:
-    clock_t t;
-    int time;
     Recorder theRecorder;
     Camera* camPtr;
     Config* m_config;
@@ -60,12 +58,11 @@ private:
     cv::Mat prev_frame, current_frame, next_frame;
     cv::Mat d1, d2, motion, treshImg;
     cv::Mat croppedImageGray;
-    cv::Mat kernel_ero;
+    cv::Mat noiseLevel;
     cv::Rect rect;
     int numberOfChanges;
     int minAmountOfMotion, max_deviation;
     std::string pathname, pathnameThresh, fileDir;
-    std::string filename;
     std::string ext;
     int imageCount;
     int thresholdLevel;

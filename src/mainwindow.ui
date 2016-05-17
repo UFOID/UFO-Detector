@@ -977,7 +977,7 @@
              <bool>true</bool>
             </property>
             <property name="text">
-             <string>PushButton</string>
+             <string>Start rec</string>
             </property>
            </widget>
           </item>

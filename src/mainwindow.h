@@ -53,7 +53,7 @@ public:
     bool getCheckboxState();
 
     void setSignalsAndSlots(ActualDetector *ptrDetector);
-    cv::Size getDisplayResolution();
+    cv::Size getCameraViewSize();
 
 private:
     Ui::MainWindow *ui;

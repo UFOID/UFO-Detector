@@ -58,7 +58,6 @@ SettingsDialog::SettingsDialog(QWidget *parent, Camera *camPtr, Config *configPt
     ui->lineMinPosRequired->setText(QString::number(m_config->minPositiveDetections()));
 
     ui->comboBoxCodec->setCurrentIndex(m_config->resultVideoCodec());
-
     setWindowFlags(Qt::FramelessWindowHint);
     setWindowFlags(Qt::WindowTitleHint);
     m_detectionAreaDialogIsOpen=false;
