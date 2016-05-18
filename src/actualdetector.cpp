@@ -121,6 +121,7 @@ void ActualDetector::detectingThread()
     int counterLight = 0;
     bool isPositiveRectangle;
     m_cameraViewFrameSize = qobject_cast <MainWindow*>(parent())->getDisplayResolution();
+    int threadYieldPauseUsec = 1000;
 
     CTracker tracker(0.2,0.5,60.0,15,15);
     CDetector* detector=new CDetector(current_frame);
@@ -314,6 +315,9 @@ void ActualDetector::detectingThread()
             cv::cvtColor(result, result, CV_BGR2RGB);
             QImage qimOriginal((uchar*)result.data, result.cols, result.rows, result.step, QImage::Format_RGB888);
             emit updatePixmap(qimOriginal);
+            // give MainWindow thread some time to update pixmap to prevent flickering
+            std::this_thread::yield();
+            std::this_thread::sleep_for(std::chrono::microseconds(threadYieldPauseUsec));
         }
     }
     delete detector;
