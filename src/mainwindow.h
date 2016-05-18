@@ -68,7 +68,7 @@ private:
     cv::Mat webcamFrame;
     Camera* CamPtr;
     std::unique_ptr<std::thread> threadWebcam;
-    cv::Size displayResolution;
+    cv::Size displayResolution;     ///< frame size of camera view
     QString m_detectionStatusStyleOn;  ///< detection status indicator style when detection on
     QString m_detectionStatusStyleOff; ///< detection status indicator style when detection off
 
@@ -81,6 +81,7 @@ private:
 
     void updateWebcamFrame();
     bool checkAndSetResolution(const int WIDTH, const int HEIGHT);
+    void adjustCameraViewFrameSize();    ///< fit camera frame into camera view
 
     /**
      * @brief readLogFileAndGetRootElement Read logfile containing existing video info
@@ -91,6 +92,17 @@ private:
      * @brief checkDetectionAreaFile Check detection area file and create if doesn't exist
      */
     void checkDetectionAreaFile();
+
+    /**
+     * @brief checkCameraAndCodec
+     *
+     * @todo refactor to checkCamera() and checkCodec()  (cleaner code)
+     *
+     * @param WIDTH
+     * @param HEIGHT
+     * @param CODEC
+     * @return
+     */
     bool checkCameraAndCodec(const int WIDTH, const int HEIGHT, const int CODEC);
 
     /**
@@ -110,6 +122,15 @@ signals:
     void elementWasRemoved();
     void updatePixmap(QImage img);
 
+    /**
+     * @brief Emitted when frame size of camera view has changed.
+     *
+     * NOTE: synchronize frame size change in the class receiving this signal to
+     * make sure the change doesn't happen in the middle of frame scaling.
+     *
+     * @param newSize new frame size
+     */
+    void cameraViewFrameSizeChanged(QSize newSize);
 
 public slots:
     void recordingWasStarted();
@@ -150,6 +171,8 @@ private slots:
     void on_toolButtonThresh_clicked();
 
 protected:
+    void showEvent(QShowEvent *event);
+    void resizeEvent(QResizeEvent *event);
     void closeEvent(QCloseEvent *event);
 };
 
