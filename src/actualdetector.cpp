@@ -845,7 +845,8 @@ void ActualDetector::setThresholdLevel(int level)
 
 void ActualDetector::startRecording()
 {
-    theRecorder.startRecording(result);
+    Mat firstFrame = result.clone();
+    theRecorder.startRecording(firstFrame);
 }
 
 

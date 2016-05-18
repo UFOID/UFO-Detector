@@ -98,6 +98,7 @@ void Recorder::startRecording(Mat &f)
 {
     if (!recording)
     {
+        firstFrame=f;
         recording=true;
         frameToRecord = camPtr->getWebcamFrame();
         if(withRectangle)
@@ -105,7 +106,6 @@ void Recorder::startRecording(Mat &f)
             if (!frameUpdateThread) frameUpdateThread.reset(new std::thread(&Recorder::readFrameThread, this));
         }
         else if (!frameUpdateThread) frameUpdateThread.reset(new std::thread(&Recorder::readFrameThreadWithoutRect, this));
-        firstFrame=f;
         recThread.reset(new std::thread(&Recorder::recordThread, this));
     }
 }
@@ -187,13 +187,13 @@ void Recorder::recordThread(){
 /*
  * Creates a new QProcess that encodes the raw video to FFV1 with ffmpeg
  */
-void Recorder::finishedRecording(QString picDir, QString filename)
+void Recorder::finishedRecording(QString tempVideoFile, QString filename)
 {
     QProcess* proc = new QProcess();
     vecProcess.push_back(proc);
-    vecString.push_back(picDir);
+    vecTempVideoFile.push_back(tempVideoFile);
     // these video encoder parameters are ok only for ffmpeg and avconv (which are more or less compatible)
-    proc->start(m_config->videoEncoderLocation(), QStringList() <<"-i"<< picDir << "-vcodec"<< "ffv1" << filename);
+    proc->start(m_config->videoEncoderLocation(), QStringList() <<"-i"<< tempVideoFile << "-vcodec"<< "ffv1" << filename);
     connect(proc,SIGNAL(finished(int)),this,SLOT(finishedProcess()));
 }
 
@@ -207,15 +207,13 @@ void Recorder::finishedProcess()
     {
         if(vecProcess.at(i)->state()==QProcess::NotRunning)
         {
-            qDebug()<<" pos: " + QString::number(i);
             delete vecProcess.at(i);
             vecProcess.erase(vecProcess.begin() + i);
 
-            QString folderToRemove=vecString.at(i);
+            QString tempVideoFile=vecTempVideoFile.at(i);
 
-            qDebug() << folderToRemove;
-            remove(folderToRemove.toStdString().c_str());
-            vecString.erase(vecString.begin() + i);
+            remove(tempVideoFile.toStdString().c_str());
+            vecTempVideoFile.erase(vecTempVideoFile.begin() + i);
 
             if(vecProcess.size()==0)
             {
@@ -314,7 +312,7 @@ void Recorder::reloadResultDataFile()
 }
 
 /*
- * Called from ActualDetector to stop recording. Bool b specifies if the video will be saved or deleted
+ * Called from ActualDetector to stop recording. Specifies if video will be saved
  */
 void Recorder::stopRecording(bool willSaveVideo)
 {

@@ -229,7 +229,7 @@ void MainWindow::onVideoDeleteClicked()
         {
             dateToRemove = widget->dateTime();
             int ret = QMessageBox::warning(this, tr("Delete video"),
-                tr("Do you really want to delete this video?"),
+                tr("Do you want to permanently delete this video?"),
                 QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
             if (QMessageBox::Yes == ret)
             {

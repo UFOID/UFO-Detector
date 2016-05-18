@@ -71,7 +71,7 @@ private:
     bool withRectangle;
 
     std::vector<QProcess*> vecProcess;
-    std::vector<QString> vecString;
+    std::vector<QString> vecTempVideoFile;
 
     QDomDocument documentXML;
     QFile resultDataFile;

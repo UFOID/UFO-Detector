@@ -70,3 +70,4 @@ QLineEdit:disabled
     background-color: #515c65;
     color: grey;
 }
+

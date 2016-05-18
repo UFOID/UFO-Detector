@@ -35,58 +35,99 @@
     <property name="bottomMargin">
      <number>10</number>
     </property>
-    <item row="1" column="1">
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <item>
-       <widget class="QLabel" name="label_3">
-        <property name="text">
-         <string>Width</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="lineEditCameraWidth"/>
-      </item>
-      <item>
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>Height</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="lineEditCameraHeight"/>
-      </item>
-     </layout>
+    <item row="12" column="1">
+     <widget class="QLineEdit" name="lineToken"/>
     </item>
-    <item row="3" column="2">
-     <widget class="QToolButton" name="toolButtonVideoPath">
-      <property name="text">
-       <string>...</string>
-      </property>
-     </widget>
-    </item>
-    <item row="13" column="0">
-     <widget class="QLabel" name="label_2">
-      <property name="text">
-       <string>UFOID user token</string>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="2">
-     <widget class="QToolButton" name="toolButtonDetectionAreaFile">
-      <property name="text">
-       <string>...</string>
-      </property>
-     </widget>
-    </item>
-    <item row="9" column="0">
+    <item row="8" column="0">
      <widget class="QLabel" name="labelImagePath">
       <property name="enabled">
        <bool>true</bool>
       </property>
       <property name="text">
        <string>Image path</string>
+      </property>
+     </widget>
+    </item>
+    <item row="12" column="2">
+     <widget class="QToolButton" name="toolButtonTokenHelp">
+      <property name="text">
+       <string>?</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="2">
+     <widget class="QToolButton" name="toolButtonCodecHelp">
+      <property name="text">
+       <string>?</string>
+      </property>
+     </widget>
+    </item>
+    <item row="9" column="0" colspan="2">
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <property name="topMargin">
+       <number>6</number>
+      </property>
+      <item>
+       <widget class="QLabel" name="labelMinPos">
+        <property name="text">
+         <string>Minimum required number of positive detections</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="lineMinPosRequired"/>
+      </item>
+     </layout>
+    </item>
+    <item row="8" column="2">
+     <widget class="QToolButton" name="toolButtonImagePath">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="text">
+       <string>...</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QLabel" name="labelCodec">
+      <property name="text">
+       <string>Video codec</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QComboBox" name="comboBoxCodec">
+      <item>
+       <property name="text">
+        <string>Raw Video</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>FFV1 Lossless Video</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Lagarith Lossless Video</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="7" column="0" colspan="2">
+     <widget class="QCheckBox" name="checkBoxsaveImages">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="text">
+       <string>Save images</string>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
       </property>
      </widget>
     </item>
@@ -114,6 +155,13 @@
       </item>
      </widget>
     </item>
+    <item row="4" column="0">
+     <widget class="QLabel" name="labelDetectionAreaFile">
+      <property name="text">
+       <string>Detection area file</string>
+      </property>
+     </widget>
+    </item>
     <item row="3" column="0">
      <widget class="QLabel" name="labelVideoPath">
       <property name="text">
@@ -121,38 +169,120 @@
       </property>
      </widget>
     </item>
-    <item row="2" column="2">
-     <widget class="QToolButton" name="toolButtonCodecHelp">
-      <property name="text">
-       <string>?</string>
+    <item row="8" column="1">
+     <widget class="QLineEdit" name="lineImagePath">
+      <property name="enabled">
+       <bool>true</bool>
       </property>
-     </widget>
-    </item>
-    <item row="7" column="0" colspan="2">
-     <widget class="QCheckBox" name="checkBoxRectangle">
-      <property name="text">
-       <string>Draw rectangle around object in the video</string>
+      <property name="styleSheet">
+       <string notr="true"/>
       </property>
-     </widget>
-    </item>
-    <item row="3" column="1">
-     <widget class="QLineEdit" name="lineVideoPath">
       <property name="readOnly">
        <bool>true</bool>
       </property>
      </widget>
     </item>
-    <item row="5" column="0">
-     <widget class="QLabel" name="label">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
+    <item row="12" column="0">
+     <widget class="QLabel" name="label_2">
       <property name="text">
-       <string>Area Status:</string>
+       <string>UFOID user token</string>
       </property>
      </widget>
     </item>
-    <item row="14" column="0" colspan="3">
+    <item row="4" column="1">
+     <widget class="QLineEdit" name="lineDetectionAreaFile">
+      <property name="text">
+       <string/>
+      </property>
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="2">
+     <widget class="QToolButton" name="toolButtonVideoPath">
+      <property name="text">
+       <string>...</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="2">
+     <widget class="QToolButton" name="toolButtonResolutionDialog">
+      <property name="text">
+       <string>...</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="labelResolution">
+      <property name="text">
+       <string>Select resolution</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="2">
+     <widget class="QToolButton" name="toolButtonDetectionAreaFile">
+      <property name="text">
+       <string>...</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QLabel" name="labelWebcam">
+      <property name="text">
+       <string>Select webcam</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="1">
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="buttonSelectDetectionArea">
+        <property name="text">
+         <string>Select detection area</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="1" column="1">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Width</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="lineEditCameraWidth"/>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Height</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="lineEditCameraHeight"/>
+      </item>
+     </layout>
+    </item>
+    <item row="13" column="0" colspan="3">
      <layout class="QHBoxLayout" name="horizontalLayout_4">
       <property name="spacing">
        <number>40</number>
@@ -185,170 +315,17 @@
       </item>
      </layout>
     </item>
-    <item row="8" column="0" colspan="2">
-     <widget class="QCheckBox" name="checkBoxsaveImages">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="text">
-       <string>Save images</string>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <property name="checked">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="13" column="2">
-     <widget class="QToolButton" name="toolButtonTokenHelp">
-      <property name="text">
-       <string>?</string>
-      </property>
-     </widget>
-    </item>
-    <item row="13" column="1">
-     <widget class="QLineEdit" name="lineToken"/>
-    </item>
-    <item row="5" column="1">
-     <widget class="QLineEdit" name="lineStatus">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
+    <item row="3" column="1">
+     <widget class="QLineEdit" name="lineVideoPath">
       <property name="readOnly">
        <bool>true</bool>
       </property>
      </widget>
     </item>
-    <item row="0" column="0">
-     <widget class="QLabel" name="labelWebcam">
+    <item row="6" column="0" colspan="2">
+     <widget class="QCheckBox" name="checkBoxRectangle">
       <property name="text">
-       <string>Select webcam</string>
-      </property>
-     </widget>
-    </item>
-    <item row="10" column="0" colspan="2">
-     <layout class="QHBoxLayout" name="horizontalLayout_3">
-      <property name="topMargin">
-       <number>6</number>
-      </property>
-      <item>
-       <widget class="QLabel" name="labelMinPos">
-        <property name="text">
-         <string>Minimum required number of positive detections</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="lineMinPosRequired"/>
-      </item>
-     </layout>
-    </item>
-    <item row="9" column="2">
-     <widget class="QToolButton" name="toolButtonImagePath">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="text">
-       <string>...</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="1">
-     <widget class="QComboBox" name="comboBoxCodec">
-      <item>
-       <property name="text">
-        <string>Raw Video</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>FFV1 Lossless Video</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Lagarith Lossless Video</string>
-       </property>
-      </item>
-     </widget>
-    </item>
-    <item row="2" column="0">
-     <widget class="QLabel" name="labelCodec">
-      <property name="text">
-       <string>Video codec</string>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="0">
-     <widget class="QLabel" name="labelDetectionAreaFile">
-      <property name="text">
-       <string>Detection area file</string>
-      </property>
-     </widget>
-    </item>
-    <item row="6" column="1">
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
-      <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="QPushButton" name="buttonSelectDetectionArea">
-        <property name="text">
-         <string>Select detection area</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item row="4" column="1">
-     <widget class="QLineEdit" name="lineDetectionAreaFile">
-      <property name="text">
-       <string/>
-      </property>
-      <property name="readOnly">
-       <bool>true</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="9" column="1">
-     <widget class="QLineEdit" name="lineImagePath">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="styleSheet">
-       <string notr="true"/>
-      </property>
-      <property name="readOnly">
-       <bool>true</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="2">
-     <widget class="QToolButton" name="toolButtonResolutionDialog">
-      <property name="text">
-       <string>...</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="0">
-     <widget class="QLabel" name="labelResolution">
-      <property name="text">
-       <string>Select resolution</string>
+       <string>Draw rectangle around object in the video</string>
       </property>
      </widget>
     </item>
