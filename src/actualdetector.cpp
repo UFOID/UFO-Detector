@@ -120,7 +120,7 @@ void ActualDetector::detectingThread()
     int counterBlackDetecor = 0;
     int counterLight = 0;
     bool isPositiveRectangle;
-    m_cameraViewFrameSize = qobject_cast <MainWindow*>(parent())->getDisplayResolution();
+    m_cameraViewFrameSize = qobject_cast <MainWindow*>(parent())->getCameraViewSize();
     int threadYieldPauseUsec = 1000;
 	
     CTracker tracker(0.2,0.5,60.0,15,15);
@@ -864,6 +864,6 @@ Recorder* ActualDetector::getRecorder()
 void ActualDetector::onCameraViewFrameSizeChanged(QSize newSize)
 {
     Q_UNUSED(newSize);
-    m_cameraViewFrameSize = qobject_cast <MainWindow*>(parent())->getDisplayResolution();
+    m_cameraViewFrameSize = qobject_cast <MainWindow*>(parent())->getCameraViewSize();
 }
 
