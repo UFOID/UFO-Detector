@@ -867,7 +867,6 @@ Recorder* ActualDetector::getRecorder()
 void ActualDetector::onCameraViewFrameSizeChanged(QSize newSize)
 {
     Q_UNUSED(newSize);
-    /// @todo needs to be synchronized
     m_cameraViewFrameSize = qobject_cast <MainWindow*>(parent())->getDisplayResolution();
 }
 

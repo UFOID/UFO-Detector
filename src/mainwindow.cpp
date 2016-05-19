@@ -404,7 +404,7 @@ void MainWindow::on_startButton_clicked()
             connect(theDetector,SIGNAL(updatePixmap(QImage)),this,SLOT(displayPixmap(QImage)));
             isDetecting=true;
             ui->statusLabel->setStyleSheet(m_detectionStatusStyleOn);
-            ui->statusLabel->setText(tr("Detection started on %1").arg(QTime::currentTime().toString()));
+            ui->statusLabel->setText(tr("Detection started at %1").arg(QTime::currentTime().toString()));
             ui->progressBar->hide();
             ui->startButton->setText(tr("Stop detection"));
         }

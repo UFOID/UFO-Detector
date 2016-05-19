@@ -124,10 +124,6 @@ signals:
 
     /**
      * @brief Emitted when frame size of camera view has changed.
-     *
-     * NOTE: synchronize frame size change in the class receiving this signal to
-     * make sure the change doesn't happen in the middle of frame scaling.
-     *
      * @param newSize new frame size
      */
     void cameraViewFrameSizeChanged(QSize newSize);
