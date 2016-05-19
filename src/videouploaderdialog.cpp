@@ -120,7 +120,7 @@ void VideoUploaderDialog::callAPI(QNetworkReply* reply)
         {
             QNetworkReply *reply =  manager->put(QNetworkRequest(url),file);
             connect(reply, SIGNAL(uploadProgress(qint64,qint64)), this, SLOT(progress(qint64,qint64)));
-            //connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(uploadError(QNetworkReply::NetworkError)));
+            connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(uploadError(QNetworkReply::NetworkError)));
             ui->textBrowser->setText("Upload started. Do not close this window.");
             ui->textBrowser->append("Edit the information about your video at "+ videoURL);
         }
@@ -129,7 +129,8 @@ void VideoUploaderDialog::callAPI(QNetworkReply* reply)
     else
     {
         ui->textBrowser->setText("Invalid User Token");
-        ui->textBrowser->setText("Create a free UFOID.net account and copy your given User Token in to the settings of the UFO Detector");
+        ui->textBrowser->setText("To upload a video create a free UFOID.net account and copy your given User Token in to the settings of the UFO Detector");
+        ui->buttonUpload->setEnabled(false);
     }
 
     delete reply;
