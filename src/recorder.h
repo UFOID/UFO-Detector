@@ -57,6 +57,7 @@ private:
     cv::Scalar color;
     cv::Size resolutionRecording;
     cv::Size resolutionThumbnail;
+    int m_defaultThumbnailSideLength;   ///< bounding square side length for thumbnail image
 
     std::string pathDirectory;
     std::string ext;

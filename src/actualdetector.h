@@ -68,6 +68,7 @@ private:
     int thresholdLevel;
     int WIDTH;
     int HEIGHT;
+    cv::Size m_cameraViewFrameSize;     ///< frame size of MainWindow's camera view
     int minPositiveRequired;
     bool willRecordWithRect;
     cv::CascadeClassifier birds_cascade;
@@ -117,6 +118,8 @@ signals:
 	void progressValueChanged(int value);
     void updatePixmap(QImage img);
 
+public slots:
+    void onCameraViewFrameSizeChanged(QSize newSize);   ///< frame size of camera view has changed
 };
 
 #endif // ACTUALREC_H

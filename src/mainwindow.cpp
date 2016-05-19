@@ -58,6 +58,7 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
 
     const int WIDTH = m_config->cameraWidth();
     const int HEIGHT = m_config->cameraHeight();
+    displayResolution = Size(WIDTH, HEIGHT);
     const int NOISELEVEL = m_config->noiseFilterPixelSize();
     QString VERSION = m_config->applicationVersion();
     const int CODEC = m_config->resultVideoCodec();
@@ -127,7 +128,6 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
         request.setRawHeader( "User-Agent" , "Mozilla Firefox" );
         manager->get(request);
     }
-
     qDebug() << "mainwindow constructed" ;
 }
 
@@ -141,6 +141,7 @@ void MainWindow::updateWebcamFrame()
     while (isUpdating)
     {
         webcamFrame = CamPtr->getWebcamFrame();
+        /// @todo sync because displayResolution could change at any moment
         cv::resize(webcamFrame,resizedFrame, displayResolution,0, 0, INTER_CUBIC);
         cv::cvtColor(resizedFrame, resizedFrame, CV_BGR2RGB);
         QImage qWebcam((uchar*)resizedFrame.data, resizedFrame.cols, resizedFrame.rows, resizedFrame.step, QImage::Format_RGB888);
@@ -150,7 +151,7 @@ void MainWindow::updateWebcamFrame()
 
 void MainWindow::displayPixmap(QImage image)
 {
-    ui->webcamView->setPixmap(QPixmap::fromImage(image));
+    ui->cameraView->setPixmap(QPixmap::fromImage(image));
 }
 
 /*
@@ -403,7 +404,7 @@ void MainWindow::on_startButton_clicked()
             connect(theDetector,SIGNAL(updatePixmap(QImage)),this,SLOT(displayPixmap(QImage)));
             isDetecting=true;
             ui->statusLabel->setStyleSheet(m_detectionStatusStyleOn);
-            ui->statusLabel->setText(tr("Detection started on %1").arg(QTime::currentTime().toString()));
+            ui->statusLabel->setText(tr("Detection started at %1").arg(QTime::currentTime().toString()));
             ui->progressBar->hide();
             ui->startButton->setText(tr("Stop detection"));
         }
@@ -530,9 +531,6 @@ void MainWindow::on_buttonImageExpl_clicked()
 bool MainWindow::checkAndSetResolution(const int WIDTH, const int HEIGHT)
 {
     double aspectRatio = (double)WIDTH / (double)HEIGHT;
-    /// @todo use actual maximum web camera view width AND height -- main window is resizable so view size changes
-    int maxWebcamWidth = 640;
-    int webcamHeight = (int)(maxWebcamWidth / aspectRatio);
     bool aspectRatioOk = false;
 
     qDebug() << "Requested web cam size:" << QSize(WIDTH, HEIGHT);
@@ -548,14 +546,20 @@ bool MainWindow::checkAndSetResolution(const int WIDTH, const int HEIGHT)
     }
     if (aspectRatioOk)
     {
-        qDebug() << "Aspect ratio of web camera is ok";
-        ui->webcamView->resize(QSize(maxWebcamWidth, webcamHeight));
-        displayResolution = Size(maxWebcamWidth, webcamHeight);
+        adjustCameraViewFrameSize();
         return true;
     }
     qDebug() << "Aspect ratio of web camera is NOT ok";
     ui->outputText->append(tr("Error: Selected webcam resolution is NOT ok"));
     return false;
+}
+
+void MainWindow::adjustCameraViewFrameSize()
+{
+    QSize cameraFrameSize(displayResolution.width, displayResolution.height);
+    cameraFrameSize.scale(ui->cameraView->width(), ui->cameraView->height(), Qt::KeepAspectRatio);
+    displayResolution = Size(cameraFrameSize.width(), cameraFrameSize.height());
+    emit cameraViewFrameSizeChanged(cameraFrameSize);
 }
 
 
@@ -818,6 +822,18 @@ MainWindow::~MainWindow()
 {
     qDebug() << "Deconstructing MainWindow" ;
     delete ui;
+}
+
+void MainWindow::showEvent(QShowEvent *event)
+{
+    Q_UNUSED(event);
+    adjustCameraViewFrameSize();
+}
+
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+    Q_UNUSED(event);
+    adjustCameraViewFrameSize();
 }
 
 /*

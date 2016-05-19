@@ -48,6 +48,8 @@ ActualDetector::ActualDetector(MainWindow *parent, Camera *cameraPtr, Config *co
     pathname = IMAGEPATH.toStdString();
     noiseLevel = getStructuringElement(MORPH_RECT, Size(1,1));
 
+    connect(parent, SIGNAL(cameraViewFrameSizeChanged(QSize)), this, SLOT(onCameraViewFrameSizeChanged(QSize)));
+
     std::cout << "actualdetector constructed" <<endl;
 }
 
@@ -95,7 +97,7 @@ bool ActualDetector::initialize()
     }
 
     std::cout << "initialized Detector" << endl;
-    this_thread::sleep_for(std::chrono::seconds(1));    
+    this_thread::sleep_for(std::chrono::seconds(1));
     startedRecording = false;
 
 
@@ -118,8 +120,9 @@ void ActualDetector::detectingThread()
     int counterBlackDetecor = 0;
     int counterLight = 0;
     bool isPositiveRectangle;
-    cv::Size viewSize = qobject_cast <MainWindow*>(parent())->getCameraViewSize();
-
+    m_cameraViewFrameSize = qobject_cast <MainWindow*>(parent())->getDisplayResolution();
+    int threadYieldPauseUsec = 1000;
+	
     CTracker tracker(0.2,0.5,60.0,15,15);
     CDetector* detector=new CDetector(current_frame);
     vector<Point2d> centers;
@@ -308,10 +311,13 @@ void ActualDetector::detectingThread()
                 }
             }
 
-            cv::resize(result,result, viewSize ,0, 0, INTER_CUBIC);
+            cv::resize(result,result, m_cameraViewFrameSize ,0, 0, INTER_CUBIC);
             cv::cvtColor(result, result, CV_BGR2RGB);
             QImage qimOriginal((uchar*)result.data, result.cols, result.rows, result.step, QImage::Format_RGB888);
             emit updatePixmap(qimOriginal);
+            // give MainWindow thread some time to update pixmap to prevent flickering
+            std::this_thread::yield();
+            std::this_thread::sleep_for(std::chrono::microseconds(threadYieldPauseUsec));
         }
     }
     delete detector;
@@ -853,5 +859,11 @@ void ActualDetector::startRecording()
 Recorder* ActualDetector::getRecorder()
 {
     return &theRecorder;
+}
+
+void ActualDetector::onCameraViewFrameSizeChanged(QSize newSize)
+{
+    Q_UNUSED(newSize);
+    m_cameraViewFrameSize = qobject_cast <MainWindow*>(parent())->getDisplayResolution();
 }
 
