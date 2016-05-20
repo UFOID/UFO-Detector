@@ -556,7 +556,7 @@ bool MainWindow::checkAndSetResolution(const int WIDTH, const int HEIGHT)
 
 void MainWindow::adjustCameraViewFrameSize()
 {
-    QSize cameraFrameSize(displayResolution.width, displayResolution.height);
+    QSize cameraFrameSize(m_config->cameraWidth(), m_config->cameraHeight());
     cameraFrameSize.scale(ui->cameraView->width(), ui->cameraView->height(), Qt::KeepAspectRatio);
     displayResolution = Size(cameraFrameSize.width(), cameraFrameSize.height());
     emit cameraViewFrameSizeChanged(cameraFrameSize);
