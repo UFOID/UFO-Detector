@@ -77,7 +77,7 @@ private:
     std::vector<cv::Point> region;
     std::string detectionAreaFile;
 
-    std::atomic<bool> isActive;
+    std::atomic<bool> isMainThreadRunning;
     std::atomic<bool> willParseRectangle;
     bool isInNightMode;
     std::atomic<bool> startedRecording;

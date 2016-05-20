@@ -129,7 +129,7 @@ void ActualDetector::detectingThread()
     Scalar Colors[]={Scalar(255,0,0),Scalar(0,255,0),Scalar(0,0,255),Scalar(255,255,0),Scalar(0,255,255),Scalar(255,0,255),Scalar(255,127,255),Scalar(127,0,255),Scalar(127,0,127)};
     pair < vector<Point2d>,vector<Rect> > centerAndRectPair;
 
-    while (isActive)
+    while (isMainThreadRunning)
     {
         prev_frame = current_frame;
         current_frame = next_frame;
@@ -579,7 +579,7 @@ void ActualDetector::checkIfNight()
                     changedRegion=false;
                 }
                 regionNew.clear();
-                isActive=true;
+                isMainThreadRunning=true;
                 pThread.reset(new std::thread(&ActualDetector::detectingThread, this));
             }
 
@@ -595,17 +595,17 @@ void ActualDetector::checkIfNight()
         bool isSleeping=true;
         while(isSleeping)
         {
-            if(isActive && counter<timerSeconds)
+            if(isMainThreadRunning && counter<timerSeconds)
             {
                 this_thread::sleep_for(chrono::seconds(1));
                 counter++;
             }
-            else if(isActive && counter==timerSeconds)
+            else if(isMainThreadRunning && counter==timerSeconds)
             {
                 isSleeping=false;
                 qDebug() << "re run loop and timer";
             }
-            else if(!isActive)
+            else if(!isMainThreadRunning)
             {
                 isSleeping=false;
                 isRunning=false;
@@ -629,7 +629,7 @@ void ActualDetector::stopOnlyDetecting()
     {
         if (pThread)
         {
-            isActive=false;
+            isMainThreadRunning=false;
             pThread->join();
             pThread.reset();
         }
@@ -639,7 +639,7 @@ void ActualDetector::stopOnlyDetecting()
 bool ActualDetector::checkIfBird()
 {
     std::vector<Rect> birds;
-    birds_cascade.detectMultiScale( croppedImageGray, birds, 1.1, 2, 0|CV_HAAR_SCALE_IMAGE, Size(40, 40) );
+    birds_cascade.detectMultiScale(croppedImageGray, birds, 1.1, 2, 0|CV_HAAR_SCALE_IMAGE, Size(40, 40) );
 
     if(birds.size()>0)
     {
@@ -790,7 +790,7 @@ void ActualDetector::saveImg(string path, Mat & image)
 void ActualDetector::stopThread()
 {
     region.clear();
-    isActive = false;
+    isMainThreadRunning = false;
     theRecorder.stopRecording(true);
     if (pThread)
     {
@@ -811,7 +811,7 @@ bool ActualDetector::start()
         emit progressValueChanged(1);
         if(initialize())
         {
-            isActive=true;
+            isMainThreadRunning=true;
             threadNightChecker.reset(new std::thread(&ActualDetector::checkIfNight, this));
             emit progressValueChanged(90);
             this_thread::sleep_for(chrono::seconds(1));
