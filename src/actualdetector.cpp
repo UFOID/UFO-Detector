@@ -17,23 +17,9 @@
  */
 
 #include "actualdetector.h"
-#include <iostream>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <chrono>
-#include <stdio.h>
-#include "camera.h"
-#include "mainwindow.h"
-#include <QDir>
-#include <QDateTime>
-#include <QDebug>
-#include <QtXml>
-#include "Ctracker.h"
-#include "Detector.h"
-
-using namespace cv;
 
 ActualDetector::ActualDetector(MainWindow *parent, Camera *cameraPtr, Config *configPtr) :
-    QObject(parent), theRecorder(this, cameraPtr, configPtr), camPtr(cameraPtr)
+    QObject(parent), camPtr(cameraPtr)
 {
     m_config = configPtr;
     const QString DETECTION_AREA_FILE = m_config->detectionAreaFile();
@@ -48,9 +34,16 @@ ActualDetector::ActualDetector(MainWindow *parent, Camera *cameraPtr, Config *co
     pathname = IMAGEPATH.toStdString();
     noiseLevel = getStructuringElement(MORPH_RECT, Size(1,1));
 
+    theRecorder = new Recorder(this, camPtr, m_config);
+
     connect(parent, SIGNAL(cameraViewFrameSizeChanged(QSize)), this, SLOT(onCameraViewFrameSizeChanged(QSize)));
 
     std::cout << "actualdetector constructed" <<endl;
+}
+
+ActualDetector::~ActualDetector()
+{
+    theRecorder->deleteLater();
 }
 
 /*
@@ -186,7 +179,7 @@ void ActualDetector::detectingThread()
                                 {
                                     Mat tempImg = result.clone();
                                     rectangle(tempImg,croppedRectangle,Scalar(255,0,0),1);
-                                    theRecorder.startRecording(tempImg);
+                                    theRecorder->startRecording(tempImg);
                                     if(willRecordWithRect) willParseRectangle=true;
                                     startedRecording=true;
                                     auto output_text = tr("Positive detection - starting video recording");
@@ -228,7 +221,7 @@ void ActualDetector::detectingThread()
                 }
                 if(willParseRectangle)
                 {
-                    theRecorder.setRectangle(rect,isPositiveRectangle);
+                    theRecorder->setRectangle(rect,isPositiveRectangle);
                 }
 
             }
@@ -254,7 +247,7 @@ void ActualDetector::detectingThread()
                 }
                 if(!tracker.removedTrackWithPositive)
                 { //+++all detected objects had more negative than positive detections or was a bird
-                    theRecorder.stopRecording(false);
+                    theRecorder->stopRecording(false);
                     auto output_text = tr("Finished recording - All found objects negative: removed video");
                     emit broadcastOutputText(output_text);
 
@@ -263,13 +256,13 @@ void ActualDetector::detectingThread()
                 {//+++one object had more positive than negative detections
                     if(posCounter>=minPositiveRequired)
                     {
-                        theRecorder.stopRecording(true);
+                        theRecorder->stopRecording(true);
                         auto output_text = tr("Finished recording - At least one object found positive: saved video");
                         emit broadcastOutputText(output_text);
                     }
                     else
                     {
-                        theRecorder.stopRecording(false);
+                        theRecorder->stopRecording(false);
                         auto output_text = tr("Finished recording - Minimum required positive detections not met: removed video");
                         emit broadcastOutputText(output_text);
                     }
@@ -791,7 +784,7 @@ void ActualDetector::stopThread()
 {
     region.clear();
     isActive = false;
-    theRecorder.stopRecording(true);
+    theRecorder->stopRecording(true);
     if (pThread)
     {
         pThread->join();
@@ -852,13 +845,13 @@ void ActualDetector::setThresholdLevel(int level)
 void ActualDetector::startRecording()
 {
     Mat firstFrame = result.clone();
-    theRecorder.startRecording(firstFrame);
+    theRecorder->startRecording(firstFrame);
 }
 
 
 Recorder* ActualDetector::getRecorder()
 {
-    return &theRecorder;
+    return theRecorder;
 }
 
 void ActualDetector::onCameraViewFrameSizeChanged(QSize newSize)

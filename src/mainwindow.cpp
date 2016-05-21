@@ -18,27 +18,6 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include <iostream>
-#include <QTime>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <QMessageBox>
-#include <QDebug>
-#include "clickablelabel.h"
-#include "videowidget.h"
-#include "camera.h"
-#include "settingsdialog.h"
-#include "imageexplorer.h"
-#include <QDesktopServices>
-#include <QDir>
-#include <QtNetwork/QNetworkAccessManager>
-#include <QtNetwork/QNetworkRequest>
-#include <QtNetwork/QNetworkReply>
-#include <QByteArray>
-#include "videouploaderdialog.h"
-#include <QJsonDocument>
-#include <QJsonObject>
-
-using namespace cv;
 
 MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
     QMainWindow(parent), ui(new Ui::MainWindow), CamPtr(cameraPtr)

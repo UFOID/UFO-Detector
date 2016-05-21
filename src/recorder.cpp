@@ -17,24 +17,6 @@
  */
 
 #include "recorder.h"
-#include <iostream>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <QTime>
-#include <QTextStream>
-#include <QFile>
-#include "camera.h"
-#include "actualdetector.h"
-#include <QDebug>
-#include <QDir>
-#include <QCoreApplication>
-
-#define OUTPUT_FPS 25
-
-using namespace cv;
-using namespace std;
-using frame_period = std::chrono::duration<long long, std::ratio<1, OUTPUT_FPS>>;
-using hr_duration = std::chrono::high_resolution_clock::duration;
-
 
 Recorder::Recorder(ActualDetector *parent, Camera *cameraPtr, Config *configPtr) :
     QObject(parent), camPtr(cameraPtr), m_config(configPtr)

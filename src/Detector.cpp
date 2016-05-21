@@ -18,9 +18,6 @@
 
 #include "Detector.h"
 
-using namespace cv;
-using namespace std;
-
 CDetector::CDetector(Mat& gray)
 {
 	fg=gray.clone();

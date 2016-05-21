@@ -20,17 +20,33 @@
 #define RECORDER_H
 
 #include "config.h"
-#include <opencv2/highgui/highgui.hpp>
-#include <atomic>
+#include "camera.h"
+#include "actualdetector.h"
 #include <QDomDocument>
 #include <QFile>
-#include <thread>
 #include <QObject>
 #include <QProcess>
+#include <QTime>
+#include <QTextStream>
+#include <QFile>
+#include <QDebug>
+#include <QDir>
+#include <QCoreApplication>
+#include <atomic>
+#include <thread>
 #include <memory>
+#include <iostream>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+
+#define OUTPUT_FPS 25
+
+using namespace cv;
+using namespace std;
+using frame_period = std::chrono::duration<long long, std::ratio<1, OUTPUT_FPS>>;
+using hr_duration = std::chrono::high_resolution_clock::duration;
 
 class ActualDetector;
-class Camera;
 
 /**
  * @brief The class for recording videos from web camera
@@ -44,8 +60,10 @@ public:
     void stopRecording(bool willSaveVideo);
     void setRectangle(cv::Rect &r, bool isRed);
 
+#ifndef _UNIT_TEST_
 private:
-	const int DEFAULT_CODEC = 0;
+#endif
+    const int DEFAULT_CODEC = 0;
 
     Camera* camPtr;
     Config* m_config;
@@ -91,7 +109,9 @@ private:
 public slots:
     void reloadResultDataFile();
 
+#ifndef _UNIT_TEST_
 private slots:
+#endif
     void finishedRecording(QString picDir, QString filename);
     void finishedProcess();
 

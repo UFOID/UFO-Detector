@@ -26,9 +26,9 @@
 
 int main(int argc, char *argv[])
 {
-	try 
-	{
-		QApplication a(argc, argv);
+    try
+    {
+        QApplication a(argc, argv);
 
         QFile styleFile(":/detector.qss");
         if (styleFile.open(QFile::ReadOnly))
@@ -48,11 +48,11 @@ int main(int argc, char *argv[])
         mainWindow.setSignalsAndSlots(&detector);
         mainWindow.show();
 
-		return a.exec();
-	}
-	catch (std::exception &e)
-	{
-		std::cout << e.what() << std::endl;
-	}
+        return a.exec();
+    }
+    catch (std::exception &e)
+    {
+        std::cout << e.what() << std::endl;
+    }
     return -1;
 }

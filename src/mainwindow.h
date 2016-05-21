@@ -27,17 +27,33 @@
 #include <QFile>
 #include <QListWidgetItem>
 #include <QMenu>
+#include <iostream>
+#include <QTime>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <QMessageBox>
+#include <QDebug>
+#include "clickablelabel.h"
+#include "videowidget.h"
+#include "camera.h"
+#include "settingsdialog.h"
+#include "imageexplorer.h"
+#include <QDesktopServices>
+#include <QDir>
+#include <QtNetwork/QNetworkAccessManager>
+#include <QtNetwork/QNetworkRequest>
+#include <QtNetwork/QNetworkReply>
+#include <QByteArray>
+#include "videouploaderdialog.h"
+#include <QJsonDocument>
+#include <QJsonObject>
 
-
+using namespace cv;
 
 namespace Ui {
 class MainWindow;
 }
 
-class QNetworkReply;
-class Camera;
-class SettingsDialog;
-class QNetworkAccessManager;
+class ActualDetector;
 
 /**
  * @brief Main window of UFO Detector

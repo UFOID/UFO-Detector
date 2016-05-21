@@ -17,9 +17,6 @@
  */
 
 #include "camera.h"
-#include <iostream>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <QDebug>
 
 Camera::Camera(int index, int width, int height)
 {
