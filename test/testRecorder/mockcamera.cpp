@@ -1,7 +1,11 @@
 #include "camera.h"
 
-Camera::Camera(int index, int width, int height) {
+cv::Mat mockCameraNextFrame;    ///< next frame which Camera::getWebcamFrame() will give
 
+Camera::Camera(int index, int width, int height) {
+    Q_UNUSED(index);
+    Q_UNUSED(width);
+    Q_UNUSED(height);
 }
 
 bool Camera::init() {
@@ -16,7 +20,7 @@ void Camera::release() {
 }
 
 cv::Mat Camera::getWebcamFrame() {
-    return cv::Mat();
+    return mockCameraNextFrame;
 }
 
 void Camera::stopReadingWebcam() {

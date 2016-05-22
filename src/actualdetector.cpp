@@ -34,8 +34,9 @@ ActualDetector::ActualDetector(MainWindow *parent, Camera *cameraPtr, Config *co
     pathname = IMAGEPATH.toStdString();
     noiseLevel = getStructuringElement(MORPH_RECT, Size(1,1));
 
-    theRecorder = new Recorder(this, camPtr, m_config);
+    theRecorder = new Recorder(camPtr, m_config);
 
+    /// @todo remove MainWindow pointer from ActualDetector as it's not used, then move this connect to MainWindow
     connect(parent, SIGNAL(cameraViewFrameSizeChanged(QSize)), this, SLOT(onCameraViewFrameSizeChanged(QSize)));
 
     std::cout << "actualdetector constructed" <<endl;

@@ -1,5 +1,7 @@
 #include "config.h"
 
+QString mockConfigResultDataDir;
+
 Config::Config(QObject *parent) {
 }
 
@@ -52,7 +54,7 @@ QString Config::birdClassifierTrainingFile() {
 }
 
 QString Config::resultDataFile() {
-    return "resultdata.xml";
+    return "./resultdata.xml";
 }
 
 QString Config::resultVideoDir() {

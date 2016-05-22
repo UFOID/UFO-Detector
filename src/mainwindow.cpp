@@ -552,6 +552,7 @@ bool MainWindow::getCheckboxState()
 
 void MainWindow::readLogFileAndGetRootElement()
 {
+    /// @todo refactor result data file handling to a different class (e.g. ResultData)
     logFile.setFileName(m_config->resultDataFile());
     if(logFile.exists())
     {
