@@ -36,10 +36,7 @@ ActualDetector::ActualDetector(MainWindow *parent, Camera *cameraPtr, Config *co
 
     theRecorder = new Recorder(camPtr, m_config);
 
-    /// @todo remove MainWindow pointer from ActualDetector as it's not used, then move this connect to MainWindow
-    connect(parent, SIGNAL(cameraViewFrameSizeChanged(QSize)), this, SLOT(onCameraViewFrameSizeChanged(QSize)));
-
-    std::cout << "actualdetector constructed" <<endl;
+    qDebug() << "Actualdetector constructed";
 }
 
 ActualDetector::~ActualDetector()
@@ -90,7 +87,7 @@ bool ActualDetector::initialize()
         isCascadeFound = false;
     }
 
-    std::cout << "initialized Detector" << endl;
+    qDebug() << "Initialized ActualDetector";
     this_thread::sleep_for(std::chrono::seconds(1));
     startedRecording = false;
 
@@ -106,7 +103,7 @@ bool ActualDetector::initialize()
  */
 void ActualDetector::detectingThread()
 {
-    qDebug() << "started normal thread";
+    qDebug() << "Started detection thread";
     Mat tempImage;
     int posCounter = 0;
     int negAndNoMotionCounter = 0;
@@ -713,7 +710,7 @@ bool ActualDetector::parseDetectionAreaFile(string file_region, vector<Point> &r
 
     if(!fileXML.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        qDebug() << "fail reading the file actualldetector" << endl;
+        qDebug() << "Failed to open the detection area file" << QString(file_region.data());
         emit errorReadingDetectionAreaFile();
         return false;
     }
@@ -721,7 +718,7 @@ bool ActualDetector::parseDetectionAreaFile(string file_region, vector<Point> &r
     {
         if(!doc.setContent(&fileXML))
         {
-            qDebug() << "Failed to read the element";
+            qDebug() << "Error reading the detection area file" << QString(file_region.data());
             emit errorReadingDetectionAreaFile();
             return false;
         }

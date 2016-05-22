@@ -68,35 +68,35 @@ public:
     void addOutputText(QString msg);
     bool getCheckboxState();
 
-    void setSignalsAndSlots(ActualDetector *ptrDetector);
+    void setSignalsAndSlots(ActualDetector *actualDetector);
     cv::Size getCameraViewSize();
 
 private:
     Ui::MainWindow *ui;
-    SettingsDialog *settingsDialog;
-    ActualDetector* theDetector;
-    UpdateApplicationDialog* updateWindow;
-    std::atomic<bool> isUpdating;
-    std::atomic<bool> isRecording;
-    std::atomic<bool> lastWasInfo;
-    bool isDetecting;
+    SettingsDialog *m_settingsDialog;
+    ActualDetector* m_actualDetector;
+    UpdateApplicationDialog* m_updateApplicationDialog;
+    std::atomic<bool> m_showCameraVideo;    ///< showing camera video
+    std::atomic<bool> m_recordingVideo;     ///< recording video
+    std::atomic<bool> m_lastMessageWasInfo; ///< last output message was an info message
+    bool m_detecting;   ///< object detection is running
     int counterPositive_, counterNegative_, recordingCounter_;
-    cv::Mat webcamFrame;
-    Camera* CamPtr;
+    cv::Mat m_webcamFrame;
+    Camera* m_camera;
     std::unique_ptr<std::thread> threadWebcam;
-    cv::Size displayResolution;     ///< frame size of camera view
+    cv::Size m_cameraViewResolution;     ///< frame size of camera view
     QString m_detectionStatusStyleOn;  ///< detection status indicator style when detection on
     QString m_detectionStatusStyleOff; ///< detection status indicator style when detection off
 
     Config* m_config;
 
-    QDomDocument documentXML;
-    QFile logFile;  ///< log file (XML)
-    QString programVersion;
-    QNetworkAccessManager *manager;
+    QDomDocument m_resultDataDomDocument;
+    QFile m_resultDataFile;  ///< result data file (XML)
+    QString m_programVersion;
+    QNetworkAccessManager *m_networkAccessManager;
 
     void updateWebcamFrame();
-    bool checkAndSetResolution(const int WIDTH, const int HEIGHT);
+    bool checkAndSetResolution(const int width, const int height);
     void adjustCameraViewFrameSize();    ///< fit camera frame into camera view
 
     /**
@@ -114,12 +114,12 @@ private:
      *
      * @todo refactor to checkCamera() and checkCodec()  (cleaner code)
      *
-     * @param WIDTH
-     * @param HEIGHT
-     * @param CODEC
+     * @param width
+     * @param height
+     * @param codec
      * @return
      */
-    bool checkCameraAndCodec(const int WIDTH, const int HEIGHT, const int CODEC);
+    bool checkCameraAndCodec(const int width, const int height, const int codec);
 
     /**
      * Check that the folder for the images and videos exist
@@ -173,7 +173,7 @@ private slots:
     void setPositiveMessage();
     void setNegativeMessage();
     void setErrorReadingDetectionAreaFile();
-    void updateWidgets(QString filename, QString datetime, QString videoLength);
+    void addVideoToVideoList(QString filename, QString datetime, QString videoLength);
     void on_aboutButton_clicked();
     void checkForUpdate(QNetworkReply* reply);
 

@@ -246,7 +246,7 @@ void Recorder::saveResultData(QString dateTime, QString videoLength)
         m_resultDataFile.flush();
         m_resultDataFile.close();
     }
-    emit updateListWidget(m_resultVideoDirName, dateTime, videoLength);
+    emit resultDataSaved(m_resultVideoDirName, dateTime, videoLength);
 }
 
 /*

@@ -33,7 +33,7 @@ private:
     int m_updateVideoWidgetCallCounter;
 
 private slots:
-    void onUpdateVideoWidget(QString fileName, QString dateTime, QString videoLength);
+    void onResultDataSaved(QString fileName, QString dateTime, QString videoLength);
 };
 
 TestRecorder::TestRecorder() {
@@ -43,7 +43,7 @@ TestRecorder::TestRecorder() {
 TestRecorder::~TestRecorder() {
 }
 
-void TestRecorder::onUpdateVideoWidget(QString fileName, QString dateTime, QString videoLength) {
+void TestRecorder::onResultDataSaved(QString fileName, QString dateTime, QString videoLength) {
     Q_UNUSED(fileName);
     Q_UNUSED(dateTime);
     Q_UNUSED(videoLength);
@@ -124,8 +124,8 @@ void TestRecorder::saveResultData() {
     QString videoLength = "01:02";
     QDomDocument resultDataDom;
     QDomElement videoEntry;
-    connect(m_recorder, SIGNAL(updateListWidget(QString,QString,QString)),
-            this, SLOT(onUpdateVideoWidget(QString,QString,QString)));
+    connect(m_recorder, SIGNAL(resultDataSaved(QString,QString,QString)),
+            this, SLOT(onResultDataSaved(QString,QString,QString)));
 
     // case: write one entry
 

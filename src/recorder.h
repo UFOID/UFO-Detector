@@ -105,7 +105,7 @@ private:
 
     /**
      * @brief Save information about the video to result data file.
-     * Emits updateListWidget() signal.
+     * Emits resultDataSaved() signal.
      * @param dateTime format: yyyy-MM-dd--hh-mm-ss
      * @param videoLength format: mm:ss
      */
@@ -121,7 +121,7 @@ private slots:
     void finishedProcess();
 
 signals:
-    void updateListWidget(QString file, QString date, QString length);
+    void resultDataSaved(QString file, QString date, QString length);
     void recordingStarted();
     void recordingStopped();
     void finishedRec(QString picDir, QString filename);
