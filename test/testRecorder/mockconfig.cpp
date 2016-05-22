@@ -3,6 +3,7 @@
 QString mockConfigResultDataDir;
 
 Config::Config(QObject *parent) {
+    Q_UNUSED(parent);
 }
 
 QString Config::applicationVersion() {
