@@ -16,6 +16,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef HUNGARIANALG_H
+#define HUNGARIANALG_H
+
 #include <vector>
 #include <iostream>
 #include <limits>
@@ -58,3 +61,5 @@ public:
 	~AssignmentProblemSolver();
         double Solve(vector<vector<double> >& DistMatrix,vector<int>& Assignment,TMethod Method=optimal);
 };
+
+#endif  // HUNGARIANALG_H

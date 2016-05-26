@@ -26,6 +26,9 @@
 #include <atomic>
 #include <memory>
 #include <QObject>
+#include <iostream>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <QDebug>
 
 /**
  * @brief Main camera class to handle reading of frames from multiple threads

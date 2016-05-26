@@ -20,17 +20,32 @@
 #define RECORDER_H
 
 #include "config.h"
-#include <opencv2/highgui/highgui.hpp>
-#include <atomic>
+#include "camera.h"
 #include <QDomDocument>
 #include <QFile>
-#include <thread>
 #include <QObject>
 #include <QProcess>
+#include <QTime>
+#include <QTextStream>
+#include <QFile>
+#include <QDebug>
+#include <QDir>
+#include <QCoreApplication>
+#include <atomic>
+#include <thread>
 #include <memory>
+#include <iostream>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+
+#define OUTPUT_FPS 25
+
+using namespace cv;
+using namespace std;
+using frame_period = std::chrono::duration<long long, std::ratio<1, OUTPUT_FPS>>;
+using hr_duration = std::chrono::high_resolution_clock::duration;
 
 class ActualDetector;
-class Camera;
 
 /**
  * @brief The class for recording videos from web camera
@@ -39,70 +54,77 @@ class Recorder : public QObject {
 Q_OBJECT
 
 public:
-    explicit Recorder(ActualDetector* parent=0, Camera* cameraPtr = 0, Config* configPtr = 0);
-    void startRecording(cv::Mat &f);
+    explicit Recorder(Camera* cameraPtr = 0, Config* configPtr = 0);
+    void startRecording(cv::Mat &firstFrame);
     void stopRecording(bool willSaveVideo);
     void setRectangle(cv::Rect &r, bool isRed);
 
+#ifndef _UNIT_TEST_
 private:
-	const int DEFAULT_CODEC = 0;
+#endif
+    const int DEFAULT_CODEC = 0;
 
-    Camera* camPtr;
+    Camera* m_camera;
     Config* m_config;
-    cv::VideoWriter theVideoWriter;
-    cv::Mat frameToRecord;
-    cv::Mat firstFrame;
-    cv::Mat secondFrame;
-    cv::Rect motionRectangle;
-    cv::Scalar color;
-    cv::Size resolutionRecording;
-    cv::Size resolutionThumbnail;
+    cv::VideoWriter m_videoWriter;
+    cv::Mat m_currentFrame;
+    cv::Mat m_firstFrame;
+    cv::Mat m_secondFrame;
+    cv::Rect m_motionRectangle;
+    cv::Scalar m_objectRectangleColor;  ///< color of object rectangle, changes each time
+    cv::Scalar m_objectPositiveColor;   ///< color used to draw rectangle around a positive detection object
+    cv::Scalar m_objectNegativeColor;   ///< color used to draw rectangle around a negative detection object
+    cv::Size m_videoResolution;     ///< resolution of video to be saved
+    cv::Size m_thumbnailResolution; ///< resolution of video thumbnail image
     int m_defaultThumbnailSideLength;   ///< bounding square side length for thumbnail image
+    QString m_resultVideoDirName;     ///< result data directory name
+    QString m_thumbnailDirName;      ///< name of thumbnail folder (without slashes)
+    QString m_videoFileExtension;
+    QString m_thumbnailExtension;
 
-    std::string pathDirectory;
-    std::string ext;
-
-    int delayFound = 0;
-    int totalDelay= 0;
-
-    std::unique_ptr<std::thread> recThread;
-    std::unique_ptr<std::thread> frameUpdateThread;
-    std::atomic<bool>  recording;
-    bool willBeSaved;
-    bool withRectangle;
+    std::unique_ptr<std::thread> m_recorderThread;
+    std::unique_ptr<std::thread> m_frameUpdateThread;
+    std::atomic<bool>  m_recording;
+    bool m_willSaveVideo;       ///< whether to save video or reject it
+    bool m_drawRectangles;      ///< whether or not to draw rectangles around detected objects
 
     std::vector<QProcess*> vecProcess;
     std::vector<QString> vecTempVideoFile;
 
-    QDomDocument documentXML;
-    QFile resultDataFile;
-    QDomElement rootXML;
+    QDomDocument m_resultDataDomDocument;
+    QFile m_resultDataFile;
+    QDomElement m_resultDataRootElement;
 
-    std::chrono::high_resolution_clock::time_point prev, current;
+    std::chrono::high_resolution_clock::time_point prevTime, currentTime;
 
-    int codec;
-    int codecSetting;
+    int m_videoCodec;
+    int m_codecSetting;
 
     void recordThread();
     void readFrameThread();
-    void readFrameThreadWithoutRect();
-    void saveLog(std::string dateTime, QString videoLength);
+
+    /**
+     * @brief Save information about the video to result data file.
+     * Emits resultDataSaved() signal.
+     * @param dateTime format: yyyy-MM-dd--hh-mm-ss
+     * @param videoLength format: mm:ss
+     */
+    void saveResultData(QString dateTime, QString videoLength);
 
 public slots:
     void reloadResultDataFile();
 
+#ifndef _UNIT_TEST_
 private slots:
+#endif
     void finishedRecording(QString picDir, QString filename);
     void finishedProcess();
 
 signals:
-    void updateListWidget(QString file, QString date, QString length);
+    void resultDataSaved(QString file, QString date, QString length);
     void recordingStarted();
     void recordingStopped();
     void finishedRec(QString picDir, QString filename);
-
-
-
 };
 
 #endif // RECORDER_H

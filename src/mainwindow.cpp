@@ -18,33 +18,12 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include <iostream>
-#include <QTime>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <QMessageBox>
-#include <QDebug>
-#include "clickablelabel.h"
-#include "videowidget.h"
-#include "camera.h"
-#include "settingsdialog.h"
-#include "imageexplorer.h"
-#include <QDesktopServices>
-#include <QDir>
-#include <QtNetwork/QNetworkAccessManager>
-#include <QtNetwork/QNetworkRequest>
-#include <QtNetwork/QNetworkReply>
-#include <QByteArray>
-#include "videouploaderdialog.h"
-#include <QJsonDocument>
-#include <QJsonObject>
-
-using namespace cv;
 
 MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
-    QMainWindow(parent), ui(new Ui::MainWindow), CamPtr(cameraPtr)
+    QMainWindow(parent), ui(new Ui::MainWindow), m_camera(cameraPtr)
 {
     ui->setupUi(this);
-    qDebug() << "begin constructing mainwindow";
+    qDebug() << "Constructing MainWindow";
 
     QWidget* mainWindowCentralWidget = new QWidget(this);
     mainWindowCentralWidget->setLayout(ui->mainWindowLayout);
@@ -52,32 +31,32 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
 
     m_config = configPtr;
 
-    programVersion = "0.6.3";
+    m_programVersion = "0.6.3";
 
-    this->setWindowTitle("UFO Detector | BETA " + programVersion);
+    this->setWindowTitle("UFO Detector | BETA " + m_programVersion);
 
-    const int WIDTH = m_config->cameraWidth();
-    const int HEIGHT = m_config->cameraHeight();
-    displayResolution = Size(WIDTH, HEIGHT);
+    const int width = m_config->cameraWidth();
+    const int height = m_config->cameraHeight();
+    m_cameraViewResolution = Size(width, height);
     const int NOISELEVEL = m_config->noiseFilterPixelSize();
     QString VERSION = m_config->applicationVersion();
-    const int CODEC = m_config->resultVideoCodec();
+    const int codec = m_config->resultVideoCodec();
 
-    if ((VERSION == "") || (VERSION < programVersion))
+    if ((VERSION == "") || (VERSION < m_programVersion))
     {
         m_config->resetDetectionAreaFile();
         qDebug() << "cleared critical settings";
-        m_config->setApplicationVersion(programVersion);
+        m_config->setApplicationVersion(m_programVersion);
     }
 
     ui->sliderNoise->setValue(NOISELEVEL);
     ui->lineNoise->setText(QString::number(NOISELEVEL));
     ui->sliderThresh->setValue(m_config->motionThreshold());
     ui->lineThresh->setText(QString::number(m_config->motionThreshold()));
-    isUpdating=true;
-    isDetecting=false;
-    isRecording=false;
-    lastWasInfo=true;
+    m_showCameraVideo=true;
+    m_detecting=false;
+    m_recordingVideo=false;
+    m_lastMessageWasInfo=true;
     counterNegative_=0;
     counterPositive_=0;
     recordingCounter_=0;
@@ -94,13 +73,13 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
     ui->progressBar->hide();
     ui->outputText->append(tr("For feedback and bug reports contact the developer at contact@ufoid.net"));
 
-    if (checkCameraAndCodec(WIDTH,HEIGHT,CODEC))
+    if (checkCameraAndCodec(width, height, codec))
     {
         threadWebcam.reset(new std::thread(&MainWindow::updateWebcamFrame, this));
     }
 
     //Add VideoWidget to UI
-    QDomNode node = documentXML.firstChildElement().firstChild();
+    QDomNode node = m_resultDataDomDocument.firstChildElement().firstChild();
     while( !node.isNull())
     {
         if( node.isElement())
@@ -121,14 +100,14 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
     //Check for new version
     if (m_config->checkApplicationUpdates())
     {
-        manager = new QNetworkAccessManager();
-        connect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(checkForUpdate(QNetworkReply*)) );
+        m_networkAccessManager = new QNetworkAccessManager();
+        connect(m_networkAccessManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(checkForUpdate(QNetworkReply*)) );
         QNetworkRequest request;
         request.setUrl(QUrl("http://ufoid.net/version.xml"));
         request.setRawHeader( "User-Agent" , "Mozilla Firefox" );
-        manager->get(request);
+        m_networkAccessManager->get(request);
     }
-    qDebug() << "mainwindow constructed" ;
+    qDebug() << "MainWindow constructed" ;
 }
 
 
@@ -138,11 +117,11 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
 void MainWindow::updateWebcamFrame()
 {
     cv::Mat resizedFrame;
-    while (isUpdating)
+    while (m_showCameraVideo)
     {
-        webcamFrame = CamPtr->getWebcamFrame();
+        m_webcamFrame = m_camera->getWebcamFrame();
         /// @todo sync because displayResolution could change at any moment
-        cv::resize(webcamFrame,resizedFrame, displayResolution,0, 0, INTER_CUBIC);
+        cv::resize(m_webcamFrame,resizedFrame, m_cameraViewResolution,0, 0, INTER_CUBIC);
         cv::cvtColor(resizedFrame, resizedFrame, CV_BGR2RGB);
         QImage qWebcam((uchar*)resizedFrame.data, resizedFrame.cols, resizedFrame.rows, resizedFrame.step, QImage::Format_RGB888);
         emit updatePixmap(qWebcam);
@@ -157,26 +136,27 @@ void MainWindow::displayPixmap(QImage image)
 /*
  * Set the signals and slots
  */
-void MainWindow::setSignalsAndSlots(ActualDetector* ptrDetector)
+void MainWindow::setSignalsAndSlots(ActualDetector* actualDetector)
 {
-    theDetector = ptrDetector;
-    connect(theDetector,SIGNAL(positiveMessage()),this,SLOT(setPositiveMessage()));
-    connect(theDetector,SIGNAL(negativeMessage()),this,SLOT(setNegativeMessage()));
-    connect(theDetector,SIGNAL(errorReadingDetectionAreaFile()),this,SLOT(setErrorReadingDetectionAreaFile()));
-    connect(theDetector->getRecorder(),SIGNAL(updateListWidget(QString,QString,QString)),this,SLOT(updateWidgets(QString,QString,QString)));
-    connect(theDetector->getRecorder(),SIGNAL(recordingStarted()),this,SLOT(recordingWasStarted()));
-    connect(theDetector->getRecorder(),SIGNAL(recordingStopped()),this,SLOT(recordingWasStoped()));
-    connect(this,SIGNAL(elementWasRemoved()),theDetector->getRecorder(),SLOT(reloadResultDataFile()));
-    connect(theDetector, SIGNAL(progressValueChanged(int)), this , SLOT(on_progressBar_valueChanged(int)) );
-    connect(theDetector, SIGNAL(broadcastOutputText(QString)), this, SLOT(update_output_text(QString)) );
-    connect(this,SIGNAL(updatePixmap(QImage)),this,SLOT(displayPixmap(QImage)));
+    m_actualDetector = actualDetector;
+    connect(m_actualDetector, SIGNAL(positiveMessage()), this, SLOT(setPositiveMessage()));
+    connect(m_actualDetector, SIGNAL(negativeMessage()), this, SLOT(setNegativeMessage()));
+    connect(m_actualDetector, SIGNAL(errorReadingDetectionAreaFile()), this, SLOT(setErrorReadingDetectionAreaFile()));
+    connect(m_actualDetector->getRecorder(), SIGNAL(resultDataSaved(QString,QString,QString)), this, SLOT(addVideoToVideoList(QString,QString,QString)));
+    connect(m_actualDetector->getRecorder(), SIGNAL(recordingStarted()), this, SLOT(recordingWasStarted()));
+    connect(m_actualDetector->getRecorder(), SIGNAL(recordingStopped()), this, SLOT(recordingWasStoped()));
+    connect(this, SIGNAL(elementWasRemoved()), m_actualDetector->getRecorder(), SLOT(reloadResultDataFile()));
+    connect(m_actualDetector, SIGNAL(progressValueChanged(int)), this, SLOT(on_progressBar_valueChanged(int)));
+    connect(m_actualDetector, SIGNAL(broadcastOutputText(QString)), this, SLOT(update_output_text(QString)));
+    connect(this, SIGNAL(cameraViewFrameSizeChanged(QSize)), m_actualDetector, SLOT(onCameraViewFrameSizeChanged(QSize)));
+    connect(this, SIGNAL(updatePixmap(QImage)), this, SLOT(displayPixmap(QImage)));
     connect(ui->videoList, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(onVideoListContextMenuRequested(const QPoint&)));
 }
 
 /*
- * Add new VideoWidget element
+ * Add new VideoWidget element to video list
  */
-void MainWindow::updateWidgets(QString filename, QString datetime, QString videoLength)
+void MainWindow::addVideoToVideoList(QString filename, QString datetime, QString videoLength)
 {
     VideoWidget* newWidget = new VideoWidget(this, filename, datetime, videoLength);
     connect(newWidget->deleteButton(), SIGNAL(clicked()),this,SLOT(onVideoDeleteClicked()));
@@ -197,7 +177,7 @@ void MainWindow::updateWidgets(QString filename, QString datetime, QString video
  */
 void MainWindow::onVideoPlayClicked()
 {
-    if(!isRecording){
+    if(!m_recordingVideo){
         for(int row = 0; row < ui->videoList->count(); row++)
         {
             QListWidgetItem *item = ui->videoList->item(row);
@@ -297,7 +277,7 @@ void MainWindow::setPositiveMessage()
     QTime time = QTime::currentTime();
     QString timestamp = time.toString();
 
-    if (!lastWasInfo)
+    if (!m_lastMessageWasInfo)
     {
         ui->outputText->moveCursor( QTextCursor::End, QTextCursor::MoveAnchor );
         ui->outputText->moveCursor( QTextCursor::StartOfLine, QTextCursor::MoveAnchor );
@@ -308,7 +288,7 @@ void MainWindow::setPositiveMessage()
             timestamp, QString::number(++counterPositive_), QString::number(counterNegative_)));
     }
     else ui->outputText->append(tr("%1 - Positive detections: %2").arg(timestamp, QString::number(++counterPositive_)));
-    lastWasInfo=false;
+    m_lastMessageWasInfo=false;
 }
 
 /*
@@ -319,7 +299,7 @@ void MainWindow::setNegativeMessage()
     QTime time = QTime::currentTime();
     QString timestamp = time.toString();
 
-    if (!lastWasInfo)
+    if (!m_lastMessageWasInfo)
     {
         ui->outputText->moveCursor( QTextCursor::End, QTextCursor::MoveAnchor );
         ui->outputText->moveCursor( QTextCursor::StartOfLine, QTextCursor::MoveAnchor );
@@ -330,7 +310,7 @@ void MainWindow::setNegativeMessage()
             timestamp, QString::number(counterPositive_), QString::number(++counterNegative_)));
     }
     else ui->outputText->append(tr("%1 - Negative detections: %2").arg(timestamp, QString::number(++counterNegative_)));
-    lastWasInfo=false;
+    m_lastMessageWasInfo=false;
 }
 
 /*
@@ -350,7 +330,7 @@ void MainWindow::addOutputText(QString msg)
     QTime time = QTime::currentTime();
     QString output_text(time.toString() + " - " + msg);
     ui->outputText->append(output_text);
-    lastWasInfo=true;
+    m_lastMessageWasInfo=true;
     counterNegative_=0;
     counterPositive_=0;
 }
@@ -359,23 +339,23 @@ void MainWindow::addOutputText(QString msg)
 void MainWindow::on_sliderNoise_sliderMoved(int position)
 {
     ui->lineNoise->setText(QString::number(position));
-    theDetector->setNoiseLevel(position);
+    m_actualDetector->setNoiseLevel(position);
 }
 
 void MainWindow::on_sliderThresh_sliderMoved(int position)
 {
     ui->lineThresh->setText(QString::number(position));
-    theDetector->setThresholdLevel(position);
+    m_actualDetector->setThresholdLevel(position);
 }
 
 void MainWindow::on_settingsButton_clicked()
 {
-    if (!isDetecting)
+    if (!m_detecting)
     {
-        settingsDialog = new SettingsDialog(0, CamPtr, m_config);
-        settingsDialog->setModal(true);
-        settingsDialog->show();
-        settingsDialog->setAttribute(Qt::WA_DeleteOnClose);
+        m_settingsDialog = new SettingsDialog(0, m_camera, m_config);
+        m_settingsDialog->setModal(true);
+        m_settingsDialog->show();
+        m_settingsDialog->setAttribute(Qt::WA_DeleteOnClose);
     }
     else
     {
@@ -386,23 +366,23 @@ void MainWindow::on_settingsButton_clicked()
 
 void MainWindow::on_startButton_clicked()
 {
-    if (!isDetecting)
+    if (!m_detecting)
     {
         ui->progressBar->show();
         ui->progressBar->repaint();
 
         disconnect(this,SIGNAL(updatePixmap(QImage)),this,SLOT(displayPixmap(QImage)));
-        if(theDetector->start())
+        if(m_actualDetector->start())
         {
-            theDetector->setNoiseLevel(ui->sliderNoise->value());
-            theDetector->setThresholdLevel(ui->sliderThresh->value());
-            isUpdating = false;
+            m_actualDetector->setNoiseLevel(ui->sliderNoise->value());
+            m_actualDetector->setThresholdLevel(ui->sliderThresh->value());
+            m_showCameraVideo = false;
             if (threadWebcam)
             {
                 threadWebcam->join(); threadWebcam.reset();
             }
-            connect(theDetector,SIGNAL(updatePixmap(QImage)),this,SLOT(displayPixmap(QImage)));
-            isDetecting=true;
+            connect(m_actualDetector,SIGNAL(updatePixmap(QImage)),this,SLOT(displayPixmap(QImage)));
+            m_detecting=true;
             ui->statusLabel->setStyleSheet(m_detectionStatusStyleOn);
             ui->statusLabel->setText(tr("Detection started at %1").arg(QTime::currentTime().toString()));
             ui->progressBar->hide();
@@ -422,15 +402,15 @@ void MainWindow::on_startButton_clicked()
 
 void MainWindow::on_stopButton_clicked()
 {
-    theDetector->stopThread();
+    m_actualDetector->stopThread();
     ui->statusLabel->setStyleSheet(m_detectionStatusStyleOff);
     ui->statusLabel->setText(tr("Detection not running"));
-    isDetecting=false;
-    disconnect(theDetector,SIGNAL(updatePixmap(QImage)),this,SLOT(displayPixmap(QImage)));
+    m_detecting=false;
+    disconnect(m_actualDetector,SIGNAL(updatePixmap(QImage)),this,SLOT(displayPixmap(QImage)));
     connect(this,SIGNAL(updatePixmap(QImage)),this,SLOT(displayPixmap(QImage)));
     if (!threadWebcam)
     {
-        isUpdating=true;
+        m_showCameraVideo=true;
         threadWebcam.reset(new std::thread(&MainWindow::updateWebcamFrame, this));
     }
     ui->startButton->setText(tr("Start detection"));
@@ -453,7 +433,7 @@ void MainWindow::removeVideo(QString dateTime)
         }
     }
 
-    QDomNode node = documentXML.firstChildElement().firstChild();
+    QDomNode node = m_resultDataDomDocument.firstChildElement().firstChild();
     while( !node.isNull())
     {
         if( node.isElement())
@@ -462,32 +442,32 @@ void MainWindow::removeVideo(QString dateTime)
             QString dateInXML = element.attribute("DateTime");
             if (dateInXML.compare(dateTime)==0)
             {
-              documentXML.firstChildElement().removeChild(node);
-              if(!logFile.open(QIODevice::WriteOnly | QIODevice::Text))
+              m_resultDataDomDocument.firstChildElement().removeChild(node);
+              if(!m_resultDataFile.open(QIODevice::WriteOnly | QIODevice::Text))
               {
                   qDebug() <<  "Failed to open result data file for item deletion";
                   return;
               }
               else
               {
-                  QTextStream stream(&logFile);
+                  QTextStream stream(&m_resultDataFile);
                   stream.setCodec("UTF-8");
-                  stream << documentXML.toString();
-                  logFile.close();
+                  stream << m_resultDataDomDocument.toString();
+                  m_resultDataFile.close();
               }
               break;
             }
         }
         node = node.nextSibling();
     }
-    logFile.close();
+    m_resultDataFile.close();
     emit elementWasRemoved();
 }
 
 void MainWindow::on_checkBox_stateChanged(int arg1)
 {
-    if(arg1==0){theDetector->willDisplayImage = false;}
-    if(arg1==2){theDetector->willDisplayImage = true;}
+    if(arg1==0){m_actualDetector->willDisplayImage = false;}
+    if(arg1==2){m_actualDetector->willDisplayImage = true;}
 }
 
 void MainWindow::on_buttonClear_clicked()
@@ -498,14 +478,14 @@ void MainWindow::on_buttonClear_clicked()
 
 void MainWindow::on_recordingTestButton_clicked()
 {
-    if (!isRecording)
+    if (!m_recordingVideo)
     {
-        theDetector->startRecording();
+        m_actualDetector->startRecording();
         ui->recordingTestButton->setText("Stop rec");
     }
     else
     {
-        theDetector->getRecorder()->stopRecording(true);
+        m_actualDetector->getRecorder()->stopRecording(true);
         ui->recordingTestButton->setText("Start rec");
     }
 
@@ -513,7 +493,7 @@ void MainWindow::on_recordingTestButton_clicked()
 
 void MainWindow::on_aboutButton_clicked()
 {
-    QMessageBox::information(this, tr("About"), QString("UFO Detector | Beta " + programVersion + "\nwww.UFOID.net\ncontact@ufoid.net"));
+    QMessageBox::information(this, tr("About"), QString("UFO Detector | Beta " + m_programVersion + "\nwww.UFOID.net\ncontact@ufoid.net"));
 }
 
 void MainWindow::on_buttonImageExpl_clicked()
@@ -528,16 +508,16 @@ void MainWindow::on_buttonImageExpl_clicked()
  * Check resolution and change UI to fit around the webcam frame
  * return false if incorrect aspect ratio
  */
-bool MainWindow::checkAndSetResolution(const int WIDTH, const int HEIGHT)
+bool MainWindow::checkAndSetResolution(const int width, const int height)
 {
-    double aspectRatio = (double)WIDTH / (double)HEIGHT;
+    double aspectRatio = (double)width / (double)height;
     bool aspectRatioOk = false;
 
-    qDebug() << "Requested web cam size:" << QSize(WIDTH, HEIGHT);
+    qDebug() << "Requested web cam size:" << QSize(width, height);
     qDebug() << "Requested aspect ratio of web camera:" << aspectRatio;
     if (m_config->checkCameraAspectRatio())
     {
-        if (CamPtr->knownAspectRatios().contains((int)(aspectRatio * 10000)))
+        if (m_camera->knownAspectRatios().contains((int)(aspectRatio * 10000)))
         {
             aspectRatioOk = true;
         }
@@ -556,9 +536,9 @@ bool MainWindow::checkAndSetResolution(const int WIDTH, const int HEIGHT)
 
 void MainWindow::adjustCameraViewFrameSize()
 {
-    QSize cameraFrameSize(displayResolution.width, displayResolution.height);
+    QSize cameraFrameSize(m_config->cameraWidth(), m_config->cameraHeight());
     cameraFrameSize.scale(ui->cameraView->width(), ui->cameraView->height(), Qt::KeepAspectRatio);
-    displayResolution = Size(cameraFrameSize.width(), cameraFrameSize.height());
+    m_cameraViewResolution = Size(cameraFrameSize.width(), cameraFrameSize.height());
     emit cameraViewFrameSizeChanged(cameraFrameSize);
 }
 
@@ -573,40 +553,41 @@ bool MainWindow::getCheckboxState()
 
 void MainWindow::readLogFileAndGetRootElement()
 {
-    logFile.setFileName(m_config->resultDataFile());
-    if(logFile.exists())
+    /// @todo refactor result data file & DOM handling to a different class (e.g. ResultData)
+    m_resultDataFile.setFileName(m_config->resultDataFile());
+    if(m_resultDataFile.exists())
     {
-        if(!logFile.open(QIODevice::ReadOnly | QIODevice::Text))
+        if(!m_resultDataFile.open(QIODevice::ReadOnly | QIODevice::Text))
         {
-            qDebug() << "failed to read the result data file" << endl;
+            qDebug() << "Failed to read the result data file" << m_resultDataFile.fileName();
         }
         else
         {
-            if(!documentXML.setContent(&logFile))
+            if(!m_resultDataDomDocument.setContent(&m_resultDataFile))
             {
-                qDebug() << "failed to load the result data file" << endl;
+                qDebug() << "Failed to load the result data file" << m_resultDataFile.fileName();
             }
             else
             {
-                logFile.close();
-                qDebug() << "correctly loaded root element from result data file" << endl;
+                m_resultDataFile.close();
+                qDebug() << "Correctly loaded root element from result data file";
             }
         }
     }
     else
     {
-        if(!logFile.open(QIODevice::WriteOnly | QIODevice::Text))
+        if(!m_resultDataFile.open(QIODevice::WriteOnly | QIODevice::Text))
         {
-            qDebug() << "failed creating result data file" << endl;
+            qDebug() << "Failed to create result data file" << m_resultDataFile.fileName();
         }
         else
         {
-            qDebug() << "creating result data file" << endl;
+            qDebug() << "Creating result data file" << m_resultDataFile.fileName();
             QDomDocument tempFirstTime;
             tempFirstTime.appendChild(tempFirstTime.createElement("UFOID"));
-            QTextStream stream(&logFile);
+            QTextStream stream(&m_resultDataFile);
             stream << tempFirstTime.toString();
-            logFile.close();
+            m_resultDataFile.close();
             readLogFileAndGetRootElement();
         }
     }
@@ -618,16 +599,16 @@ void MainWindow::checkDetectionAreaFile()
     QFile areaFile(areaFileName);
     if(areaFile.exists())
     {
-         qDebug() << "found detection area file";
+         qDebug() << "Found detection area file";
     }
     else
     {
         areaFile.setFileName(areaFileName);
         if (areaFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            qDebug() << "created detection area file " << areaFile.fileName();
+            qDebug() << "Created detection area file " << areaFile.fileName();
             areaFile.close();
         } else {
-            qDebug() << "failed to create detection area file " << areaFile.fileName();
+            qDebug() << "Failed to create detection area file " << areaFile.fileName();
         }
     }
 }
@@ -635,35 +616,34 @@ void MainWindow::checkDetectionAreaFile()
 /*
  * Check camera and codec
  */
-bool MainWindow::checkCameraAndCodec(const int WIDTH, const int HEIGHT, const int CODEC)
+bool MainWindow::checkCameraAndCodec(const int width, const int height, const int codec)
 {
     bool success = false;
-    if (checkAndSetResolution(WIDTH,HEIGHT)&&!threadWebcam&&CamPtr->isWebcamOpen())
+    if (checkAndSetResolution(width, height) && !threadWebcam && m_camera->isWebcamOpen())
     {
         try
         {
-            webcamFrame = CamPtr->getWebcamFrame();
-            cv::resize(webcamFrame,webcamFrame, displayResolution,0, 0, INTER_CUBIC);
+            m_webcamFrame = m_camera->getWebcamFrame();
+            cv::resize(m_webcamFrame,m_webcamFrame, m_cameraViewResolution,0, 0, INTER_CUBIC);
             success = true;
         }
         catch( cv::Exception& e )
         {
-            const char* err_msg = e.what();
-            std::cout << "exception caught: " << err_msg << std::endl;
-            CamPtr->stopReadingWebcam();
+            qDebug() << "Exception caught: " << QString(e.what());
+            m_camera->stopReadingWebcam();
             ui->outputText->append(tr("ERROR: Found webcam but video frame could not be read. Reconnect and check resolution in settings."));
         }
     }
-    else if (!CamPtr->isWebcamOpen())
+    else if (!m_camera->isWebcamOpen())
     {
         ui->outputText->append("ERROR: Could not open webcam. Select webcam in settings");
     }
 
 
-    if (CODEC==0)
+    if (codec==0)
     {
         VideoWriter theVideoWriter;
-        theVideoWriter.open("filename.avi",0, 25,Size(WIDTH,HEIGHT), true);
+        theVideoWriter.open("filename.avi", 0, 25, Size(width, height), true);
         if (!theVideoWriter.isOpened())
         {
             ui->outputText->append(tr("ERROR: Could not find Raw Video Codec"));
@@ -675,10 +655,10 @@ bool MainWindow::checkCameraAndCodec(const int WIDTH, const int HEIGHT, const in
             remove("filename.avi");
         }
     }
-    else if (CODEC==1)
+    else if (codec==1)
     {
         VideoWriter theVideoWriter;
-        theVideoWriter.open("filename.avi",0, 25,Size(WIDTH,HEIGHT), true);
+        theVideoWriter.open("filename.avi",0, 25, Size(width, height), true);
         if (!theVideoWriter.isOpened())
         {
             ui->outputText->append(tr("ERROR: Could not find Raw Video Codec"));
@@ -700,10 +680,10 @@ bool MainWindow::checkCameraAndCodec(const int WIDTH, const int HEIGHT, const in
         }
 
     }
-    else if (CODEC==2)
+    else if (codec==2)
     {
         VideoWriter theVideoWriter;
-        theVideoWriter.open("filename.avi",CV_FOURCC('L','A','G','S'), 25,Size(WIDTH,HEIGHT), true);
+        theVideoWriter.open("filename.avi",CV_FOURCC('L','A','G','S'), 25, Size(width, height), true);
         if (!theVideoWriter.isOpened())
         {
             ui->outputText->append(tr("ERROR: Could not find Lagarith Lossless Video Codec"));
@@ -794,12 +774,12 @@ void MainWindow::checkForUpdate(QNetworkReply *reply)
             node = node.nextSibling();
         }
 
-        if(versionInXML>programVersion)
+        if(versionInXML>m_programVersion)
         {
             qDebug() << messageInXML.size();
-            updateWindow = new UpdateApplicationDialog(this, versionInXML, messageInXML);
-            updateWindow->show();
-            updateWindow->setAttribute(Qt::WA_DeleteOnClose);
+            m_updateApplicationDialog = new UpdateApplicationDialog(this, versionInXML, messageInXML);
+            m_updateApplicationDialog->show();
+            m_updateApplicationDialog->setAttribute(Qt::WA_DeleteOnClose);
         }
     }
 
@@ -810,12 +790,12 @@ void MainWindow::checkForUpdate(QNetworkReply *reply)
 
 void MainWindow::recordingWasStarted()
 {
-    isRecording=true;
+    m_recordingVideo=true;
 }
 
 void MainWindow::recordingWasStoped()
 {
-    isRecording=false;
+    m_recordingVideo=false;
 }
 
 MainWindow::~MainWindow()
@@ -842,18 +822,18 @@ void MainWindow::resizeEvent(QResizeEvent *event)
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     Q_UNUSED(event);
-    theDetector->stopThread();
+    m_actualDetector->stopThread();
 
     m_config->setNoiseFilterPixelSize(ui->sliderNoise->value());
     m_config->setMotionThreshold(ui->sliderThresh->value());
-    isUpdating = false;
+    m_showCameraVideo = false;
     if (threadWebcam)
     {
         threadWebcam->join();
         threadWebcam.reset();
     }
-    CamPtr->stopReadingWebcam();
-    CamPtr->release();
+    m_camera->stopReadingWebcam();
+    m_camera->release();
     QApplication::quit();
 }
 
@@ -879,7 +859,7 @@ void MainWindow::on_toolButtonThresh_clicked()
 
 Size MainWindow::getCameraViewSize()
 {
-    return displayResolution;
+    return m_cameraViewResolution;
 }
 
 

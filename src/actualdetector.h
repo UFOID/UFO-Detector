@@ -26,10 +26,23 @@
 #include <QObject>
 #include "opencv2/objdetect/objdetect.hpp"
 #include <QImage>
+#include <iostream>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <chrono>
+#include <stdio.h>
+#include "camera.h"
+#include "mainwindow.h"
+#include <QDir>
+#include <QDateTime>
+#include <QDebug>
+#include <QtXml>
+#include "Ctracker.h"
+#include "Detector.h"
 
-class MainWindow;
+using namespace cv;
+
 class Recorder;
-class Camera;
+class MainWindow;
 
 /**
  * @brief Main class to detect moving objects in video stream
@@ -40,6 +53,7 @@ class ActualDetector : public QObject
 
 public:
     ActualDetector(MainWindow *parent, Camera *cameraPtr = 0, Config *configPtr = 0);
+    ~ActualDetector();
     bool start();
     bool initialize();
     void stopThread();
@@ -50,8 +64,10 @@ public:
     Recorder* getRecorder();
     std::atomic<bool> willDisplayImage;
 
+#ifndef _UNIT_TEST_
 private:
-    Recorder theRecorder;
+#endif
+    Recorder* theRecorder;
     Camera* camPtr;
     Config* m_config;
     cv::Mat result, result_cropped;

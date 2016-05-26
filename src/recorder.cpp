@@ -17,83 +17,69 @@
  */
 
 #include "recorder.h"
-#include <iostream>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <QTime>
-#include <QTextStream>
-#include <QFile>
-#include "camera.h"
-#include "actualdetector.h"
-#include <QDebug>
-#include <QDir>
-#include <QCoreApplication>
 
-#define OUTPUT_FPS 25
-
-using namespace cv;
-using namespace std;
-using frame_period = std::chrono::duration<long long, std::ratio<1, OUTPUT_FPS>>;
-using hr_duration = std::chrono::high_resolution_clock::duration;
-
-
-Recorder::Recorder(ActualDetector *parent, Camera *cameraPtr, Config *configPtr) :
-    QObject(parent), camPtr(cameraPtr), m_config(configPtr)
+Recorder::Recorder(Camera *cameraPtr, Config *configPtr) :
+    m_camera(cameraPtr), m_config(configPtr)
 {
-    cout << "begin recorder " << endl;
-    const int WIDTH = m_config->cameraWidth();
-    const int HEIGHT  = m_config->cameraHeight();
-    const QString recordingPath = m_config->resultVideoDir();
-    withRectangle = m_config->resultVideoWithObjectRectangles();
-    pathDirectory = recordingPath.toLatin1().toStdString();
-    codecSetting = m_config->resultVideoCodec();
+    qDebug() << "Creating recorder";
+    const int width = m_config->cameraWidth();
+    const int height  = m_config->cameraHeight();
+    m_drawRectangles = m_config->resultVideoWithObjectRectangles();
+    m_resultDataFile.setFileName(m_config->resultDataFile());
+    m_resultVideoDirName = m_config->resultVideoDir();
+    m_codecSetting = m_config->resultVideoCodec();
+    m_thumbnailDirName = "thumbnails";
+    m_thumbnailExtension = ".jpg";
 
-    QDir dir(QString(recordingPath+"/thumbnails/"));
+    QDir dir(QString(m_resultVideoDirName + "/" + m_thumbnailDirName));
     if (!dir.exists())
     {
         dir.mkpath(".");
     }
 
-    ext=".avi";
-    color = Scalar(255,0,0);
-    resolutionRecording = Size(WIDTH,HEIGHT);
-    double aspectRatio = (double)WIDTH / (double)HEIGHT;
+    m_videoFileExtension = ".avi";
+    m_objectPositiveColor = Scalar(255, 0, 0);
+    m_objectNegativeColor = Scalar(0, 0, 255);
+    m_objectRectangleColor = m_objectPositiveColor;
+    m_videoResolution = Size(width, height);
+
+    double aspectRatio = (double)width / (double)height;
     m_defaultThumbnailSideLength = 80;
     int thumbnailWidth = m_defaultThumbnailSideLength;
     int thumbnailHeight = qBound(m_defaultThumbnailSideLength / 2,
             (int)(thumbnailWidth / aspectRatio), m_defaultThumbnailSideLength);
-    resolutionThumbnail = Size(thumbnailWidth, thumbnailHeight);
+    m_thumbnailResolution = Size(thumbnailWidth, thumbnailHeight);
 
-    if (codecSetting == 2)
+    if (m_codecSetting == 2)
     {
-        codec = CV_FOURCC('L', 'A', 'G', 'S');
+        m_videoCodec = CV_FOURCC('L', 'A', 'G', 'S');
     }
-    else if (codecSetting == 0 || codecSetting == 1)
+    else if (m_codecSetting == 0 || m_codecSetting == 1)
     {
-        codec = DEFAULT_CODEC;
+        m_videoCodec = DEFAULT_CODEC;
     }
 
     reloadResultDataFile();
-    recording = false;
+    m_recording = false;
     connect(this,SIGNAL(finishedRec(QString,QString)),this,SLOT(finishedRecording(QString,QString)));
-    cout << "recorder constructed" << endl;
+    qDebug() << "Recorder created";
 }
 
 /*
- * Called from ActualDetector to start recording. Mat &f is the frame that caused the positive detection
+ * Called from ActualDetector to start recording. Mat &firstFrame is the frame that caused the positive detection
  */
-void Recorder::startRecording(Mat &f)
+void Recorder::startRecording(Mat &firstFrame)
 {
-    if (!recording)
+    if (!m_recording)
     {
-        firstFrame=f;
-        recording=true;
-        frameToRecord = camPtr->getWebcamFrame();
-        if(withRectangle)
+        m_firstFrame = firstFrame;
+        m_recording = true;
+        m_currentFrame = m_camera->getWebcamFrame();
+        if (!m_frameUpdateThread)
         {
-            if (!frameUpdateThread) frameUpdateThread.reset(new std::thread(&Recorder::readFrameThread, this));
+            m_frameUpdateThread.reset(new std::thread(&Recorder::readFrameThread, this));
         }
-        else if (!frameUpdateThread) frameUpdateThread.reset(new std::thread(&Recorder::readFrameThreadWithoutRect, this));
-        recThread.reset(new std::thread(&Recorder::recordThread, this));
+        m_recorderThread.reset(new std::thread(&Recorder::recordThread, this));
     }
 }
 
@@ -101,73 +87,73 @@ void Recorder::startRecording(Mat &f)
  * Thread to record a video
  */
 void Recorder::recordThread(){
-    cout << "++++++++recorder thread called+++" << endl;
+    qDebug() << "++++++++recorder thread called+++";
     emit recordingStarted();
 
-    string dateTime=QDateTime::currentDateTime().toString("yyyy-MM-dd--hh-mm-ss").toStdString();
-    string filename= pathDirectory+"/Capture--"+dateTime+"temp"+ext;
-    string filenameFinal= pathDirectory+"/Capture--"+dateTime+ext;
-    theVideoWriter.open(filename,codec, OUTPUT_FPS, resolutionRecording, true);
+    QString dateTime = QDateTime::currentDateTime().toString("yyyy-MM-dd--hh-mm-ss");
+    QString filenameTemp = m_resultVideoDirName + "/Capture--" + dateTime + "temp" + m_videoFileExtension;
+    QString filenameFinal = m_resultVideoDirName + "/Capture--" + dateTime + m_videoFileExtension;
+    m_videoWriter.open(filenameTemp.toStdString(), m_videoCodec, OUTPUT_FPS, m_videoResolution, true);
 
-    if (!theVideoWriter.isOpened())
+    if (!m_videoWriter.isOpened())
     {
-        cout << "ERROR: Failed to write the video" << filename << endl;
+        qDebug() << "ERROR: Failed to write temporary video" << filenameTemp;
         return;
     }
 
-    prev = std::chrono::high_resolution_clock::now();
-    current = prev + std::chrono::high_resolution_clock::duration(40000000);
-    auto difference = current-prev;
+    prevTime = std::chrono::high_resolution_clock::now();
+    currentTime = prevTime + std::chrono::high_resolution_clock::duration(40000000);
+    auto difference = currentTime - prevTime;
 
     QTime timer;
     timer.start();
-    if (firstFrame.data)
+    if (m_firstFrame.data)
     {
-        theVideoWriter.write(firstFrame);
+        m_videoWriter.write(m_firstFrame);
     }
 
-    while(recording)
+    while(m_recording)
     {
         while (difference < frame_period{ 1 })
         {
-            current = std::chrono::high_resolution_clock::now();
-            difference = current - prev;
+            currentTime = std::chrono::high_resolution_clock::now();
+            difference = currentTime - prevTime;
         }
 
-        if (frameToRecord.data)
+        if (m_currentFrame.data)
         {
-            theVideoWriter.write(frameToRecord);
+            m_videoWriter.write(m_currentFrame);
         }
 
-        prev = std::chrono::time_point_cast<hr_duration>(prev + frame_period{ 1 });
-        difference = current - prev;
+        prevTime = std::chrono::time_point_cast<hr_duration>(prevTime + frame_period{ 1 });
+        difference = currentTime - prevTime;
     }
 
-    theVideoWriter.release();
+    m_videoWriter.release();
     int millisec = timer.elapsed();
-    QString videoLength = QString("%1:%2").arg( millisec / 60000        , 2, 10, QChar('0'))
+    QString videoLength = QString("%1:%2").arg( millisec / 60000, 2, 10, QChar('0'))
             .arg((millisec % 60000) / 1000, 2, 10, QChar('0'));
-    cout << videoLength.toStdString() << endl;
+    qDebug() << "Video length" << videoLength;
 
-    if(willBeSaved)
+    if(m_willSaveVideo)
     {
-        saveLog(dateTime,videoLength);
-        if(codecSetting==1)
+        saveResultData(dateTime, videoLength);
+        if(m_codecSetting==1)
         {	//Convert raw video to FFV1
-            emit finishedRec(filename.c_str(),filenameFinal.c_str());
+            emit finishedRec(filenameTemp, filenameFinal);
         }
         else
         {	//Rename temp video to final
-            rename(filename.c_str(),filenameFinal.c_str());
+            rename(filenameTemp.toLocal8Bit().data(), filenameFinal.toLocal8Bit().data());
             emit recordingStopped();
         }
     }
     else
     {
-        remove(filename.c_str());
+        remove(filenameTemp.toLocal8Bit().data());
         emit recordingStopped();
     }
-    cout << "finished recording" << endl;
+    qDebug() << "Finished recording";
 
 }
 
@@ -218,60 +204,49 @@ void Recorder::readFrameThread()
 {
     Mat temp;
     Rect oldRectangle;
-    while(recording)
+    while(m_recording)
     {
-        temp = camPtr->getWebcamFrame();
-        if(motionRectangle!=oldRectangle)
+        temp = m_camera->getWebcamFrame();
+        if (m_drawRectangles && (m_motionRectangle != oldRectangle))
         {
-            rectangle(temp,motionRectangle,color);
-            oldRectangle=motionRectangle;
+            rectangle(temp, m_motionRectangle, m_objectRectangleColor);
+            oldRectangle=m_motionRectangle;
         }
-        temp.copyTo(frameToRecord);
+        temp.copyTo(m_currentFrame);
     }
 }
 
-/*
- * Reads frame from Camera while video is recording
- */
-void Recorder::readFrameThreadWithoutRect()
+void Recorder::saveResultData(QString dateTime, QString videoLength)
 {
-    Mat temp;
-    while(recording)
-    {
-        temp = camPtr->getWebcamFrame();
-        temp.copyTo(frameToRecord);
-    }
-}
+    cv::resize(m_firstFrame, m_firstFrame, m_thumbnailResolution, 0, 0, INTER_CUBIC);
+    QString thumbnail = m_resultVideoDirName + "/" + m_thumbnailDirName + "/" + dateTime + m_thumbnailExtension;
+    imwrite(thumbnail.toStdString(), m_firstFrame);
 
-/*
- * Save information about the video to log file. Emits signal that will add new VideoWidget to MainWindow
- */
-void Recorder::saveLog(string dateTime, QString videoLength)
-{
-    cv::resize(firstFrame,firstFrame, resolutionThumbnail,0, 0, INTER_CUBIC);
-    String thumbnail = pathDirectory+"/thumbnails/"+dateTime+".jpg";
-    imwrite(thumbnail, firstFrame );
-
-    QDomElement node = documentXML.createElement("Video");
-    node.setAttribute("Pathname", QString::fromLatin1(pathDirectory.c_str()));
-    node.setAttribute("DateTime", dateTime.c_str());
+    /// @todo create root element here if it doesn't exist
+    QDomElement node = m_resultDataDomDocument.createElement("Video");
+    node.setAttribute("Pathname", m_resultVideoDirName);
+    node.setAttribute("DateTime", dateTime);
     node.setAttribute("Length", videoLength);
-    rootXML.appendChild(node);
+    m_resultDataRootElement.appendChild(node);
 
-    if(!resultDataFile.open(QIODevice::WriteOnly | QIODevice::Text))
+    if(!m_resultDataFile.open(QIODevice::WriteOnly | QIODevice::Text))
     {
-        cout << "fail open" << endl;
+        qDebug() << "Failed to open result data file" << m_resultDataFile.fileName();
         return;
     }
     else
     {
-        QTextStream stream(&resultDataFile);
+        QTextStream stream(&m_resultDataFile);
         stream.setCodec("UTF-8");
-        stream << documentXML.toString();
-        resultDataFile.close();
+        stream << m_resultDataDomDocument.toString();
+        if (stream.status() != QTextStream::Ok)
+        {
+            qDebug() << "Problem writing to result data file" << m_resultDataFile.fileName();
+        }
+        m_resultDataFile.flush();
+        m_resultDataFile.close();
     }
-    emit updateListWidget(QString::fromLatin1(pathDirectory.c_str()),dateTime.c_str(),videoLength);
-
+    emit resultDataSaved(m_resultVideoDirName, dateTime, videoLength);
 }
 
 /*
@@ -279,21 +254,20 @@ void Recorder::saveLog(string dateTime, QString videoLength)
  */
 void Recorder::reloadResultDataFile()
 {
-    resultDataFile.setFileName(m_config->resultDataFile());
-    if(!resultDataFile.open(QIODevice::ReadOnly | QIODevice::Text))
+    if(!m_resultDataFile.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        qDebug() << "failed reading the result data file" << endl;
+        qDebug() << "Failed to open result data file" << m_resultDataFile.fileName();
     }
     else
     {
-        if(!documentXML.setContent(&resultDataFile))
+        if(!m_resultDataDomDocument.setContent(&m_resultDataFile))
         {
-            qDebug() << "failed to load log document recorder" << endl;
+            qDebug() << "Failed to reload result data file" << m_resultDataFile.fileName();
         }
         else
         {
-            rootXML=documentXML.firstChildElement();
-            resultDataFile.close();
+            m_resultDataRootElement = m_resultDataDomDocument.firstChildElement();
+            m_resultDataFile.close();
         }
     }
 }
@@ -303,27 +277,27 @@ void Recorder::reloadResultDataFile()
  */
 void Recorder::stopRecording(bool willSaveVideo)
 {
-    if(recThread)
+    if(m_recorderThread)
     {
 
-        willBeSaved=willSaveVideo;
-        recording = false;
-        recThread->join(); recThread.reset();
-        frameUpdateThread->join(); frameUpdateThread.reset();
+        m_willSaveVideo=willSaveVideo;
+        m_recording = false;
+        m_recorderThread->join(); m_recorderThread.reset();
+        m_frameUpdateThread->join(); m_frameUpdateThread.reset();
     }
 }
 
 /*
- * Called from ActualDetector to pass the rectangle that highlights the detected object and bool isRed to specify the color of the rectangle
+ * Called from ActualDetector to pass the rectangle that highlights the detected object and bool isPositive to specify the color of the rectangle
  * Red = positive detection | Blue = negative detection
  */
-void Recorder::setRectangle(Rect &r, bool isRed)
+void Recorder::setRectangle(Rect &r, bool isPositive)
 {
-    motionRectangle=r;
-    if(isRed)
+    m_motionRectangle=r;
+    if(isPositive)
     {
-        color = Scalar(0,0,255);
+        m_objectRectangleColor = m_objectPositiveColor;
     }
-    else  color = Scalar(255,0,0);
+    else  m_objectRectangleColor = m_objectNegativeColor;
 }
 

@@ -17,23 +17,9 @@
  */
 
 #include "actualdetector.h"
-#include <iostream>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <chrono>
-#include <stdio.h>
-#include "camera.h"
-#include "mainwindow.h"
-#include <QDir>
-#include <QDateTime>
-#include <QDebug>
-#include <QtXml>
-#include "Ctracker.h"
-#include "Detector.h"
-
-using namespace cv;
 
 ActualDetector::ActualDetector(MainWindow *parent, Camera *cameraPtr, Config *configPtr) :
-    QObject(parent), theRecorder(this, cameraPtr, configPtr), camPtr(cameraPtr)
+    QObject(parent), camPtr(cameraPtr)
 {
     m_config = configPtr;
     const QString DETECTION_AREA_FILE = m_config->detectionAreaFile();
@@ -48,9 +34,14 @@ ActualDetector::ActualDetector(MainWindow *parent, Camera *cameraPtr, Config *co
     pathname = IMAGEPATH.toStdString();
     noiseLevel = getStructuringElement(MORPH_RECT, Size(1,1));
 
-    connect(parent, SIGNAL(cameraViewFrameSizeChanged(QSize)), this, SLOT(onCameraViewFrameSizeChanged(QSize)));
+    theRecorder = new Recorder(camPtr, m_config);
 
-    std::cout << "actualdetector constructed" <<endl;
+    qDebug() << "Actualdetector constructed";
+}
+
+ActualDetector::~ActualDetector()
+{
+    theRecorder->deleteLater();
 }
 
 /*
@@ -96,7 +87,7 @@ bool ActualDetector::initialize()
         isCascadeFound = false;
     }
 
-    std::cout << "initialized Detector" << endl;
+    qDebug() << "Initialized ActualDetector";
     this_thread::sleep_for(std::chrono::seconds(1));
     startedRecording = false;
 
@@ -112,7 +103,7 @@ bool ActualDetector::initialize()
  */
 void ActualDetector::detectingThread()
 {
-    qDebug() << "started normal thread";
+    qDebug() << "Started detection thread";
     Mat tempImage;
     int posCounter = 0;
     int negAndNoMotionCounter = 0;
@@ -186,7 +177,7 @@ void ActualDetector::detectingThread()
                                 {
                                     Mat tempImg = result.clone();
                                     rectangle(tempImg,croppedRectangle,Scalar(255,0,0),1);
-                                    theRecorder.startRecording(tempImg);
+                                    theRecorder->startRecording(tempImg);
                                     if(willRecordWithRect) willParseRectangle=true;
                                     startedRecording=true;
                                     auto output_text = tr("Positive detection - starting video recording");
@@ -228,7 +219,7 @@ void ActualDetector::detectingThread()
                 }
                 if(willParseRectangle)
                 {
-                    theRecorder.setRectangle(rect,isPositiveRectangle);
+                    theRecorder->setRectangle(rect,isPositiveRectangle);
                 }
 
             }
@@ -254,7 +245,7 @@ void ActualDetector::detectingThread()
                 }
                 if(!tracker.removedTrackWithPositive)
                 { //+++all detected objects had more negative than positive detections or was a bird
-                    theRecorder.stopRecording(false);
+                    theRecorder->stopRecording(false);
                     auto output_text = tr("Finished recording - All found objects negative: removed video");
                     emit broadcastOutputText(output_text);
 
@@ -263,13 +254,13 @@ void ActualDetector::detectingThread()
                 {//+++one object had more positive than negative detections
                     if(posCounter>=minPositiveRequired)
                     {
-                        theRecorder.stopRecording(true);
+                        theRecorder->stopRecording(true);
                         auto output_text = tr("Finished recording - At least one object found positive: saved video");
                         emit broadcastOutputText(output_text);
                     }
                     else
                     {
-                        theRecorder.stopRecording(false);
+                        theRecorder->stopRecording(false);
                         auto output_text = tr("Finished recording - Minimum required positive detections not met: removed video");
                         emit broadcastOutputText(output_text);
                     }
@@ -719,7 +710,7 @@ bool ActualDetector::parseDetectionAreaFile(string file_region, vector<Point> &r
 
     if(!fileXML.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        qDebug() << "fail reading the file actualldetector" << endl;
+        qDebug() << "Failed to open the detection area file" << QString(file_region.data());
         emit errorReadingDetectionAreaFile();
         return false;
     }
@@ -727,7 +718,7 @@ bool ActualDetector::parseDetectionAreaFile(string file_region, vector<Point> &r
     {
         if(!doc.setContent(&fileXML))
         {
-            qDebug() << "Failed to read the element";
+            qDebug() << "Error reading the detection area file" << QString(file_region.data());
             emit errorReadingDetectionAreaFile();
             return false;
         }
@@ -790,8 +781,8 @@ void ActualDetector::saveImg(string path, Mat & image)
 void ActualDetector::stopThread()
 {
     region.clear();
-    isMainThreadRunning = false;
-    theRecorder.stopRecording(true);
+    isMainThreadRunning = false;  
+    theRecorder->stopRecording(true);
     if (pThread)
     {
         pThread->join();
@@ -852,13 +843,13 @@ void ActualDetector::setThresholdLevel(int level)
 void ActualDetector::startRecording()
 {
     Mat firstFrame = result.clone();
-    theRecorder.startRecording(firstFrame);
+    theRecorder->startRecording(firstFrame);
 }
 
 
 Recorder* ActualDetector::getRecorder()
 {
-    return &theRecorder;
+    return theRecorder;
 }
 
 void ActualDetector::onCameraViewFrameSizeChanged(QSize newSize)
