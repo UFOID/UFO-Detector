@@ -145,8 +145,8 @@ signals:
     void cameraViewFrameSizeChanged(QSize newSize);
 
 public slots:
-    void recordingWasStarted();
-    void recordingWasStoped();
+    void onRecordingStarted();
+    void onRecordingFinished();
     void on_progressBar_valueChanged(int value);
 	void update_output_text(QString msg);
     void displayPixmap(QImage img);

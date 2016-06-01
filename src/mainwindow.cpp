@@ -143,8 +143,8 @@ void MainWindow::setSignalsAndSlots(ActualDetector* actualDetector)
     connect(m_actualDetector, SIGNAL(negativeMessage()), this, SLOT(setNegativeMessage()));
     connect(m_actualDetector, SIGNAL(errorReadingDetectionAreaFile()), this, SLOT(setErrorReadingDetectionAreaFile()));
     connect(m_actualDetector->getRecorder(), SIGNAL(resultDataSaved(QString,QString,QString)), this, SLOT(addVideoToVideoList(QString,QString,QString)));
-    connect(m_actualDetector->getRecorder(), SIGNAL(recordingStarted()), this, SLOT(recordingWasStarted()));
-    connect(m_actualDetector->getRecorder(), SIGNAL(recordingStopped()), this, SLOT(recordingWasStoped()));
+    connect(m_actualDetector->getRecorder(), SIGNAL(recordingStarted()), this, SLOT(onRecordingStarted()));
+    connect(m_actualDetector->getRecorder(), SIGNAL(recordingFinished()), this, SLOT(onRecordingFinished()));
     connect(this, SIGNAL(elementWasRemoved()), m_actualDetector->getRecorder(), SLOT(reloadResultDataFile()));
     connect(m_actualDetector, SIGNAL(progressValueChanged(int)), this, SLOT(on_progressBar_valueChanged(int)));
     connect(m_actualDetector, SIGNAL(broadcastOutputText(QString)), this, SLOT(update_output_text(QString)));
@@ -460,7 +460,6 @@ void MainWindow::removeVideo(QString dateTime)
         }
         node = node.nextSibling();
     }
-    m_resultDataFile.close();
     emit elementWasRemoved();
 }
 
@@ -559,19 +558,19 @@ void MainWindow::readLogFileAndGetRootElement()
     {
         if(!m_resultDataFile.open(QIODevice::ReadOnly | QIODevice::Text))
         {
-            qDebug() << "Failed to read the result data file" << m_resultDataFile.fileName();
+            qDebug() << "MainWindow: failed to read the result data file" << m_resultDataFile.fileName();
         }
         else
         {
             if(!m_resultDataDomDocument.setContent(&m_resultDataFile))
             {
-                qDebug() << "Failed to load the result data file" << m_resultDataFile.fileName();
+                qDebug() << "MainWindow: failed to load the result data file" << m_resultDataFile.fileName();
             }
             else
             {
-                m_resultDataFile.close();
                 qDebug() << "Correctly loaded root element from result data file";
             }
+            m_resultDataFile.close();
         }
     }
     else
@@ -788,12 +787,12 @@ void MainWindow::checkForUpdate(QNetworkReply *reply)
 
 }
 
-void MainWindow::recordingWasStarted()
+void MainWindow::onRecordingStarted()
 {
     m_recordingVideo=true;
 }
 
-void MainWindow::recordingWasStoped()
+void MainWindow::onRecordingFinished()
 {
     m_recordingVideo=false;
 }

@@ -88,8 +88,8 @@ private:
     bool m_willSaveVideo;       ///< whether to save video or reject it
     bool m_drawRectangles;      ///< whether or not to draw rectangles around detected objects
 
-    std::vector<QProcess*> vecProcess;
-    std::vector<QString> vecTempVideoFile;
+    std::vector<QProcess*> m_encoderProcesses;
+    std::vector<QString> m_tempVideoFiles;
 
     QDomDocument m_resultDataDomDocument;
     QFile m_resultDataFile;
@@ -111,20 +111,23 @@ private:
      */
     void saveResultData(QString dateTime, QString videoLength);
 
+    /**
+     * @brief Creates a new QProcess that encodes the temporary raw video to FFV1 with ffmpeg/avconv
+     */
+    void startEncodingVideoToFFV1(QString tempVideoFileName, QString targetVideoFileName);
+
 public slots:
     void reloadResultDataFile();
 
 #ifndef _UNIT_TEST_
 private slots:
 #endif
-    void finishedRecording(QString picDir, QString filename);
-    void finishedProcess();
+    void onVideoEncodingFinished();
 
 signals:
     void resultDataSaved(QString file, QString date, QString length);
     void recordingStarted();
-    void recordingStopped();
-    void finishedRec(QString picDir, QString filename);
+    void recordingFinished();
 };
 
 #endif // RECORDER_H

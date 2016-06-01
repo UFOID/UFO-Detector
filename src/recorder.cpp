@@ -61,7 +61,6 @@ Recorder::Recorder(Camera *cameraPtr, Config *configPtr) :
 
     reloadResultDataFile();
     m_recording = false;
-    connect(this,SIGNAL(finishedRec(QString,QString)),this,SLOT(finishedRecording(QString,QString)));
     qDebug() << "Recorder created";
 }
 
@@ -94,6 +93,8 @@ void Recorder::recordThread(){
     QString filenameTemp = m_resultVideoDirName + "/Capture--" + dateTime + "temp" + m_videoFileExtension;
     QString filenameFinal = m_resultVideoDirName + "/Capture--" + dateTime + m_videoFileExtension;
     m_videoWriter.open(filenameTemp.toStdString(), m_videoCodec, OUTPUT_FPS, m_videoResolution, true);
+
+    qDebug() << "Video timestamp" << dateTime;
 
     if (!m_videoWriter.isOpened())
     {
@@ -139,58 +140,67 @@ void Recorder::recordThread(){
     {
         saveResultData(dateTime, videoLength);
         if(m_codecSetting==1)
-        {	//Convert raw video to FFV1
-            emit finishedRec(filenameTemp, filenameFinal);
+        {
+            //Convert raw video to FFV1
+            startEncodingVideoToFFV1(filenameTemp, filenameFinal);
         }
         else
-        {	//Rename temp video to final
+        {
+            //Rename temp video to final
             rename(filenameTemp.toLocal8Bit().data(), filenameFinal.toLocal8Bit().data());
-            emit recordingStopped();
+            emit recordingFinished();
         }
     }
     else
     {
         remove(filenameTemp.toLocal8Bit().data());
-        emit recordingStopped();
+        emit recordingFinished();
     }
-    qDebug() << "Finished recording";
+    if (m_willSaveVideo)
+    {
+        qDebug() << "Finished recording, saved video";
+    }
+    else
+    {
+        qDebug() << "Finished recording, discarded video";
+    }
 
 }
 
-/*
- * Creates a new QProcess that encodes the raw video to FFV1 with ffmpeg
- */
-void Recorder::finishedRecording(QString tempVideoFile, QString filename)
+void Recorder::startEncodingVideoToFFV1(QString tempVideoFileName, QString targetVideoFileName)
 {
     QProcess* proc = new QProcess();
-    vecProcess.push_back(proc);
-    vecTempVideoFile.push_back(tempVideoFile);
+    m_encoderProcesses.push_back(proc);
+    m_tempVideoFiles.push_back(tempVideoFileName);
+    QStringList args;
     // these video encoder parameters are ok only for ffmpeg and avconv (which are more or less compatible)
-    proc->start(m_config->videoEncoderLocation(), QStringList() <<"-i"<< tempVideoFile << "-vcodec"<< "ffv1" << filename);
-    connect(proc,SIGNAL(finished(int)),this,SLOT(finishedProcess()));
+    args << "-i" << tempVideoFileName << "-vcodec" << "ffv1" << targetVideoFileName;
+    proc->start(m_config->videoEncoderLocation(), args);
+    connect(proc, SIGNAL(finished(int)), this, SLOT(onVideoEncodingFinished()));
 }
 
 /*
  * Called when the ffmpeg encoding finishes.  Removes the temporary video file
- * If no process is running emit recordingStopped()
+ * If no process is running emit recordingFinished()
  */
-void Recorder::finishedProcess()
+void Recorder::onVideoEncodingFinished()
 {
-    for (unsigned int i=0; i<vecProcess.size();i++)
+    for (unsigned int i=0; i<m_encoderProcesses.size();i++)
     {
-        if(vecProcess.at(i)->state()==QProcess::NotRunning)
+        QProcess* process = m_encoderProcesses.at(i);
+        if (process->state() == QProcess::NotRunning)
         {
-            delete vecProcess.at(i);
-            vecProcess.erase(vecProcess.begin() + i);
+            delete m_encoderProcesses.at(i);
+            m_encoderProcesses.erase(m_encoderProcesses.begin() + i);
 
-            QString tempVideoFile=vecTempVideoFile.at(i);
+            QString tempVideoFile=m_tempVideoFiles.at(i);
 
             remove(tempVideoFile.toStdString().c_str());
-            vecTempVideoFile.erase(vecTempVideoFile.begin() + i);
+            m_tempVideoFiles.erase(m_tempVideoFiles.begin() + i);
 
-            if(vecProcess.size()==0)
+            if(m_encoderProcesses.size()==0)
             {
-                emit recordingStopped();
+                emit recordingFinished();
             }
             break;
         }
@@ -231,7 +241,7 @@ void Recorder::saveResultData(QString dateTime, QString videoLength)
 
     if(!m_resultDataFile.open(QIODevice::WriteOnly | QIODevice::Text))
     {
-        qDebug() << "Failed to open result data file" << m_resultDataFile.fileName();
+        qDebug() << "Recorder: failed to open result data file" << m_resultDataFile.fileName();
         return;
     }
     else
@@ -256,19 +266,19 @@ void Recorder::reloadResultDataFile()
 {
     if(!m_resultDataFile.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        qDebug() << "Failed to open result data file" << m_resultDataFile.fileName();
+        qDebug() << "Recorder: failed to open result data file" << m_resultDataFile.fileName();
     }
     else
     {
         if(!m_resultDataDomDocument.setContent(&m_resultDataFile))
         {
-            qDebug() << "Failed to reload result data file" << m_resultDataFile.fileName();
+            qDebug() << "Recorder: failed to reload result data file" << m_resultDataFile.fileName();
         }
         else
         {
             m_resultDataRootElement = m_resultDataDomDocument.firstChildElement();
-            m_resultDataFile.close();
         }
+        m_resultDataFile.close();
     }
 }
 
