@@ -169,8 +169,8 @@ void Recorder::startEncodingVideoToFFV1(QString tempVideoFileName, QString targe
     QStringList args;
     // these video encoder parameters are ok only for ffmpeg and avconv (which are more or less compatible)
     args << "-i" << tempVideoFileName << "-vcodec" << "ffv1" << targetVideoFileName;
-    proc->start(m_config->videoEncoderLocation(), args);
     connect(proc, SIGNAL(finished(int)), this, SLOT(onVideoEncodingFinished()));
+    proc->start(m_config->videoEncoderLocation(), args);
 }
 
 /*
