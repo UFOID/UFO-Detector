@@ -61,6 +61,7 @@ Recorder::Recorder(Camera *cameraPtr, Config *configPtr) :
 
     reloadResultDataFile();
     m_recording = false;
+    connect(this, SIGNAL(videoEncodingRequested(QString,QString)), this, SLOT(startEncodingVideoToFFV1(QString,QString)));
     qDebug() << "Recorder created";
 }
 
@@ -141,30 +142,23 @@ void Recorder::recordThread(){
         saveResultData(dateTime, videoLength);
         if(m_codecSetting==1)
         {
-            //Convert raw video to FFV1
-            startEncodingVideoToFFV1(filenameTemp, filenameFinal);
+            // Convert raw video to FFV1
+            emit videoEncodingRequested(filenameTemp, filenameFinal);
         }
         else
         {
-            //Rename temp video to final
+            // Rename temp video to final
             rename(filenameTemp.toLocal8Bit().data(), filenameFinal.toLocal8Bit().data());
+            qDebug() << "Finished recording, saved video";
             emit recordingFinished();
         }
     }
     else
     {
         remove(filenameTemp.toLocal8Bit().data());
+        qDebug() << "Finished recording, discarded video";
         emit recordingFinished();
     }
-    if (m_willSaveVideo)
-    {
-        qDebug() << "Finished recording, saved video";
-    }
-    else
-    {
-        qDebug() << "Finished recording, discarded video";
-    }
-
 }
 
 void Recorder::startEncodingVideoToFFV1(QString tempVideoFileName, QString targetVideoFileName)
@@ -185,25 +179,37 @@ void Recorder::startEncodingVideoToFFV1(QString tempVideoFileName, QString targe
  */
 void Recorder::onVideoEncodingFinished()
 {
-    for (unsigned int i=0; i<m_encoderProcesses.size();i++)
+    QVector<unsigned int> markedForDeletion;
+    unsigned int i = 0;
+
+    for (i = 0; i < m_encoderProcesses.size(); i++)
     {
         QProcess* process = m_encoderProcesses.at(i);
-        if (process->state() == QProcess::NotRunning)
+        if (process && (process->state() == QProcess::NotRunning))
         {
-            delete m_encoderProcesses.at(i);
-            m_encoderProcesses.erase(m_encoderProcesses.begin() + i);
-
-            QString tempVideoFile=m_tempVideoFiles.at(i);
-
-            remove(tempVideoFile.toStdString().c_str());
-            m_tempVideoFiles.erase(m_tempVideoFiles.begin() + i);
-
-            if(m_encoderProcesses.size()==0)
-            {
-                emit recordingFinished();
-            }
-            break;
+            markedForDeletion << i;
         }
+    }
+
+    QVectorIterator<unsigned int> delIt(markedForDeletion);
+
+    while (delIt.hasNext())
+    {
+        i = delIt.next();
+
+        QProcess* process = m_encoderProcesses.at(i);
+        process->deleteLater();
+        m_encoderProcesses.erase(m_encoderProcesses.begin() + i);
+
+        QString tempVideoFile = m_tempVideoFiles.at(i);
+        remove(tempVideoFile.toStdString().c_str());
+        m_tempVideoFiles.erase(m_tempVideoFiles.begin() + i);
+    }
+
+    if(m_encoderProcesses.size() == 0)
+    {
+        qDebug() << "Video encoder(s) finished";
+        emit recordingFinished();
     }
 }
 

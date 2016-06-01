@@ -111,23 +111,28 @@ private:
      */
     void saveResultData(QString dateTime, QString videoLength);
 
-    /**
-     * @brief Creates a new QProcess that encodes the temporary raw video to FFV1 with ffmpeg/avconv
-     */
-    void startEncodingVideoToFFV1(QString tempVideoFileName, QString targetVideoFileName);
-
 public slots:
     void reloadResultDataFile();
 
 #ifndef _UNIT_TEST_
 private slots:
 #endif
+    /**
+     * @brief Creates a new QProcess that encodes the temporary raw video to FFV1 with ffmpeg/avconv
+     *
+     * @note this method NEEDS to be called via signal-slot system, I guess in order
+     * to run it in the main thread. If this is called from detecting thread via direct
+     * method call then can't get signals from the encoder process.
+     */
+    void startEncodingVideoToFFV1(QString tempVideoFileName, QString targetVideoFileName);
+
     void onVideoEncodingFinished();
 
 signals:
     void resultDataSaved(QString file, QString date, QString length);
     void recordingStarted();
     void recordingFinished();
+    void videoEncodingRequested(QString tempVideoName, QString targetVideoName);
 };
 
 #endif // RECORDER_H
