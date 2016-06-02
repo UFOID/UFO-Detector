@@ -70,8 +70,10 @@ private:
     Recorder* theRecorder;
     Camera* camPtr;
     Config* m_config;
+    MainWindow* m_mainWindow;
     cv::Mat result, result_cropped;
     cv::Mat prev_frame, current_frame, next_frame;
+    QImage m_cameraViewImage;   ///< image to be given out with signal updatePixmap()
     cv::Mat d1, d2, motion, treshImg;
     cv::Mat croppedImageGray;
     cv::Mat noiseLevel;

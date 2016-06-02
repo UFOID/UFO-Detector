@@ -123,14 +123,18 @@ void MainWindow::updateWebcamFrame()
         /// @todo sync because displayResolution could change at any moment
         cv::resize(m_webcamFrame,resizedFrame, m_cameraViewResolution,0, 0, INTER_CUBIC);
         cv::cvtColor(resizedFrame, resizedFrame, CV_BGR2RGB);
-        QImage qWebcam((uchar*)resizedFrame.data, resizedFrame.cols, resizedFrame.rows, resizedFrame.step, QImage::Format_RGB888);
-        emit updatePixmap(qWebcam);
+        m_cameraViewImageMutex.lock();
+        m_cameraViewImage = QImage((uchar*)resizedFrame.data, resizedFrame.cols, resizedFrame.rows, resizedFrame.step, QImage::Format_RGB888);
+        m_cameraViewImageMutex.unlock();
+        emit updatePixmap(m_cameraViewImage);
     }
 }
 
 void MainWindow::displayPixmap(QImage image)
 {
+    m_cameraViewImageMutex.lock();
     ui->cameraView->setPixmap(QPixmap::fromImage(image));
+    m_cameraViewImageMutex.unlock();
 }
 
 /*
@@ -859,6 +863,11 @@ void MainWindow::on_toolButtonThresh_clicked()
 Size MainWindow::getCameraViewSize()
 {
     return m_cameraViewResolution;
+}
+
+QMutex* MainWindow::cameraViewImageMutex()
+{
+    return &m_cameraViewImageMutex;
 }
 
 

@@ -22,6 +22,7 @@ ActualDetector::ActualDetector(MainWindow *parent, Camera *cameraPtr, Config *co
     QObject(parent), camPtr(cameraPtr)
 {
     m_config = configPtr;
+    m_mainWindow = parent;
     const QString DETECTION_AREA_FILE = m_config->detectionAreaFile();
     const QString IMAGEPATH = m_config->resultImageDir() + "/";
     willSaveImages = m_config->saveResultImages();
@@ -304,8 +305,10 @@ void ActualDetector::detectingThread()
 
             cv::resize(result,result, m_cameraViewFrameSize ,0, 0, INTER_CUBIC);
             cv::cvtColor(result, result, CV_BGR2RGB);
-            QImage qimOriginal((uchar*)result.data, result.cols, result.rows, result.step, QImage::Format_RGB888);
-            emit updatePixmap(qimOriginal);
+            m_mainWindow->cameraViewImageMutex()->lock();
+            m_cameraViewImage = QImage((uchar*)result.data, result.cols, result.rows, result.step, QImage::Format_RGB888);
+            m_mainWindow->cameraViewImageMutex()->unlock();
+            emit updatePixmap(m_cameraViewImage);
             // give MainWindow thread some time to update pixmap to prevent flickering
             std::this_thread::yield();
             std::this_thread::sleep_for(std::chrono::microseconds(threadYieldPauseUsec));

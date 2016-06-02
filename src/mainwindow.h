@@ -46,6 +46,7 @@
 #include "videouploaderdialog.h"
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QMutex>
 
 using namespace cv;
 
@@ -70,6 +71,7 @@ public:
 
     void setSignalsAndSlots(ActualDetector *actualDetector);
     cv::Size getCameraViewSize();
+    QMutex* cameraViewImageMutex();
 
 private:
     Ui::MainWindow *ui;
@@ -84,9 +86,11 @@ private:
     cv::Mat m_webcamFrame;
     Camera* m_camera;
     std::unique_ptr<std::thread> threadWebcam;
-    cv::Size m_cameraViewResolution;     ///< frame size of camera view
-    QString m_detectionStatusStyleOn;  ///< detection status indicator style when detection on
-    QString m_detectionStatusStyleOff; ///< detection status indicator style when detection off
+    cv::Size m_cameraViewResolution;    ///< frame size of camera view
+    QImage m_cameraViewImage;           ///< image to be drawn in camera view
+    QMutex m_cameraViewImageMutex;      ///< syncing camera view image
+    QString m_detectionStatusStyleOn;   ///< detection status indicator style when detection on
+    QString m_detectionStatusStyleOff;  ///< detection status indicator style when detection off
 
     Config* m_config;
 
