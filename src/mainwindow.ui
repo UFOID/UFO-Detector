@@ -566,7 +566,7 @@
          <item>
           <layout class="QVBoxLayout" name="verticalLayout_2">
            <item>
-            <widget class="QCheckBox" name="checkBox">
+            <widget class="QCheckBox" name="checkBoxDisplayWebcam">
              <property name="toolTip">
               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Deactivate for better performance&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>

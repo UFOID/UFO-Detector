@@ -67,7 +67,7 @@ bool ActualDetector::initialize()
 
     bool success = parseDetectionAreaFile(detectionAreaFile, region);
 
-    willDisplayImage= qobject_cast <MainWindow*>(parent())->getCheckboxState();
+    m_showCameraVideo= qobject_cast <MainWindow*>(parent())->getCheckboxDisplayWebcamState();
     willParseRectangle=false;
     if(willSaveImages)
     {
@@ -129,6 +129,7 @@ void ActualDetector::detectingThread()
 
         next_frame = tempImage.clone();
         result = next_frame;
+        m_latestStillFrame = next_frame;
         cvtColor(next_frame, next_frame, CV_RGB2GRAY);
 
         absdiff(prev_frame, next_frame, d1);
@@ -277,7 +278,7 @@ void ActualDetector::detectingThread()
 
 
 
-        if (willDisplayImage)
+        if (m_showCameraVideo)
         {
             for(unsigned int i=0; i<centers.size(); i++)
             {
@@ -303,16 +304,16 @@ void ActualDetector::detectingThread()
                 }
             }
 
-            cv::resize(result,result, m_cameraViewFrameSize ,0, 0, INTER_CUBIC);
+            cv::resize(result, result, m_cameraViewFrameSize, 0, 0, INTER_CUBIC);
             cv::cvtColor(result, result, CV_BGR2RGB);
             m_mainWindow->cameraViewImageMutex()->lock();
             m_cameraViewImage = QImage((uchar*)result.data, result.cols, result.rows, result.step, QImage::Format_RGB888);
             m_mainWindow->cameraViewImageMutex()->unlock();
             emit updatePixmap(m_cameraViewImage);
-            // give MainWindow thread some time to update pixmap to prevent flickering
-            std::this_thread::yield();
-            std::this_thread::sleep_for(std::chrono::microseconds(threadYieldPauseUsec));
         }
+        // give chance to other threads to run
+        std::this_thread::yield();
+        std::this_thread::sleep_for(std::chrono::microseconds(threadYieldPauseUsec));
     }
     delete detector;
 }
@@ -853,6 +854,15 @@ void ActualDetector::startRecording()
 Recorder* ActualDetector::getRecorder()
 {
     return theRecorder;
+}
+
+void ActualDetector::showCameraVideo(bool show)
+{
+    m_showCameraVideo = show;
+    if (!m_showCameraVideo && isMainThreadRunning)
+    {
+        m_mainWindow->setLatestStillFrame(m_latestStillFrame);
+    }
 }
 
 void ActualDetector::onCameraViewFrameSizeChanged(QSize newSize)

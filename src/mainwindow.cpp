@@ -467,10 +467,16 @@ void MainWindow::removeVideo(QString dateTime)
     emit elementWasRemoved();
 }
 
-void MainWindow::on_checkBox_stateChanged(int arg1)
+void MainWindow::on_checkBoxDisplayWebcam_stateChanged(int arg1)
 {
-    if(arg1==0){m_actualDetector->willDisplayImage = false;}
-    if(arg1==2){m_actualDetector->willDisplayImage = true;}
+    if (Qt::Unchecked == arg1)
+    {
+        m_actualDetector->showCameraVideo(false);
+    }
+    else if (Qt::Checked == arg1)
+    {
+        m_actualDetector->showCameraVideo(true);
+    }
 }
 
 void MainWindow::on_buttonClear_clicked()
@@ -542,6 +548,17 @@ void MainWindow::adjustCameraViewFrameSize()
     QSize cameraFrameSize(m_config->cameraWidth(), m_config->cameraHeight());
     cameraFrameSize.scale(ui->cameraView->width(), ui->cameraView->height(), Qt::KeepAspectRatio);
     m_cameraViewResolution = Size(cameraFrameSize.width(), cameraFrameSize.height());
+    // if image is not resized anywhere else do it here
+    if (m_detecting && !ui->checkBoxDisplayWebcam->isChecked())
+    {
+        cv::Mat resizedFrame;
+        cv::resize(m_webcamFrame, resizedFrame, m_cameraViewResolution, 0, 0, INTER_CUBIC);
+        cv::cvtColor(resizedFrame, resizedFrame, CV_BGR2RGB);
+        m_cameraViewImageMutex.lock();
+        m_cameraViewImage = QImage((uchar*)resizedFrame.data, resizedFrame.cols, resizedFrame.rows, resizedFrame.step, QImage::Format_RGB888);
+        m_cameraViewImageMutex.unlock();
+        displayPixmap(m_cameraViewImage);   // slot
+    }
     emit cameraViewFrameSizeChanged(cameraFrameSize);
 }
 
@@ -549,9 +566,9 @@ void MainWindow::adjustCameraViewFrameSize()
 /*
  * Get the DisplayImages checkbox state for the ActualDetector
  */
-bool MainWindow::getCheckboxState()
+bool MainWindow::getCheckboxDisplayWebcamState()
 {
-    return ui->checkBox->isChecked();
+    return ui->checkBoxDisplayWebcam->isChecked();
 }
 
 void MainWindow::readLogFileAndGetRootElement()
@@ -870,5 +887,19 @@ QMutex* MainWindow::cameraViewImageMutex()
     return &m_cameraViewImageMutex;
 }
 
-
+void MainWindow::setLatestStillFrame(Mat& frame)
+{
+    if (m_detecting && !ui->checkBoxDisplayWebcam->isChecked())
+    {
+        m_webcamFrame = frame.clone();
+        /// @todo converting & scaling camera frame into QImage repeats many times -> refactor
+        cv::Mat resizedFrame;
+        cv::resize(m_webcamFrame, resizedFrame, m_cameraViewResolution, 0, 0, INTER_CUBIC);
+        cv::cvtColor(resizedFrame, resizedFrame, CV_BGR2RGB);
+        m_cameraViewImageMutex.lock();
+        m_cameraViewImage = QImage((uchar*)resizedFrame.data, resizedFrame.cols, resizedFrame.rows, resizedFrame.step, QImage::Format_RGB888);
+        m_cameraViewImageMutex.unlock();
+        displayPixmap(m_cameraViewImage);   // slot
+    }
+}
 
