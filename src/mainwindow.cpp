@@ -123,14 +123,18 @@ void MainWindow::updateWebcamFrame()
         /// @todo sync because displayResolution could change at any moment
         cv::resize(m_webcamFrame,resizedFrame, m_cameraViewResolution,0, 0, INTER_CUBIC);
         cv::cvtColor(resizedFrame, resizedFrame, CV_BGR2RGB);
-        QImage qWebcam((uchar*)resizedFrame.data, resizedFrame.cols, resizedFrame.rows, resizedFrame.step, QImage::Format_RGB888);
-        emit updatePixmap(qWebcam);
+        m_cameraViewImageMutex.lock();
+        m_cameraViewImage = QImage((uchar*)resizedFrame.data, resizedFrame.cols, resizedFrame.rows, resizedFrame.step, QImage::Format_RGB888);
+        m_cameraViewImageMutex.unlock();
+        emit updatePixmap(m_cameraViewImage);
     }
 }
 
 void MainWindow::displayPixmap(QImage image)
 {
+    m_cameraViewImageMutex.lock();
     ui->cameraView->setPixmap(QPixmap::fromImage(image));
+    m_cameraViewImageMutex.unlock();
 }
 
 /*
@@ -143,8 +147,8 @@ void MainWindow::setSignalsAndSlots(ActualDetector* actualDetector)
     connect(m_actualDetector, SIGNAL(negativeMessage()), this, SLOT(setNegativeMessage()));
     connect(m_actualDetector, SIGNAL(errorReadingDetectionAreaFile()), this, SLOT(setErrorReadingDetectionAreaFile()));
     connect(m_actualDetector->getRecorder(), SIGNAL(resultDataSaved(QString,QString,QString)), this, SLOT(addVideoToVideoList(QString,QString,QString)));
-    connect(m_actualDetector->getRecorder(), SIGNAL(recordingStarted()), this, SLOT(recordingWasStarted()));
-    connect(m_actualDetector->getRecorder(), SIGNAL(recordingStopped()), this, SLOT(recordingWasStoped()));
+    connect(m_actualDetector->getRecorder(), SIGNAL(recordingStarted()), this, SLOT(onRecordingStarted()));
+    connect(m_actualDetector->getRecorder(), SIGNAL(recordingFinished()), this, SLOT(onRecordingFinished()));
     connect(this, SIGNAL(elementWasRemoved()), m_actualDetector->getRecorder(), SLOT(reloadResultDataFile()));
     connect(m_actualDetector, SIGNAL(progressValueChanged(int)), this, SLOT(on_progressBar_valueChanged(int)));
     connect(m_actualDetector, SIGNAL(broadcastOutputText(QString)), this, SLOT(update_output_text(QString)));
@@ -460,14 +464,19 @@ void MainWindow::removeVideo(QString dateTime)
         }
         node = node.nextSibling();
     }
-    m_resultDataFile.close();
     emit elementWasRemoved();
 }
 
-void MainWindow::on_checkBox_stateChanged(int arg1)
+void MainWindow::on_checkBoxDisplayWebcam_stateChanged(int arg1)
 {
-    if(arg1==0){m_actualDetector->willDisplayImage = false;}
-    if(arg1==2){m_actualDetector->willDisplayImage = true;}
+    if (Qt::Unchecked == arg1)
+    {
+        m_actualDetector->showCameraVideo(false);
+    }
+    else if (Qt::Checked == arg1)
+    {
+        m_actualDetector->showCameraVideo(true);
+    }
 }
 
 void MainWindow::on_buttonClear_clicked()
@@ -539,6 +548,17 @@ void MainWindow::adjustCameraViewFrameSize()
     QSize cameraFrameSize(m_config->cameraWidth(), m_config->cameraHeight());
     cameraFrameSize.scale(ui->cameraView->width(), ui->cameraView->height(), Qt::KeepAspectRatio);
     m_cameraViewResolution = Size(cameraFrameSize.width(), cameraFrameSize.height());
+    // if image is not resized anywhere else do it here
+    if (m_detecting && !ui->checkBoxDisplayWebcam->isChecked())
+    {
+        cv::Mat resizedFrame;
+        cv::resize(m_webcamFrame, resizedFrame, m_cameraViewResolution, 0, 0, INTER_CUBIC);
+        cv::cvtColor(resizedFrame, resizedFrame, CV_BGR2RGB);
+        m_cameraViewImageMutex.lock();
+        m_cameraViewImage = QImage((uchar*)resizedFrame.data, resizedFrame.cols, resizedFrame.rows, resizedFrame.step, QImage::Format_RGB888);
+        m_cameraViewImageMutex.unlock();
+        displayPixmap(m_cameraViewImage);   // slot
+    }
     emit cameraViewFrameSizeChanged(cameraFrameSize);
 }
 
@@ -546,9 +566,9 @@ void MainWindow::adjustCameraViewFrameSize()
 /*
  * Get the DisplayImages checkbox state for the ActualDetector
  */
-bool MainWindow::getCheckboxState()
+bool MainWindow::getCheckboxDisplayWebcamState()
 {
-    return ui->checkBox->isChecked();
+    return ui->checkBoxDisplayWebcam->isChecked();
 }
 
 void MainWindow::readLogFileAndGetRootElement()
@@ -559,19 +579,19 @@ void MainWindow::readLogFileAndGetRootElement()
     {
         if(!m_resultDataFile.open(QIODevice::ReadOnly | QIODevice::Text))
         {
-            qDebug() << "Failed to read the result data file" << m_resultDataFile.fileName();
+            qDebug() << "MainWindow: failed to read the result data file" << m_resultDataFile.fileName();
         }
         else
         {
             if(!m_resultDataDomDocument.setContent(&m_resultDataFile))
             {
-                qDebug() << "Failed to load the result data file" << m_resultDataFile.fileName();
+                qDebug() << "MainWindow: failed to load the result data file" << m_resultDataFile.fileName();
             }
             else
             {
-                m_resultDataFile.close();
                 qDebug() << "Correctly loaded root element from result data file";
             }
+            m_resultDataFile.close();
         }
     }
     else
@@ -788,12 +808,12 @@ void MainWindow::checkForUpdate(QNetworkReply *reply)
 
 }
 
-void MainWindow::recordingWasStarted()
+void MainWindow::onRecordingStarted()
 {
     m_recordingVideo=true;
 }
 
-void MainWindow::recordingWasStoped()
+void MainWindow::onRecordingFinished()
 {
     m_recordingVideo=false;
 }
@@ -862,5 +882,24 @@ Size MainWindow::getCameraViewSize()
     return m_cameraViewResolution;
 }
 
+QMutex* MainWindow::cameraViewImageMutex()
+{
+    return &m_cameraViewImageMutex;
+}
 
+void MainWindow::setLatestStillFrame(Mat& frame)
+{
+    if (m_detecting && !ui->checkBoxDisplayWebcam->isChecked())
+    {
+        m_webcamFrame = frame.clone();
+        /// @todo converting & scaling camera frame into QImage repeats many times -> refactor
+        cv::Mat resizedFrame;
+        cv::resize(m_webcamFrame, resizedFrame, m_cameraViewResolution, 0, 0, INTER_CUBIC);
+        cv::cvtColor(resizedFrame, resizedFrame, CV_BGR2RGB);
+        m_cameraViewImageMutex.lock();
+        m_cameraViewImage = QImage((uchar*)resizedFrame.data, resizedFrame.cols, resizedFrame.rows, resizedFrame.step, QImage::Format_RGB888);
+        m_cameraViewImageMutex.unlock();
+        displayPixmap(m_cameraViewImage);   // slot
+    }
+}
 

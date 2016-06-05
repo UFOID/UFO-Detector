@@ -46,6 +46,7 @@
 #include "videouploaderdialog.h"
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QMutex>
 
 using namespace cv;
 
@@ -66,10 +67,18 @@ public:
     explicit MainWindow(QWidget *parent = 0, Camera *cameraPtr = 0, Config *configPtr = 0);
     ~MainWindow();
     void addOutputText(QString msg);
-    bool getCheckboxState();
+    bool getCheckboxDisplayWebcamState();
 
     void setSignalsAndSlots(ActualDetector *actualDetector);
     cv::Size getCameraViewSize();
+    QMutex* cameraViewImageMutex();
+
+    /**
+     * @brief Set latest still frame to be shown during detection if no video is shown.
+     * This doesn't have effect during detection if the video is being shown.
+     * @param frame
+     */
+    void setLatestStillFrame(cv::Mat& frame);
 
 private:
     Ui::MainWindow *ui;
@@ -84,9 +93,11 @@ private:
     cv::Mat m_webcamFrame;
     Camera* m_camera;
     std::unique_ptr<std::thread> threadWebcam;
-    cv::Size m_cameraViewResolution;     ///< frame size of camera view
-    QString m_detectionStatusStyleOn;  ///< detection status indicator style when detection on
-    QString m_detectionStatusStyleOff; ///< detection status indicator style when detection off
+    cv::Size m_cameraViewResolution;    ///< frame size of camera view
+    QImage m_cameraViewImage;           ///< image to be drawn in camera view
+    QMutex m_cameraViewImageMutex;      ///< syncing camera view image
+    QString m_detectionStatusStyleOn;   ///< detection status indicator style when detection on
+    QString m_detectionStatusStyleOff;  ///< detection status indicator style when detection off
 
     Config* m_config;
 
@@ -145,15 +156,15 @@ signals:
     void cameraViewFrameSizeChanged(QSize newSize);
 
 public slots:
-    void recordingWasStarted();
-    void recordingWasStoped();
+    void onRecordingStarted();
+    void onRecordingFinished();
     void on_progressBar_valueChanged(int value);
 	void update_output_text(QString msg);
     void displayPixmap(QImage img);
 
 private slots:
     void on_startButton_clicked();
-    void on_checkBox_stateChanged(int arg1);
+    void on_checkBoxDisplayWebcam_stateChanged(int arg1);
     void on_buttonClear_clicked();
     void on_sliderNoise_sliderMoved(int position);
     void on_settingsButton_clicked();

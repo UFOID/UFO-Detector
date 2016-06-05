@@ -62,7 +62,12 @@ public:
     void setFilename(std::string msg);    
     void startRecording();
     Recorder* getRecorder();
-    std::atomic<bool> willDisplayImage;
+
+    /**
+     * @brief Set whether to show camera video. A still image is shown if the video is not shown.
+     * @param show true = show, false = don't show
+     */
+    void showCameraVideo(bool show);
 
 #ifndef _UNIT_TEST_
 private:
@@ -70,8 +75,12 @@ private:
     Recorder* theRecorder;
     Camera* camPtr;
     Config* m_config;
+    MainWindow* m_mainWindow;
     cv::Mat result, result_cropped;
     cv::Mat prev_frame, current_frame, next_frame;
+    cv::Mat m_latestStillFrame;             ///< latest still frame, shown if no video is shown
+    std::atomic<bool> m_showCameraVideo;    ///< whether the camera video is shown
+    QImage m_cameraViewImage;   ///< image to be given out with signal updatePixmap()
     cv::Mat d1, d2, motion, treshImg;
     cv::Mat croppedImageGray;
     cv::Mat noiseLevel;

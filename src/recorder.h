@@ -88,8 +88,8 @@ private:
     bool m_willSaveVideo;       ///< whether to save video or reject it
     bool m_drawRectangles;      ///< whether or not to draw rectangles around detected objects
 
-    std::vector<QProcess*> vecProcess;
-    std::vector<QString> vecTempVideoFile;
+    std::vector<QProcess*> m_encoderProcesses;
+    std::vector<QString> m_tempVideoFiles;
 
     QDomDocument m_resultDataDomDocument;
     QFile m_resultDataFile;
@@ -117,14 +117,22 @@ public slots:
 #ifndef _UNIT_TEST_
 private slots:
 #endif
-    void finishedRecording(QString picDir, QString filename);
-    void finishedProcess();
+    /**
+     * @brief Creates a new QProcess that encodes the temporary raw video to FFV1 with ffmpeg/avconv
+     *
+     * @note this method NEEDS to be called via signal-slot system, I guess in order
+     * to run it in the main thread. If this is called from detecting thread via direct
+     * method call then can't get signals from the encoder process.
+     */
+    void startEncodingVideoToFFV1(QString tempVideoFileName, QString targetVideoFileName);
+
+    void onVideoEncodingFinished();
 
 signals:
     void resultDataSaved(QString file, QString date, QString length);
     void recordingStarted();
-    void recordingStopped();
-    void finishedRec(QString picDir, QString filename);
+    void recordingFinished();
+    void videoEncodingRequested(QString tempVideoName, QString targetVideoName);
 };
 
 #endif // RECORDER_H
