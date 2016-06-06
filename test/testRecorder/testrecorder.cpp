@@ -7,6 +7,10 @@
 #include <QtTest>
 #include <QString>
 #include <QFile>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+
+extern cv::Mat mockCameraNextFrame;
 
 /**
  * @brief Unit test of Recorder class
@@ -24,6 +28,7 @@ private Q_SLOTS:
     void cleanupTestCase();
     void constructor();
     void saveResultData();
+    void mockCamera();
 
 private:
     Recorder* m_recorder;
@@ -162,6 +167,59 @@ void TestRecorder::saveResultData() {
     QVERIFY(thumbnailFile.exists());
     QVERIFY(thumbnailFile.remove());
     QVERIFY(!thumbnailFile.exists());
+}
+
+void TestRecorder::mockCamera() {
+    Vec3b pixel;
+    bool showImage = false;     // If you want to see test images, change this to true
+
+    cv::namedWindow("Mock camera frame");
+
+    QVERIFY(m_camera->getWebcamFrame().data == mockCameraNextFrame.data);
+    QVERIFY(mockCameraNextFrame.empty());
+    QVERIFY(m_camera->getWebcamFrame().empty());
+    QVERIFY(0 == mockCameraNextFrame.cols);
+    QVERIFY(0 == mockCameraNextFrame.rows);
+    QVERIFY(0 == m_camera->getWebcamFrame().cols);
+    QVERIFY(0 == m_camera->getWebcamFrame().rows);
+
+    // 1st image
+    mockCameraNextFrame = cv::Mat(m_config->cameraHeight(), m_config->cameraWidth(), CV_8UC3, Scalar(0, 0, 0));
+    cv::rectangle(mockCameraNextFrame, Rect(10, 10, 50, 50), Scalar(40, 60, 80), -1);
+    if (showImage) {
+        cv::imshow("Mock camera frame", mockCameraNextFrame);
+        cv::waitKey(0);
+    }
+    QVERIFY(m_camera->getWebcamFrame().data == mockCameraNextFrame.data);
+    QVERIFY(!mockCameraNextFrame.empty());
+    QVERIFY(!m_camera->getWebcamFrame().empty());
+    QVERIFY(m_config->cameraWidth() == m_camera->getWebcamFrame().cols);
+    QVERIFY(m_config->cameraHeight() == m_camera->getWebcamFrame().rows);
+    pixel = m_camera->getWebcamFrame().at<Vec3b>(Point(10, 10));
+    QVERIFY(40 == pixel[0]);
+    QVERIFY(60 == pixel[1]);
+    QVERIFY(80 == pixel[2]);
+    pixel = m_camera->getWebcamFrame().at<Vec3b>(Point(9, 10));
+    QVERIFY(0 == pixel[0]);
+    QVERIFY(0 == pixel[1]);
+    QVERIFY(0 == pixel[2]);
+
+    // another image
+    mockCameraNextFrame = cv::Mat(m_config->cameraHeight(), m_config->cameraWidth(), CV_8UC3, Scalar(0, 0, 0));
+    cv::rectangle(mockCameraNextFrame, Rect(110, 10, 50, 50), Scalar(90, 70, 50), -1);
+    if (showImage) {
+        cv::imshow("Mock camera frame", mockCameraNextFrame);
+        cv::waitKey(0);
+    }
+    QVERIFY(m_camera->getWebcamFrame().data == mockCameraNextFrame.data);
+    pixel = m_camera->getWebcamFrame().at<Vec3b>(Point(110, 10));
+    QVERIFY(90 == pixel[0]);
+    QVERIFY(70 == pixel[1]);
+    QVERIFY(50 == pixel[2]);
+    pixel = m_camera->getWebcamFrame().at<Vec3b>(Point(109, 10));
+    QVERIFY(0 == pixel[0]);
+    QVERIFY(0 == pixel[1]);
+    QVERIFY(0 == pixel[2]);
 }
 
 QTEST_APPLESS_MAIN(TestRecorder)
