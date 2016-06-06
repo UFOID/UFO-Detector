@@ -121,11 +121,12 @@ void Recorder::recordThread(){
             currentTime = std::chrono::high_resolution_clock::now();
             difference = currentTime - prevTime;
         }
-
+        m_currentFrameMutex.lock();
         if (m_currentFrame.data)
         {
             m_videoWriter.write(m_currentFrame);
         }
+        m_currentFrameMutex.unlock();
 
         prevTime = std::chrono::time_point_cast<hr_duration>(prevTime + frame_period{ 1 });
         difference = currentTime - prevTime;
@@ -228,7 +229,9 @@ void Recorder::readFrameThread()
             rectangle(temp, m_motionRectangle, m_objectRectangleColor);
             oldRectangle=m_motionRectangle;
         }
+        m_currentFrameMutex.lock();
         temp.copyTo(m_currentFrame);
+        m_currentFrameMutex.unlock();
     }
 }
 

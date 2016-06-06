@@ -31,6 +31,7 @@
 #include <QDebug>
 #include <QDir>
 #include <QCoreApplication>
+#include <QMutex>
 #include <atomic>
 #include <thread>
 #include <memory>
@@ -84,6 +85,7 @@ private:
 
     std::unique_ptr<std::thread> m_recorderThread;
     std::unique_ptr<std::thread> m_frameUpdateThread;
+    QMutex m_currentFrameMutex;     ///< mutex for synchronizing access to m_currentFrame
     std::atomic<bool>  m_recording;
     bool m_willSaveVideo;       ///< whether to save video or reject it
     bool m_drawRectangles;      ///< whether or not to draw rectangles around detected objects
