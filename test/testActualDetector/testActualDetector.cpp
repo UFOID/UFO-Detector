@@ -24,6 +24,10 @@
 #include <QtTest>
 #include <QCoreApplication>
 
+extern cv::Mat mockCameraNextFrame;
+extern void mockCamera_setFrameBlockingEnabled(bool);
+extern void mockCamera_releaseNextFrame();
+
 class TestActualDetector : public QObject
 {
     Q_OBJECT
@@ -36,11 +40,23 @@ private Q_SLOTS:
     void cleanupTestCase();
     void constructor();
 
+    /**
+     * Test blocking Camera::getWebcamFrame(). See a basic non-blocking test in Recorder unit test.
+     */
+    void mockCameraBlockNextFrame();
+
 private:
     ActualDetector* m_actualDetector;
     MainWindow* m_mainWindow;
     Config* m_config;
     Camera* m_camera;
+
+    // test thread to consume camera frames
+    std::thread* m_cameraFrameConsumerThread;
+    void cameraFrameConsumerThreadFunc();
+    int m_cameraFramesConsumed; ///< number of camera frames received by cameraFrameConsumerThreadFunc
+    bool m_consumeCameraFrames; ///< camera frame consumer thread run enabled flag
+    bool m_cameraFrameConsumerRunning;  ///< camera frame consumer thread is running
 };
 
 TestActualDetector::TestActualDetector()
@@ -67,6 +83,15 @@ void TestActualDetector::cleanupTestCase()
     m_config->deleteLater();
 }
 
+void TestActualDetector::cameraFrameConsumerThreadFunc() {
+    m_cameraFrameConsumerRunning = true;
+    while (m_consumeCameraFrames) {
+        cv::Mat frame = m_camera->getWebcamFrame();
+        m_cameraFramesConsumed++;
+    }
+    m_cameraFrameConsumerRunning = false;
+}
+
 void TestActualDetector::constructor()
 {
     QVERIFY(NULL != m_actualDetector->m_mainWindow);
@@ -77,6 +102,33 @@ void TestActualDetector::constructor()
     QVERIFY(m_camera == m_actualDetector->camPtr);
 }
 
+void TestActualDetector::mockCameraBlockNextFrame() {
+    m_cameraFramesConsumed = 0;
+    m_consumeCameraFrames = true;
+    m_cameraFrameConsumerRunning = false;
+    mockCamera_setFrameBlockingEnabled(true);
+
+    m_cameraFrameConsumerThread = new std::thread(&TestActualDetector::cameraFrameConsumerThreadFunc, this);
+    // wait camera frame consumer thread up
+    while (!m_cameraFrameConsumerRunning) {
+        std::this_thread::sleep_for(chrono::milliseconds(1));
+        std::this_thread::yield();
+    }
+    std::this_thread::sleep_for(chrono::milliseconds(10));
+
+    mockCamera_releaseNextFrame();
+    std::this_thread::sleep_for(chrono::milliseconds(10));
+
+    QVERIFY(1 == m_cameraFramesConsumed);
+
+    m_consumeCameraFrames = false;
+    mockCamera_setFrameBlockingEnabled(false);
+    m_cameraFrameConsumerThread->join();
+    QVERIFY(!m_cameraFrameConsumerRunning);
+    // there will be one more frame
+    QVERIFY(2 == m_cameraFramesConsumed);
+}
+
 QTEST_MAIN(TestActualDetector)
 
-#include "testactualdetector.moc"
+#include "testActualDetector.moc"

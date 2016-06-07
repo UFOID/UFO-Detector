@@ -45,6 +45,10 @@ private Q_SLOTS:
     void cleanupTestCase();
     void constructor();
     void saveResultData();
+
+    /**
+     * Basic mock Camera test. See a blocking Camera::getWebcamFrame() test in ActualDetector unit test.
+     */
     void mockCamera();
 
 private:

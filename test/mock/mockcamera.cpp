@@ -17,13 +17,69 @@
  */
 
 #include "camera.h"
+#include <condition_variable>
 
-cv::Mat mockCameraNextFrame;    ///< next frame which Camera::getWebcamFrame() will give
+/*
+ * == How to Use the Blocking Version of Camera::getWebcamFrame() ==
+ *
+ * It is possible to use the Camera mock object (not the real Camera object)
+ * to get camera frames one by one for unit testing purposes. Here's how to
+ * do it.
+ *
+ * 1. enable blocking by calling mockCamera_setFrameBlockingEnabled(true)
+ * 2. start a frame consumer thread which will be calling Camera::getWebcamFrame()
+ * 3. prepare a cv::Mat and put it into mockCameraNextFrame
+ * 4. call mockCamera_releaseNextFrame() to get the next frame in the frame consumer thread
+ * 5. the frame consumer thread now has the frame in mockCameraNextFrame
+ * 6. to get the next frame to the consumer, go to step 3
+ *
+ * There's a usage example of this in ActualDetector unit test, more specifically
+ * in TestActualDetector::mockCameraBlockNextFrame().
+ */
+
+cv::Mat mockCameraNextFrame;    ///< next frame to be given by Camera::getWebcamFrame()
+
+/**
+ * @brief Enable Camera::getWebcamFrame() blocking.
+ */
+std::atomic_bool mockCamera_blockFrameEnabled;
+
+/**
+ * @brief Mutex for blocking next call to Camera::getWebcamFrame().
+ */
+std::mutex mockCamera_blockerMutex;
+
+/**
+ * @brief Condition variable to do the actual waiting in Camera::getWebcamFrame().
+ */
+std::condition_variable_any mockCamera_blockerCond;
+
+/**
+ * @brief Enable blocking of Camera::getWebcamFrame() the next time it is called.
+ * @note Be sure to not call Camera::getWebcamFrame() after this from main thread
+ * because it will block. Call from a thread which is <i>intended/i> to block.
+ */
+void mockCamera_setFrameBlockingEnabled(bool enabled) {
+    mockCamera_blockFrameEnabled = enabled;
+    // wake up waiting threads
+    if (!enabled) {
+        mockCamera_blockerCond.notify_all();
+    }
+}
+
+/**
+ * @brief Release next camera frame from Camera::getWebcamFrame().
+ */
+void mockCamera_releaseNextFrame() {
+    mockCamera_blockerCond.notify_all();
+}
+
 
 Camera::Camera(int index, int width, int height) {
     Q_UNUSED(index);
     Q_UNUSED(width);
     Q_UNUSED(height);
+    mockCamera_blockFrameEnabled = false;
 }
 
 bool Camera::init() {
@@ -38,6 +94,11 @@ void Camera::release() {
 }
 
 cv::Mat Camera::getWebcamFrame() {
+    if (mockCamera_blockFrameEnabled) {
+        mockCamera_blockerMutex.lock();
+        mockCamera_blockerCond.wait(mockCamera_blockerMutex);
+        mockCamera_blockerMutex.unlock();
+    }
     return mockCameraNextFrame;
 }
 

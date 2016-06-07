@@ -29,4 +29,7 @@ CDetector::~CDetector() {
 pair<vector<Point2d>, vector<Rect>> CDetector::Detect(Mat &gray, Rect &croppedRect) {
     Q_UNUSED(gray);
     Q_UNUSED(croppedRect);
+    vector<Point2d> pointVector;
+    vector<Rect> rectVector;
+    return std::make_pair(pointVector, rectVector);
 }
