@@ -4,5 +4,6 @@ TEMPLATE = subdirs
 SUBDIRS = \
     testConfig \
     testCameraInfo \
-    testRecorder
+    testRecorder \
+    testActualDetector
 

@@ -22,11 +22,12 @@ DEFINES += SRCDIR=\\\"$$PWD/\\\" \
 include(../../src/opencv.pri)
 
 INCLUDEPATH += . \
-    ../../src
+    ../../src \
+    ../mock
 
 SOURCES += testrecorder.cpp \
-    mockcamera.cpp \
-    mockconfig.cpp \
+    ../mock/mockcamera.cpp \
+    ../mock/mockconfig.cpp \
     ../../src/recorder.cpp \
     ../../src/camerainfo.cpp
 

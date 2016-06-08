@@ -127,6 +127,7 @@ void MainWindow::updateWebcamFrame()
         m_cameraViewImage = QImage((uchar*)resizedFrame.data, resizedFrame.cols, resizedFrame.rows, resizedFrame.step, QImage::Format_RGB888);
         m_cameraViewImageMutex.unlock();
         emit updatePixmap(m_cameraViewImage);
+        std::this_thread::yield();
     }
 }
 
