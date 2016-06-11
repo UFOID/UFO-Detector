@@ -22,9 +22,9 @@ The UFO Detector is a software that allows the autonomous video recording of pos
   - Many bug fixes
 
 ### Detection Algorithm:
-Since the objects that the software looks for are not well defined (i.e. being “unknown”) false positive detections are expected.  We use a combination of following algorithm in order to narrow down the results:
+Since the objects that the software looks for are not well defined (i.e. being “unknown”) false positive detections are expected.  We use a combination of following algorithms in order to narrow down the results:
 
-1.	Motion Detection: The program looks for moving objects within the selected are of detection. The user can specify the size of noise which will be ignored. Each moving object is tracked.
+1.	Motion Detection: The program looks for moving objects within the selected area of detection. The user can specify the size of noise which will be ignored. Each moving object is tracked.
 2.	Light detection: We assume any UFO is light emitting (i.e. object being brighter than the background) in order to decrease the amount of false-positives.
 3.	Object recognition: Each detected bright object is analyzed using cascade classifier which was trained using images of flying birds. This is only used if the detection process is run during the day. Currently only birds are filtered out in this way.
 
