@@ -19,9 +19,11 @@
 #include "config.h"
 
 QString mockConfigResultDataDir;
+int mockConfigResultVideoCodec;
 
 Config::Config(QObject *parent) {
     Q_UNUSED(parent);
+    mockConfigResultVideoCodec = 0;
 }
 
 QString Config::applicationVersion() {
@@ -81,7 +83,7 @@ QString Config::resultVideoDir() {
 }
 
 int Config::resultVideoCodec() {
-    return 0;
+    return mockConfigResultVideoCodec;
 }
 
 bool Config::resultVideoWithObjectRectangles() {
@@ -148,7 +150,7 @@ void Config::setResultVideoDir(QString dirName) {
 }
 
 void Config::setResultVideoCodec(int codec) {
-    Q_UNUSED(codec);
+    mockConfigResultVideoCodec = codec;
 }
 
 void Config::setResultVideoWithObjectRectangles(bool drawRectangles) {
