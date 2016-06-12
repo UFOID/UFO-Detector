@@ -56,8 +56,20 @@ Recorder::Recorder(Camera *cameraPtr, Config *configPtr) :
     }
     else if (m_codecSetting == 0 || m_codecSetting == 1)
     {
+        // if requesting FFV1 codec use default codec and use ffmpeg/avconv to convert
         m_videoCodec = DEFAULT_CODEC;
     }
+    /*switch (m_codecSetting) {
+        case 0:
+            m_videoCodec = CV_FOURCC('I', 'Y', 'U', 'V');
+            break;
+        case 1:
+            m_videoCodec = CV_FOURCC('F', 'F', 'V', '1');
+            break;
+        case 2:
+            m_videoCodec = CV_FOURCC('L', 'A', 'G', 'S');
+            break;
+    }*/
 
     reloadResultDataFile();
     m_recording = false;

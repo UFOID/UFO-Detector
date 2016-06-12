@@ -62,16 +62,21 @@ private:
     Config* m_config;
     Camera* m_camera;
     QFile m_resultDataFile;
-    int m_updateVideoWidgetCallCounter;
+    int m_resultDataSavedCounter;
+    int m_requestFFV1EncodingCounter;
+    QString m_requestFFV1TempFileName;
+    QString m_requestFFV1TargetFileName;
 
     void fourccToStr(int fourcc, char str[5]);
 
 private slots:
     void onResultDataSaved(QString fileName, QString dateTime, QString videoLength);
+    void onFFV1EncodingRequested(QString tempFileName, QString targetFileName);
 };
 
 TestRecorder::TestRecorder() {
-    m_updateVideoWidgetCallCounter = 0;
+    m_resultDataSavedCounter = 0;
+    m_requestFFV1EncodingCounter = 0;
 }
 
 TestRecorder::~TestRecorder() {
@@ -81,7 +86,13 @@ void TestRecorder::onResultDataSaved(QString fileName, QString dateTime, QString
     Q_UNUSED(fileName);
     Q_UNUSED(dateTime);
     Q_UNUSED(videoLength);
-    m_updateVideoWidgetCallCounter++;
+    m_resultDataSavedCounter++;
+}
+
+void TestRecorder::onFFV1EncodingRequested(QString tempFileName, QString targetFileName) {
+    m_requestFFV1TempFileName = tempFileName;
+    m_requestFFV1TargetFileName = targetFileName;
+    m_requestFFV1EncodingCounter++;
 }
 
 void TestRecorder::initTestCase() {
@@ -113,9 +124,9 @@ void TestRecorder::cleanupTestCase() {
     m_config->deleteLater();
     QVERIFY(m_resultDataFile.remove());
     QVERIFY(!m_resultDataFile.exists());
-    //QDir videoDir(m_config->resultVideoDir());
-    //QVERIFY(videoDir.removeRecursively());
-    //QVERIFY(!videoDir.exists());
+    QDir videoDir(m_config->resultVideoDir());
+    QVERIFY(videoDir.removeRecursively());
+    QVERIFY(!videoDir.exists());
 }
 
 void TestRecorder::constructor() {
@@ -170,12 +181,12 @@ void TestRecorder::saveResultData() {
     QVERIFY(resultDataDom.firstChild().childNodes().isEmpty());
     resultDataDom.clear();
 
-    QCOMPARE(m_updateVideoWidgetCallCounter, 0);
+    QCOMPARE(m_resultDataSavedCounter, 0);
     m_recorder->m_firstFrame = cv::Mat(cv::Size(m_config->cameraWidth(), m_config->cameraWidth()), CV_8UC3);
 
     m_recorder->saveResultData(dateTime, videoLength);
 
-    QCOMPARE(m_updateVideoWidgetCallCounter, 1);
+    QCOMPARE(m_resultDataSavedCounter, 1);
     QVERIFY(!m_recorder->m_resultDataFile.isOpen());
     // check content of result data file
     QVERIFY(m_resultDataFile.open(QFile::ReadOnly));
@@ -255,14 +266,31 @@ void TestRecorder::videoCodecs()
 {
     int defaultCodec = CV_FOURCC_DEFAULT;
     char defaultCodecStr[5];
+    int expectedFourcc = 0;
+    int actualFourcc = 0;
     fourccToStr(defaultCodec, defaultCodecStr);
     qDebug() << "Default video codec" << defaultCodec << defaultCodecStr;
 
-    for (int codec = 0; codec < 3; codec++) {
+    qDebug() << "TODO: add Lagarith codec test (Ubuntu Linux doesn't seem to support it?)";
+
+    for (int codec = 0; codec < 2; codec++) {
+        if (m_recorder) {
+            m_recorder->disconnect(m_recorder, SIGNAL(videoEncodingRequested(QString,QString)), this,
+                                   SLOT(onFFV1EncodingRequested(QString,QString)));
+            m_recorder->disconnect(m_recorder, SIGNAL(resultDataSaved(QString,QString,QString)), this,
+                                   SLOT(onResultDataSaved(QString,QString,QString)));
+            m_recorder->deleteLater();
+        }
+
         m_config->setResultVideoCodec(codec);
         QVERIFY(m_config->resultVideoCodec() == codec);
-        int expectedFourcc = 0;
-        int actualFourcc = 0;
+
+        m_recorder = new Recorder(m_camera, m_config);
+        QVERIFY(m_recorder->m_codecSetting == codec);
+        connect(m_recorder, SIGNAL(videoEncodingRequested(QString,QString)), this,
+                SLOT(onFFV1EncodingRequested(QString,QString)));
+        connect(m_recorder, SIGNAL(resultDataSaved(QString,QString,QString)), this,
+                SLOT(onResultDataSaved(QString,QString,QString)));
 
         // FOURCC codes for video codecs: http://www.fourcc.org/codecs.php
 
@@ -271,8 +299,8 @@ void TestRecorder::videoCodecs()
                 // raw -- Linux default is CV_FOURCC_DEFAULT which is 'IYUV' but 'I420' is saved actually,
                 // Recorder sets codec to 0.
                 // http://fourcc.org/yuv.php#IYUV
-                //expectedFourcc = CV_FOURCC('I', '4', '2', '0');
-                expectedFourcc = CV_FOURCC('I', 'Y', 'U', 'V');
+                expectedFourcc = CV_FOURCC('I', '4', '2', '0');
+                //expectedFourcc = CV_FOURCC('I', 'Y', 'U', 'V');
                 break;
             case 1:
                 // FFV1
@@ -298,15 +326,30 @@ void TestRecorder::videoCodecs()
         QFile resultVideoFile(filenameFinal);
         qDebug() << "target file" << resultVideoFile.fileName();
 
+        m_requestFFV1TempFileName = "";
+        m_requestFFV1TargetFileName = "";
+        m_requestFFV1EncodingCounter = 0;
+        m_resultDataSavedCounter = 0;
+
         m_recorder->startRecording(firstFrame);
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        QTest::qWait(100);
 
         QVERIFY(tempFile.exists());
         QVERIFY(!resultVideoFile.exists());
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(400));
+        QTest::qWait(400);
         m_recorder->stopRecording(true);
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        QVERIFY(m_recorder->m_willSaveVideo);
+        if (codec == 1) {
+            QTest::qWait(2000);
+            QCOMPARE(m_requestFFV1TempFileName, filenameTemp);
+            QCOMPARE(m_requestFFV1TargetFileName, filenameFinal);
+            QCOMPARE(m_requestFFV1EncodingCounter, 1);
+        } else {
+            QTest::qWait(500);
+        }
+        QCOMPARE(m_resultDataSavedCounter, 1);
+
         QVERIFY(!tempFile.exists());
         QVERIFY(resultVideoFile.exists());
 
@@ -323,8 +366,6 @@ void TestRecorder::videoCodecs()
         fourccToStr(actualFourcc, fourccStr);
         qDebug() << "actualFourcc =" << actualFourcc << "fourccStr =" << QString(fourccStr);
         QVERIFY(actualFourcc == expectedFourcc);
-
-
     }
     // Recorder has modified the next frame of mock Camera so clean it
     mockCameraNextFrame = cv::Mat();
@@ -337,6 +378,6 @@ void TestRecorder::fourccToStr(int fourcc, char str[5]) {
     str[4] = '\0';
 }
 
-QTEST_APPLESS_MAIN(TestRecorder)
+QTEST_MAIN(TestRecorder)
 
 #include "testrecorder.moc"
