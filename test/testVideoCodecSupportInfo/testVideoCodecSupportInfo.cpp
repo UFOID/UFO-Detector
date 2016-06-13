@@ -152,6 +152,7 @@ void TestVideoCodecSupportInfo::testEncoderSupport() {
     difference = endTime - startTime;
     qDebug() << "Checking encoder support status inside test took" << difference << "ms";
 
+    // case: encoder exists
 
     startTime = QDateTime::currentMSecsSinceEpoch();
     QCOMPARE(m_codecInfo->testEncoderSupport(rawFourcc), rawSupported);
@@ -160,6 +161,17 @@ void TestVideoCodecSupportInfo::testEncoderSupport() {
     endTime = QDateTime::currentMSecsSinceEpoch();
     difference = endTime - startTime;
     qDebug() << "Checking encoder support status by VideoCodecSupportInfo took" << difference << "ms";
+
+    // case: encoder doesn't exist
+
+    QString nonexistingEncoderLocation = "/nonexistingEncoderDir/nonexistingEncoderBin";
+    QFile nonexistingEncoder(nonexistingEncoderLocation);
+    QVERIFY(!nonexistingEncoder.exists());
+    m_codecInfo->m_videoEncoderLocation = nonexistingEncoderLocation;
+    QVERIFY(!m_codecInfo->testEncoderSupport(rawFourcc));
+    QVERIFY(!m_codecInfo->testEncoderSupport(ffv1Fourcc));
+    QVERIFY(!m_codecInfo->testEncoderSupport(lagarithFourcc));
+    m_codecInfo->m_videoEncoderLocation = m_videoEncoderLocation;
 
     // These apply to basic/non-PPA OpenCV2 packages in Ubuntu 14.04.4 (Trusty)
     //QVERIFY(rawFourcc);
@@ -203,20 +215,8 @@ void TestVideoCodecSupportInfo::initialize() {
         }
     }
 
-    // case: nonexisting encoder
-
-    QVERIFY(!m_codecInfo->m_isInitialized);
-    QString nonexistingEncoderLocation = "/nonexistingEncoderDir/nonexistingEncoderBin";
-    QFile nonexistingEncoder(nonexistingEncoderLocation);
-    QVERIFY(!nonexistingEncoder.exists());
-    m_codecInfo->m_videoEncoderLocation = nonexistingEncoderLocation;
-    QVERIFY(!m_codecInfo->init());
     QVERIFY(!m_codecInfo->m_isInitialized);
     QVERIFY(!m_codecInfo->isInitialized());
-
-    // case: existing encoder
-
-    m_codecInfo->m_videoEncoderLocation = m_videoEncoderLocation;
     QVERIFY(m_codecInfo->init());
     QVERIFY(m_codecInfo->m_isInitialized);
     QVERIFY(m_codecInfo->isInitialized());

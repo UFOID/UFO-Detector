@@ -23,12 +23,6 @@ bool VideoCodecSupportInfo::init() {
     int codec = 0;
     QListIterator<int> codecIt(m_codecSupport.keys());
     QList<int> encoderList;
-    QFile encoder(m_videoEncoderLocation);
-
-    if (!encoder.exists()) {
-        qDebug() << "Video encoder" << m_videoEncoderLocation << "doesn't exist";
-        return false;
-    }
 
     while (codecIt.hasNext()) {
         codec = codecIt.next();
