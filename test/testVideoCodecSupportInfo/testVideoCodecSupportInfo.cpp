@@ -203,9 +203,21 @@ void TestVideoCodecSupportInfo::initialize() {
         }
     }
 
+    // case: nonexisting encoder
+
+    QVERIFY(!m_codecInfo->m_isInitialized);
+    QString nonexistingEncoderLocation = "/nonexistingEncoderDir/nonexistingEncoderBin";
+    QFile nonexistingEncoder(nonexistingEncoderLocation);
+    QVERIFY(!nonexistingEncoder.exists());
+    m_codecInfo->m_videoEncoderLocation = nonexistingEncoderLocation;
+    QVERIFY(!m_codecInfo->init());
     QVERIFY(!m_codecInfo->m_isInitialized);
     QVERIFY(!m_codecInfo->isInitialized());
-    m_codecInfo->init();
+
+    // case: existing encoder
+
+    m_codecInfo->m_videoEncoderLocation = m_videoEncoderLocation;
+    QVERIFY(m_codecInfo->init());
     QVERIFY(m_codecInfo->m_isInitialized);
     QVERIFY(m_codecInfo->isInitialized());
 

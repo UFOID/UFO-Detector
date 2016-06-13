@@ -16,13 +16,19 @@ VideoCodecSupportInfo::VideoCodecSupportInfo(QString externalVideoEncoderLocatio
     m_fourccToEncoderStr.insert(toFourcc("LAGS"), "lagarith");
 }
 
-void VideoCodecSupportInfo::init() {
+bool VideoCodecSupportInfo::init() {
     if (m_isInitialized) {
-        return;
+        return false;
     }
     int codec = 0;
     QListIterator<int> codecIt(m_codecSupport.keys());
     QList<int> encoderList;
+    QFile encoder(m_videoEncoderLocation);
+
+    if (!encoder.exists()) {
+        qDebug() << "Video encoder" << m_videoEncoderLocation << "doesn't exist";
+        return false;
+    }
 
     while (codecIt.hasNext()) {
         codec = codecIt.next();
@@ -38,6 +44,7 @@ void VideoCodecSupportInfo::init() {
         }
     }
     m_isInitialized = true;
+    return true;
 }
 
 bool VideoCodecSupportInfo::isInitialized() {

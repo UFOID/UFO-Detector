@@ -5,6 +5,7 @@
 #include <QProcess>
 #include <QHash>
 #include <QFile>
+#include <QDebug>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
@@ -37,7 +38,7 @@ public:
     /**
      * @brief This method does the work for actually collecting info about supported codecs.
      */
-    void init();
+    bool init();
 
     /**
      * @brief Whether this object is initialized.
