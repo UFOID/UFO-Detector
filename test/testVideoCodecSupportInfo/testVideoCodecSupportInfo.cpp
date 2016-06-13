@@ -21,38 +21,44 @@ private Q_SLOTS:
     void constructor();
     void testOpencvSupport();
     void testEncoderSupport();
-    void init();
+    void initialize();  // init() would be called for each test case
     void isSupportedMethods();
 
 private:
-    Config* m_config;
     VideoCodecSupportInfo* m_codecInfo;
+    QString m_videoEncoderLocation;
     QString m_testFileName;
+    int m_frameWidth;
+    int m_frameHeight;
     bool localTestOpencvSupport(int fourcc);
     bool localTestEncoderSupport(QString encoderCodecStr);
 };
 
 TestVideoCodecSupportInfo::TestVideoCodecSupportInfo()
 {
-    m_config = NULL;
     m_codecInfo = NULL;
     m_testFileName = "dummy.avi";
+    m_videoEncoderLocation = "";
+#if defined(Q_OS_LINUX) || defined(Q_OS_UNIX)
+    m_videoEncoderLocation = "/usr/bin/avconv";
+#endif
+    QVERIFY(m_videoEncoderLocation != "");
+    m_frameWidth = 640;
+    m_frameHeight = 480;
 }
 
 void TestVideoCodecSupportInfo::initTestCase() {
-    m_config = new Config();
-    QVERIFY(NULL != m_config);
-    m_codecInfo = new VideoCodecSupportInfo(m_config);
+    m_codecInfo = new VideoCodecSupportInfo(m_videoEncoderLocation);
     QVERIFY(NULL != m_codecInfo);
 }
 
 void TestVideoCodecSupportInfo::cleanupTestCase() {
     m_codecInfo->deleteLater();
-    m_config->deleteLater();
 }
 
 void TestVideoCodecSupportInfo::constructor() {
-    QVERIFY(m_config == m_codecInfo->m_config);
+    QVERIFY(!m_codecInfo->m_isInitialized);
+    QVERIFY(!m_codecInfo->isInitialized());
 }
 
 bool TestVideoCodecSupportInfo::localTestOpencvSupport(int fourcc) {
@@ -63,13 +69,13 @@ bool TestVideoCodecSupportInfo::localTestOpencvSupport(int fourcc) {
     std::string testFileNameStd(m_testFileName.toLocal8Bit().data());
 
     // try opening & writing file
-    if (!writer.open(testFileNameStd, fourcc, 25, cv::Size(m_config->cameraWidth(), m_config->cameraHeight()))) {
+    if (!writer.open(testFileNameStd, fourcc, 25, cv::Size(m_frameWidth, m_frameHeight))) {
         return false;
     }
     if (!writer.isOpened()) {
         return false;
     }
-    frame = cv::Mat(m_config->cameraHeight(), m_config->cameraWidth(), CV_8UC3);
+    frame = cv::Mat(m_frameHeight, m_frameWidth, CV_8UC3);
     writer.write(frame);
     writer.release();
 
@@ -111,7 +117,7 @@ bool TestVideoCodecSupportInfo::localTestEncoderSupport(QString encoderCodecStr)
     QStringList encoderOutput;
     QStringList args;
     args << "-codecs";
-    encoder.start(m_config->videoEncoderLocation(), args);
+    encoder.start(m_videoEncoderLocation, args);
     encoder.waitForFinished();
     while (encoder.canReadLine()) {
         encoderOutput << encoder.readLine();
@@ -161,7 +167,7 @@ void TestVideoCodecSupportInfo::testEncoderSupport() {
     //QVERIFY(!lagarithSupported);
 }
 
-void TestVideoCodecSupportInfo::init() {
+void TestVideoCodecSupportInfo::initialize() {
     QMap<int, QList<int>> codecSupport;
     QList<int> codecs;
     codecs << CV_FOURCC('I', 'Y', 'U', 'V');
@@ -191,13 +197,17 @@ void TestVideoCodecSupportInfo::init() {
         }
         if (localTestEncoderSupport(encoderCodecStrMap.value(codec))) {
             encoderList = codecSupport.value(codec);
-            encoderList.append(VideoCodecSupportInfo::Encoder);
+            encoderList.append(VideoCodecSupportInfo::External);
             codecSupport.insert(codec, encoderList);
-            QVERIFY(codecSupport.value(codec).contains(VideoCodecSupportInfo::Encoder));
+            QVERIFY(codecSupport.value(codec).contains(VideoCodecSupportInfo::External));
         }
     }
 
+    QVERIFY(!m_codecInfo->m_isInitialized);
+    QVERIFY(!m_codecInfo->isInitialized());
     m_codecInfo->init();
+    QVERIFY(m_codecInfo->m_isInitialized);
+    QVERIFY(m_codecInfo->isInitialized());
 
     // check results
     codecIt.toFront();
@@ -207,8 +217,8 @@ void TestVideoCodecSupportInfo::init() {
         bool actualOpencvSupported = m_codecInfo->m_codecSupport.value(codec).contains(VideoCodecSupportInfo::OpenCv);
         QCOMPARE(actualOpencvSupported, expectedOpencvSupported);
 
-        bool expectedEncoderSupported = codecSupport.value(codec).contains(VideoCodecSupportInfo::Encoder);
-        bool actualEncoderSupported = m_codecInfo->m_codecSupport.value(codec).contains(VideoCodecSupportInfo::Encoder);
+        bool expectedEncoderSupported = codecSupport.value(codec).contains(VideoCodecSupportInfo::External);
+        bool actualEncoderSupported = m_codecInfo->m_codecSupport.value(codec).contains(VideoCodecSupportInfo::External);
         QCOMPARE(actualEncoderSupported, expectedEncoderSupported);
     }
 }
@@ -243,9 +253,9 @@ void TestVideoCodecSupportInfo::isSupportedMethods() {
         }
         if (localTestEncoderSupport(encoderCodecStrMap.value(codec))) {
             encoderList = codecSupport.value(codec);
-            encoderList.append(VideoCodecSupportInfo::Encoder);
+            encoderList.append(VideoCodecSupportInfo::External);
             codecSupport.insert(codec, encoderList);
-            QVERIFY(codecSupport.value(codec).contains(VideoCodecSupportInfo::Encoder));
+            QVERIFY(codecSupport.value(codec).contains(VideoCodecSupportInfo::External));
         }
     }
 
@@ -259,7 +269,7 @@ void TestVideoCodecSupportInfo::isSupportedMethods() {
         bool actualOpencvSupported = m_codecInfo->isOpencvSupported(codec);
         QCOMPARE(actualOpencvSupported, expectedOpencvSupported);
 
-        bool expectedEncoderSupported = codecSupport.value(codec).contains(VideoCodecSupportInfo::Encoder);
+        bool expectedEncoderSupported = codecSupport.value(codec).contains(VideoCodecSupportInfo::External);
         bool actualEncoderSupported = m_codecInfo->isEncoderSupported(codec);
         QCOMPARE(actualEncoderSupported, expectedEncoderSupported);
 

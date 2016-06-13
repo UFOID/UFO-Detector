@@ -1,10 +1,11 @@
 #include "videocodecsupportinfo.h"
 
-VideoCodecSupportInfo::VideoCodecSupportInfo(Config* config, QObject* parent)
+VideoCodecSupportInfo::VideoCodecSupportInfo(QString externalVideoEncoderLocation, QObject* parent)
     : QObject(parent)
 {
-    m_config = config;
+    m_videoEncoderLocation = externalVideoEncoderLocation;
     m_testFileName = "dummy_Wa8F7bVL3lmF4ngfD0894u32Nd.avi";
+    m_isInitialized = false;
 
     m_codecSupport.insert(toFourcc("IYUV"), QList<int>());
     m_codecSupport.insert(toFourcc("FFV1"), QList<int>());
@@ -16,6 +17,9 @@ VideoCodecSupportInfo::VideoCodecSupportInfo(Config* config, QObject* parent)
 }
 
 void VideoCodecSupportInfo::init() {
+    if (m_isInitialized) {
+        return;
+    }
     int codec = 0;
     QListIterator<int> codecIt(m_codecSupport.keys());
     QList<int> encoderList;
@@ -29,10 +33,15 @@ void VideoCodecSupportInfo::init() {
         }
         if (testEncoderSupport(codec)) {
             encoderList = m_codecSupport.value(codec);
-            encoderList.append(VideoCodecSupportInfo::Encoder);
+            encoderList.append(VideoCodecSupportInfo::External);
             m_codecSupport.insert(codec, encoderList);
         }
     }
+    m_isInitialized = true;
+}
+
+bool VideoCodecSupportInfo::isInitialized() {
+    return m_isInitialized;
 }
 
 // static
@@ -46,7 +55,7 @@ bool VideoCodecSupportInfo::isOpencvSupported(int fourcc) {
 }
 
 bool VideoCodecSupportInfo::isEncoderSupported(int fourcc) {
-    return m_codecSupport.value(fourcc).contains(VideoCodecSupportInfo::Encoder);
+    return m_codecSupport.value(fourcc).contains(VideoCodecSupportInfo::External);
 }
 
 QList<int> VideoCodecSupportInfo::supportedCodecs() {
@@ -71,13 +80,13 @@ bool VideoCodecSupportInfo::testOpencvSupport(int fourcc) {
     std::string testFileNameStd(m_testFileName.toLocal8Bit().data());
 
     // try opening & writing file
-    if (!writer.open(testFileNameStd, fourcc, 25, cv::Size(m_config->cameraWidth(), m_config->cameraHeight()))) {
+    if (!writer.open(testFileNameStd, fourcc, 25, cv::Size(640, 480))) {
         return false;
     }
     if (!writer.isOpened()) {
         return false;
     }
-    frame = cv::Mat(m_config->cameraHeight(), m_config->cameraWidth(), CV_8UC3);
+    frame = cv::Mat(480, 640, CV_8UC3);
     writer.write(frame);
     writer.release();
 
@@ -106,7 +115,7 @@ bool VideoCodecSupportInfo::testEncoderSupport(int fourcc) {
     }
 
     args << "-codecs";
-    encoder.start(m_config->videoEncoderLocation(), args);
+    encoder.start(m_videoEncoderLocation, args);
     encoder.waitForFinished();
     while (encoder.canReadLine()) {
         encoderOutput << encoder.readLine();

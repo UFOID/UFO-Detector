@@ -23,13 +23,10 @@ DEFINES += SRCDIR=\\\"$$PWD/\\\" \
 
 include(../../src/opencv.pri)
 
-INCLUDEPATH += ../../src \
-    ../mock
+INCLUDEPATH += ../../src
 
-HEADERS += ../../src/videocodecsupportinfo.h \
-    ../../src/config.h
+HEADERS += ../../src/videocodecsupportinfo.h
 
 SOURCES += testVideoCodecSupportInfo.cpp \
-    ../../src/videocodecsupportinfo.cpp \
-    ../mock/mockconfig.cpp
+    ../../src/videocodecsupportinfo.cpp
 
