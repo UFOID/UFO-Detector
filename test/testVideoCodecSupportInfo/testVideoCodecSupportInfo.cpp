@@ -40,6 +40,7 @@ private Q_SLOTS:
     void testEncoderSupport();
     void initialize();  // init() would be called for each test case
     void isSupportedMethods();
+    void codecName();
 
 private:
     VideoCodecSupportInfo* m_codecInfo;
@@ -309,6 +310,16 @@ void TestVideoCodecSupportInfo::isSupportedMethods() {
         }
     }
 }
+
+void TestVideoCodecSupportInfo::codecName() {
+    QCOMPARE(m_codecInfo->codecName(CV_FOURCC('I', 'Y', 'U', 'V')), QString("Raw Video"));
+    QCOMPARE(m_codecInfo->codecName(CV_FOURCC('F', 'F', 'V', '1')), QString("FFV1 Lossless Video"));
+    QCOMPARE(m_codecInfo->codecName(CV_FOURCC('L', 'A', 'G', 'S')), QString("Lagarith Lossless Video"));
+
+    // case: non-existing codec
+    QCOMPARE(m_codecInfo->codecName(CV_FOURCC('!', '!', '!', '!')), QString(""));
+}
+
 
 QTEST_MAIN(TestVideoCodecSupportInfo)
 

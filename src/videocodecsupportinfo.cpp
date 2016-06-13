@@ -29,9 +29,15 @@ VideoCodecSupportInfo::VideoCodecSupportInfo(QString externalVideoEncoderLocatio
     m_codecSupport.insert(toFourcc("FFV1"), QList<int>());
     m_codecSupport.insert(toFourcc("LAGS"), QList<int>());
 
+    // These codes are used by external encoder (ffmpeg/avconv). Use parameter -codecs for list.
     m_fourccToEncoderStr.insert(toFourcc("IYUV"), "rawvideo");
     m_fourccToEncoderStr.insert(toFourcc("FFV1"), "ffv1");
     m_fourccToEncoderStr.insert(toFourcc("LAGS"), "lagarith");
+
+    // These names are shown to the user for codec selection
+    m_fourccToCodecName.insert(toFourcc("IYUV"), tr("Raw Video"));
+    m_fourccToCodecName.insert(toFourcc("FFV1"), tr("FFV1 Lossless Video"));
+    m_fourccToCodecName.insert(toFourcc("LAGS"), tr("Lagarith Lossless Video"));
 }
 
 bool VideoCodecSupportInfo::init() {
@@ -89,6 +95,10 @@ QList<int> VideoCodecSupportInfo::supportedCodecs() {
         }
     }
     return codecs;
+}
+
+QString VideoCodecSupportInfo::codecName(int fourcc) {
+    return m_fourccToCodecName.value(fourcc, "");
 }
 
 bool VideoCodecSupportInfo::testOpencvSupport(int fourcc) {

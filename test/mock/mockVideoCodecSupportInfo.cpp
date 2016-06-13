@@ -55,3 +55,8 @@ QList<int> VideoCodecSupportInfo::supportedCodecs() {
     return list;
 }
 
+QString VideoCodecSupportInfo::codecName(int fourcc) {
+    Q_UNUSED(fourcc);
+    return "";
+}
+

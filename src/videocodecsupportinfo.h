@@ -89,13 +89,21 @@ public:
      */
     QList<int> supportedCodecs();
 
+    /**
+     * @brief Name of codec to be shown to user
+     * @param fourcc FOURCC code of the codec
+     * @return codec name
+     */
+    QString codecName(int fourcc);
+
 #ifndef _UNIT_TEST_
 private:
 #endif
     QString m_videoEncoderLocation; ///< video encoder executable location
     bool m_isInitialized;           ///< object initialized
     QHash<int, QList<int>> m_codecSupport;      ///< encoder fourcc -> support provider list
-    QHash<int, QString> m_fourccToEncoderStr;    ///< encoder fourcc -> encoder ID string used by encoder
+    QHash<int, QString> m_fourccToEncoderStr;   ///< encoder fourcc -> encoder ID string used by encoder
+    QHash<int, QString> m_fourccToCodecName;    ///< clear text name of codec (max. few words)
 
     QString m_testFileName;     ///< file name used in support tests -- @todo must not collide with existing files
 
