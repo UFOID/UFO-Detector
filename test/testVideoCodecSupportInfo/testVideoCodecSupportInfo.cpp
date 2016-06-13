@@ -262,6 +262,12 @@ void TestVideoCodecSupportInfo::isSupportedMethods() {
         bool expectedEncoderSupported = codecSupport.value(codec).contains(VideoCodecSupportInfo::Encoder);
         bool actualEncoderSupported = m_codecInfo->isEncoderSupported(codec);
         QCOMPARE(actualEncoderSupported, expectedEncoderSupported);
+
+        if (expectedOpencvSupported || expectedEncoderSupported) {
+            QVERIFY(m_codecInfo->supportedCodecs().contains(codec));
+        } else {
+            QVERIFY(!m_codecInfo->supportedCodecs().contains(codec));
+        }
     }
 }
 

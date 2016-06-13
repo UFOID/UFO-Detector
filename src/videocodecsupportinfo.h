@@ -56,6 +56,11 @@ public:
      */
     bool isEncoderSupported(int fourcc);
 
+    /**
+     * @brief List of codecs with some kind of support. Codecs are listed as FOURCC codes.
+     */
+    QList<int> supportedCodecs();
+
 #ifndef _UNIT_TEST_
 private:
 #endif

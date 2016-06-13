@@ -49,6 +49,20 @@ bool VideoCodecSupportInfo::isEncoderSupported(int fourcc) {
     return m_codecSupport.value(fourcc).contains(VideoCodecSupportInfo::Encoder);
 }
 
+QList<int> VideoCodecSupportInfo::supportedCodecs() {
+    QList<int> codecs;
+    QListIterator<int> codecIt(m_codecSupport.keys());
+    int codec = 0;
+
+    while (codecIt.hasNext()) {
+        codec = codecIt.next();
+        if (!m_codecSupport.value(codec).isEmpty()) {
+            codecs << codec;
+        }
+    }
+    return codecs;
+}
+
 bool VideoCodecSupportInfo::testOpencvSupport(int fourcc) {
     cv::VideoWriter writer;
     cv::Mat frame;
