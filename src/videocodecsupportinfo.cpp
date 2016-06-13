@@ -16,6 +16,23 @@ VideoCodecSupportInfo::VideoCodecSupportInfo(Config* config, QObject* parent)
 }
 
 void VideoCodecSupportInfo::init() {
+    int codec = 0;
+    QListIterator<int> codecIt(m_codecSupport.keys());
+    QList<int> encoderList;
+
+    while (codecIt.hasNext()) {
+        codec = codecIt.next();
+        if (testOpencvSupport(codec)) {
+            encoderList = m_codecSupport.value(codec);
+            encoderList.append(VideoCodecSupportInfo::OpenCv);
+            m_codecSupport.insert(codec, encoderList);
+        }
+        if (testEncoderSupport(codec)) {
+            encoderList = m_codecSupport.value(codec);
+            encoderList.append(VideoCodecSupportInfo::Encoder);
+            m_codecSupport.insert(codec, encoderList);
+        }
+    }
 }
 
 // static
@@ -25,23 +42,11 @@ int VideoCodecSupportInfo::toFourcc(QString fourccStr) {
 }
 
 bool VideoCodecSupportInfo::isOpencvSupported(int fourcc) {
-    Q_UNUSED(fourcc);
-    return false;
-}
-
-bool VideoCodecSupportInfo::isOpencvSupported(QString fourccStr) {
-    Q_UNUSED(fourccStr);
-    return false;
+    return m_codecSupport.value(fourcc).contains(VideoCodecSupportInfo::OpenCv);
 }
 
 bool VideoCodecSupportInfo::isEncoderSupported(int fourcc) {
-    Q_UNUSED(fourcc);
-    return false;
-}
-
-bool VideoCodecSupportInfo::isEncoderSupported(QString fourccStr) {
-    Q_UNUSED(fourccStr);
-    return false;
+    return m_codecSupport.value(fourcc).contains(VideoCodecSupportInfo::Encoder);
 }
 
 bool VideoCodecSupportInfo::testOpencvSupport(int fourcc) {

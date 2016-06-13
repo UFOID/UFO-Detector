@@ -42,8 +42,6 @@ public:
      */
     static int toFourcc(QString fourccStr);
 
-    QStringList codecStrList();
-
     /**
      * @brief Whether OpenCV supports the specified codec.
      * @param fourcc FOURCC code for codec
@@ -52,25 +50,11 @@ public:
     bool isOpencvSupported(int fourcc);
 
     /**
-     * @brief Whether OpenCV supports the specified codec.
-     * @param fourccStr FOURCC code for codec
-     * @return true: codec supported, false: not supported
-     */
-    bool isOpencvSupported(QString fourccStr);
-
-    /**
      * @brief Whether the video encoder supports the specified codec.
      * @param fourcc FOURCC code for codec
      * @return true: codec supported, false: not supported
      */
     bool isEncoderSupported(int fourcc);
-
-    /**
-     * @brief Whether the video encoder supports the specified codec.
-     * @param fourccStr FOURCC code for codec
-     * @return true: codec supported, false: not supported
-     */
-    bool isEncoderSupported(QString fourccStr);
 
 #ifndef _UNIT_TEST_
 private:
