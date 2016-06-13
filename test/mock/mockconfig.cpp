@@ -106,6 +106,10 @@ QString Config::userTokenAtUfoId() {
     return "";
 }
 
+VideoCodecSupportInfo* Config::videoCodecSupportInfo() {
+    return m_videoCodecSupportInfo;
+}
+
 void Config::setApplicationVersion(QString version) {
     Q_UNUSED(version);
 }

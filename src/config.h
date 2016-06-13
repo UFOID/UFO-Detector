@@ -19,6 +19,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include "videocodecsupportinfo.h"
 #include <QObject>
 #include <QSettings>
 #include <QApplication>
@@ -61,6 +62,8 @@ public:
     };
 
     explicit Config(QObject *parent = 0);
+
+    ~Config();
 
     /**
      * @brief applicationVersion Application version number
@@ -176,6 +179,8 @@ public:
      * @return
      */
     QString userTokenAtUfoId();
+
+    VideoCodecSupportInfo* videoCodecSupportInfo();
 
     /**
      * @brief setApplicationVersion set application version. Format: major.minor.subminor
@@ -305,6 +310,8 @@ private:
     bool m_defaultSaveResultImages;     ///< whether to save result images by default
 
     QString m_defaultUserTokenAtUfoId;  ///< default user token for ufoid.net: empty value by default
+
+    VideoCodecSupportInfo* m_videoCodecSupportInfo; ///< info about video codec support
 
 signals:
     /**

@@ -82,6 +82,13 @@ Config::Config(QObject *parent) : QObject(parent)
     m_defaultSaveResultImages = false;
 
     m_defaultUserTokenAtUfoId = "";
+
+    m_videoCodecSupportInfo = new VideoCodecSupportInfo(m_defaultVideoEncoderLocation);
+    m_videoCodecSupportInfo->init();
+}
+
+Config::~Config() {
+    m_videoCodecSupportInfo->deleteLater();
 }
 
 QString Config::applicationVersion() {
@@ -162,6 +169,10 @@ int Config::detectionAreaSize() {
 
 QString Config::userTokenAtUfoId() {
     return m_settings->value(m_settingKeys[Config::UserTokenAtUfoId], m_defaultUserTokenAtUfoId).toString();
+}
+
+VideoCodecSupportInfo* Config::videoCodecSupportInfo() {
+    return m_videoCodecSupportInfo;
 }
 
 void Config::setApplicationVersion(QString version) {
