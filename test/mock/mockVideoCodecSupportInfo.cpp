@@ -34,10 +34,14 @@ bool VideoCodecSupportInfo::isInitialized() {
     return m_isInitialized;
 }
 
-// static
-int VideoCodecSupportInfo::toFourcc(QString fourccStr) {
-    Q_UNUSED(fourccStr);
-    return 0;
+int VideoCodecSupportInfo::stringToFourcc(QString fourccStr) {
+    char* str = fourccStr.toLocal8Bit().data();
+    return CV_FOURCC(str[0], str[1], str[2], str[3]);
+}
+
+QString VideoCodecSupportInfo::fourccToString(int fourcc) {
+    Q_UNUSED(fourcc);
+    return "";
 }
 
 bool VideoCodecSupportInfo::isOpencvSupported(int fourcc) {
@@ -58,5 +62,14 @@ QList<int> VideoCodecSupportInfo::supportedCodecs() {
 QString VideoCodecSupportInfo::codecName(int fourcc) {
     Q_UNUSED(fourcc);
     return "";
+}
+
+QString VideoCodecSupportInfo::fourccToEncoderString(int fourcc) {
+    Q_UNUSED(fourcc);
+    return "";
+}
+
+QString VideoCodecSupportInfo::rawVideoCodecStr() {
+    return "IYUV";
 }
 

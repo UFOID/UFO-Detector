@@ -27,7 +27,6 @@ Recorder::Recorder(Camera *cameraPtr, Config *configPtr) :
     m_drawRectangles = m_config->resultVideoWithObjectRectangles();
     m_resultDataFile.setFileName(m_config->resultDataFile());
     m_resultVideoDirName = m_config->resultVideoDir();
-    m_codecSetting = m_config->resultVideoCodec();
     m_thumbnailDirName = "thumbnails";
     m_thumbnailExtension = ".jpg";
 
@@ -50,30 +49,9 @@ Recorder::Recorder(Camera *cameraPtr, Config *configPtr) :
             (int)(thumbnailWidth / aspectRatio), m_defaultThumbnailSideLength);
     m_thumbnailResolution = Size(thumbnailWidth, thumbnailHeight);
 
-    if (m_codecSetting == 2)
-    {
-        m_videoCodec = CV_FOURCC('L', 'A', 'G', 'S');
-    }
-    else if (m_codecSetting == 0 || m_codecSetting == 1)
-    {
-        // if requesting FFV1 codec use default codec and use ffmpeg/avconv to convert
-        m_videoCodec = DEFAULT_CODEC;
-    }
-    /*switch (m_codecSetting) {
-        case 0:
-            m_videoCodec = CV_FOURCC('I', 'Y', 'U', 'V');
-            break;
-        case 1:
-            m_videoCodec = CV_FOURCC('F', 'F', 'V', '1');
-            break;
-        case 2:
-            m_videoCodec = CV_FOURCC('L', 'A', 'G', 'S');
-            break;
-    }*/
-
     reloadResultDataFile();
     m_recording = false;
-    connect(this, SIGNAL(videoEncodingRequested(QString,QString)), this, SLOT(startEncodingVideoToFFV1(QString,QString)));
+    connect(this, SIGNAL(videoEncodingRequested(QString,QString)), this, SLOT(startEncodingVideo(QString,QString)));
     qDebug() << "Recorder created";
 }
 
@@ -105,7 +83,22 @@ void Recorder::recordThread(){
     QString dateTime = QDateTime::currentDateTime().toString("yyyy-MM-dd--hh-mm-ss");
     QString filenameTemp = m_resultVideoDirName + "/Capture--" + dateTime + "temp" + m_videoFileExtension;
     QString filenameFinal = m_resultVideoDirName + "/Capture--" + dateTime + m_videoFileExtension;
-    m_videoWriter.open(filenameTemp.toStdString(), m_videoCodec, OUTPUT_FPS, m_videoResolution, true);
+    int recordCodec = m_config->resultVideoCodec();
+    bool recordCodecIsFinal = true;
+    VideoCodecSupportInfo* codecInfo = m_config->videoCodecSupportInfo();
+
+    // record temporary video directly with OpenCV if it supports the final codec
+    if (!codecInfo->isOpencvSupported(recordCodec))
+    {
+        // no support in OpenCV -> record with raw video codec
+        recordCodec = codecInfo->stringToFourcc(codecInfo->rawVideoCodecStr());
+        if (codecInfo->isEncoderSupported(m_config->resultVideoCodec()))
+        {
+            // encode only when encoder supports codec, otherwise video will be left raw video
+            recordCodecIsFinal = false;
+        }
+    }
+    m_videoWriter.open(filenameTemp.toStdString(), recordCodec, OUTPUT_FPS, m_videoResolution, true);
 
     qDebug() << "Video timestamp" << dateTime;
 
@@ -154,9 +147,9 @@ void Recorder::recordThread(){
     if(m_willSaveVideo)
     {
         saveResultData(dateTime, videoLength);
-        if(m_codecSetting==1)
+        if(!recordCodecIsFinal)
         {
-            // Convert raw video to FFV1
+            // Convert raw video to final codec with external encoder
             emit videoEncodingRequested(filenameTemp, filenameFinal);
         }
         else
@@ -175,14 +168,16 @@ void Recorder::recordThread(){
     }
 }
 
-void Recorder::startEncodingVideoToFFV1(QString tempVideoFileName, QString targetVideoFileName)
+void Recorder::startEncodingVideo(QString tempVideoFileName, QString targetVideoFileName)
 {
     QProcess* proc = new QProcess();
     m_encoderProcesses.push_back(proc);
     m_tempVideoFiles.push_back(tempVideoFileName);
     QStringList args;
+    int codec = m_config->resultVideoCodec();
+    QString codecStr = m_config->videoCodecSupportInfo()->fourccToEncoderString(codec);
     // these video encoder parameters are ok only for ffmpeg and avconv (which are more or less compatible)
-    args << "-i" << tempVideoFileName << "-vcodec" << "ffv1" << targetVideoFileName;
+    args << "-i" << tempVideoFileName << "-vcodec" << codecStr << targetVideoFileName;
     connect(proc, SIGNAL(finished(int)), this, SLOT(onVideoEncodingFinished()));
     proc->start(m_config->videoEncoderLocation(), args);
 }

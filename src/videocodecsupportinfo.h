@@ -21,6 +21,7 @@
 
 #include <QObject>
 #include <QProcess>
+#include <QMap>
 #include <QHash>
 #include <QFile>
 #include <QDebug>
@@ -68,7 +69,14 @@ public:
      * @param fourccStr FOURCC code as string
      * @return FOURCC code
      */
-    static int toFourcc(QString fourccStr);
+    int stringToFourcc(QString fourccStr);
+
+    /**
+     * @brief Convert FOURCC code to FOURCC string.
+     * @param fourcc
+     * @return
+     */
+    QString fourccToString(int fourcc);
 
     /**
      * @brief Whether OpenCV supports the specified codec.
@@ -96,16 +104,31 @@ public:
      */
     QString codecName(int fourcc);
 
+    /**
+     * @brief Convert FOURCC code to string used by external encoder.
+     * @param fourcc FOURCC code of the codec
+     * @return Codec string used by external encoder
+     */
+    QString fourccToEncoderString(int fourcc);
+
+    /**
+     * @brief Shortcut to get raw video codec string
+     * @return raw video codec as FOURCC string ("IYUV")
+     */
+    QString rawVideoCodecStr();
+
 #ifndef _UNIT_TEST_
 private:
 #endif
     QString m_videoEncoderLocation; ///< video encoder executable location
     bool m_isInitialized;           ///< object initialized
-    QHash<int, QList<int>> m_codecSupport;      ///< encoder fourcc -> support provider list
+    /// @todo table model would be clearer. Columns: fourcc, encoderStr, codecName, encoderList
+    QMap<int, QList<int>> m_codecSupport;      ///< encoder fourcc -> support provider list
     QHash<int, QString> m_fourccToEncoderStr;   ///< encoder fourcc -> encoder ID string used by encoder
     QHash<int, QString> m_fourccToCodecName;    ///< clear text name of codec (max. few words)
 
     QString m_testFileName;     ///< file name used in support tests -- @todo must not collide with existing files
+    QString m_rawVideoCodecStr; ///< raw video codec FOURCC string
 
     /**
      * @brief Test whether OpenCV supports the specified codec.

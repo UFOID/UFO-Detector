@@ -41,6 +41,8 @@ private Q_SLOTS:
     void initialize();  // init() would be called for each test case
     void isSupportedMethods();
     void codecName();
+    void toFromFourcc();
+    void rawVideoCodecStr();
 
 private:
     VideoCodecSupportInfo* m_codecInfo;
@@ -59,8 +61,10 @@ TestVideoCodecSupportInfo::TestVideoCodecSupportInfo()
     m_videoEncoderLocation = "";
 #if defined(Q_OS_LINUX) || defined(Q_OS_UNIX)
     m_videoEncoderLocation = "/usr/bin/avconv";
+#elif defined(Q_OS_WIN)
+    m_videoEncoderLocation = QCoreApplication::applicationDirPath()+"/ffmpeg.exe";
 #endif
-    QVERIFY(m_videoEncoderLocation != "");
+    QVERIFY(!m_videoEncoderLocation.isEmpty());
     m_frameWidth = 640;
     m_frameHeight = 480;
 }
@@ -318,6 +322,26 @@ void TestVideoCodecSupportInfo::codecName() {
 
     // case: non-existing codec
     QCOMPARE(m_codecInfo->codecName(CV_FOURCC('!', '!', '!', '!')), QString(""));
+}
+
+void TestVideoCodecSupportInfo::toFromFourcc() {
+    QCOMPARE(m_codecInfo->stringToFourcc("IYUV"), CV_FOURCC('I', 'Y', 'U', 'V'));
+    QCOMPARE(m_codecInfo->stringToFourcc("FFV1"), CV_FOURCC('F', 'F', 'V', '1'));
+    QCOMPARE(m_codecInfo->stringToFourcc("LAGS"), CV_FOURCC('L', 'A', 'G', 'S'));
+    QCOMPARE(m_codecInfo->stringToFourcc("1"), 0);
+
+    QCOMPARE(m_codecInfo->fourccToString(CV_FOURCC('I', 'Y', 'U', 'V')), QString("IYUV"));
+    QCOMPARE(m_codecInfo->fourccToString(CV_FOURCC('F', 'F', 'V', '1')), QString("FFV1"));
+    QCOMPARE(m_codecInfo->fourccToString(CV_FOURCC('L', 'A', 'G', 'S')), QString("LAGS"));
+    //QCOMPARE(VideoCodecSupportInfo::fourccToString(0), QString(""));
+
+    QCOMPARE(m_codecInfo->fourccToEncoderString(CV_FOURCC('I', 'Y', 'U', 'V')), QString("rawvideo"));
+    QCOMPARE(m_codecInfo->fourccToEncoderString(CV_FOURCC('F', 'F', 'V', '1')), QString("ffv1"));
+    QCOMPARE(m_codecInfo->fourccToEncoderString(CV_FOURCC('L', 'A', 'G', 'S')), QString("lagarith"));
+}
+
+void TestVideoCodecSupportInfo::rawVideoCodecStr() {
+    QCOMPARE(m_codecInfo->rawVideoCodecStr(), QString("IYUV"));
 }
 
 

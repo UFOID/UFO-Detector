@@ -67,24 +67,24 @@ Config::Config(QObject *parent) : QObject(parent)
     m_defaultDetectionDataDir = QStandardPaths::writableLocation(QStandardPaths::HomeLocation) +"/.UFO ID";
 #endif
 
+    m_videoCodecSupportInfo = new VideoCodecSupportInfo(m_defaultVideoEncoderLocation);
+    m_videoCodecSupportInfo->init();
+
     m_defaultResultDataFileName = m_defaultDetectionDataDir + "/logs.xml";
     m_defaultResultDocumentDir = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)+"/UFO ID";
     m_defaultDetectionAreaFileName = m_defaultDetectionDataDir + "/detectionArea.xml";
 
     m_defaultResultVideoDir = m_defaultResultDocumentDir + "/Videos";
     if ((QSysInfo::windowsVersion()==QSysInfo::WV_WINDOWS8) || (QSysInfo::windowsVersion()==QSysInfo::WV_WINDOWS8_1)) {
-        m_defaultVideoCodec = 2;
+        m_defaultVideoCodecStr = "LAGS";
     } else {
-        m_defaultVideoCodec = 1;
+        m_defaultVideoCodecStr = "FFV1";
     }
     m_defaultResultVideoWithRectangles = false;
     m_defaultResultImageDir = m_defaultResultDocumentDir + "/Images";
     m_defaultSaveResultImages = false;
 
     m_defaultUserTokenAtUfoId = "";
-
-    m_videoCodecSupportInfo = new VideoCodecSupportInfo(m_defaultVideoEncoderLocation);
-    m_videoCodecSupportInfo->init();
 }
 
 Config::~Config() {
@@ -143,8 +143,12 @@ QString Config::resultVideoDir() {
     return m_settings->value(m_settingKeys[Config::ResultVideoDir], m_defaultResultVideoDir).toString();
 }
 
+QString Config::resultVideoCodecStr() {
+    return m_settings->value(m_settingKeys[Config::ResultVideoCodec], m_defaultVideoCodecStr).toString();
+}
+
 int Config::resultVideoCodec() {
-    return m_settings->value(m_settingKeys[Config::ResultVideoCodec], m_defaultVideoCodec).toInt();
+    return m_videoCodecSupportInfo->stringToFourcc(this->resultVideoCodecStr());
 }
 
 bool Config::resultVideoWithObjectRectangles() {
@@ -241,7 +245,7 @@ void Config::setResultVideoDir(QString dirName) {
     emit settingsChanged();
 }
 
-void Config::setResultVideoCodec(int codec) {
+void Config::setResultVideoCodec(QString codec) {
     m_settings->setValue(m_settingKeys[Config::ResultVideoCodec], QVariant(codec));
     m_settings->sync();
     emit settingsChanged();

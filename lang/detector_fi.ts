@@ -4,42 +4,42 @@
 <context>
     <name>ActualDetector</name>
     <message>
-        <location filename="../src/actualdetector.cpp" line="120"/>
-        <source>WARNING: could not load cascade classifier</source>
+        <location filename="../src/actualdetector.cpp" line="85"/>
+        <source>WARNING: could not load bird detection data (cascade classifier file)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/actualdetector.cpp" line="184"/>
+        <location filename="../src/actualdetector.cpp" line="185"/>
         <source>Positive detection - starting video recording</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/actualdetector.cpp" line="244"/>
+        <location filename="../src/actualdetector.cpp" line="245"/>
         <source>One object identified as a bird</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/actualdetector.cpp" line="250"/>
+        <location filename="../src/actualdetector.cpp" line="251"/>
         <source>Finished recording - All found objects negative: removed video</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/actualdetector.cpp" line="259"/>
+        <location filename="../src/actualdetector.cpp" line="260"/>
         <source>Finished recording - At least one object found positive: saved video</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/actualdetector.cpp" line="265"/>
+        <location filename="../src/actualdetector.cpp" line="266"/>
         <source>Finished recording - Minimum required positive detections not met: removed video</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/actualdetector.cpp" line="559"/>
+        <location filename="../src/actualdetector.cpp" line="564"/>
         <source>%1 area(s) being ignored in order to filter the moon and stars</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/actualdetector.cpp" line="740"/>
+        <location filename="../src/actualdetector.cpp" line="747"/>
         <source>ERROR: Selected area of detection does not match camera resolution. Re-select area of detection.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -47,25 +47,8 @@
 <context>
     <name>CameraResolutionDialog</name>
     <message>
-        <location filename="../src/cameraresolutiondialog.ui" line="26"/>
-        <source>Query supported web camera resolutions</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../src/cameraresolutiondialog.ui" line="46"/>
         <source>Warning</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/cameraresolutiondialog.ui" line="59"/>
-        <source>- Querying the supported web camera resolutions causes problems with some web camera brands. Use at your own risk.</source>
-        <extracomment>Bullet list item</extracomment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/cameraresolutiondialog.ui" line="78"/>
-        <source>- Recommended to use only vendor-supported resolutions</source>
-        <extracomment>Bullet list item</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -75,18 +58,33 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/cameraresolutiondialog.ui" line="112"/>
-        <source>Query status</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../src/cameraresolutiondialog.ui" line="142"/>
         <source>Available resolutions</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../src/cameraresolutiondialog.ui" line="26"/>
+        <source>Check supported web camera resolutions</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/cameraresolutiondialog.ui" line="59"/>
+        <source>- Checking the supported web camera resolutions causes problems with some web camera brands.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/cameraresolutiondialog.ui" line="78"/>
+        <source>- It is recommended to read your webcam specification or manual for supported resolutions</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/cameraresolutiondialog.ui" line="112"/>
+        <source>Checking status</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../src/cameraresolutiondialog.ui" line="171"/>
-        <source>&amp;Start querying</source>
+        <source>&amp;Start checking</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -256,242 +254,205 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.ui" line="601"/>
-        <location filename="../src/mainwindow.cpp" line="429"/>
+        <location filename="../src/mainwindow.ui" line="532"/>
+        <location filename="../src/mainwindow.cpp" line="411"/>
         <source>Detection not running</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.ui" line="640"/>
+        <location filename="../src/mainwindow.ui" line="571"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Deactivate for better performance&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.ui" line="643"/>
+        <location filename="../src/mainwindow.ui" line="574"/>
         <source>Display webcam during detection (not recommended)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.ui" line="690"/>
-        <location filename="../src/mainwindow.cpp" line="508"/>
+        <location filename="../src/mainwindow.ui" line="621"/>
+        <location filename="../src/mainwindow.cpp" line="505"/>
         <source>About</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.ui" line="737"/>
+        <location filename="../src/mainwindow.ui" line="668"/>
         <source>1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.ui" line="757"/>
+        <location filename="../src/mainwindow.ui" line="688"/>
         <source>Filter noise by pixel size</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.ui" line="769"/>
-        <location filename="../src/mainwindow.ui" line="853"/>
+        <location filename="../src/mainwindow.ui" line="700"/>
+        <location filename="../src/mainwindow.ui" line="784"/>
         <source>?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.ui" line="821"/>
+        <location filename="../src/mainwindow.ui" line="752"/>
         <source>10</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.ui" line="841"/>
+        <location filename="../src/mainwindow.ui" line="772"/>
         <source>Select threshold</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.ui" line="885"/>
+        <location filename="../src/mainwindow.ui" line="816"/>
         <source>0</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.ui" line="902"/>
+        <location filename="../src/mainwindow.ui" line="833"/>
         <source>Number of recorded videos</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.ui" line="938"/>
-        <location filename="../src/mainwindow.cpp" line="438"/>
+        <location filename="../src/mainwindow.ui" line="869"/>
+        <location filename="../src/mainwindow.cpp" line="420"/>
         <source>Start detection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.ui" line="956"/>
+        <location filename="../src/mainwindow.ui" line="887"/>
         <source>Settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.ui" line="963"/>
+        <location filename="../src/mainwindow.ui" line="894"/>
         <source>Clear messages</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.ui" line="970"/>
+        <location filename="../src/mainwindow.ui" line="901"/>
         <source>Upload images</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.ui" line="980"/>
-        <source>PushButton</source>
+        <location filename="../src/mainwindow.ui" line="911"/>
+        <source>Start rec</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="95"/>
+        <location filename="../src/mainwindow.cpp" line="73"/>
         <source>For feedback and bug reports contact the developer at contact@ufoid.net</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="214"/>
-        <location filename="../src/mainwindow.cpp" line="384"/>
+        <location filename="../src/mainwindow.cpp" line="198"/>
+        <location filename="../src/mainwindow.cpp" line="366"/>
         <source>Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="214"/>
+        <location filename="../src/mainwindow.cpp" line="198"/>
         <source>Playing video file while recording another video is disabled. Wait until the recording has finished.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="232"/>
+        <location filename="../src/mainwindow.cpp" line="216"/>
         <source>Delete video</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="233"/>
-        <source>Do you really want to delete this video?</source>
+        <location filename="../src/mainwindow.cpp" line="217"/>
+        <source>Do you want to permanently delete this video?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="264"/>
+        <location filename="../src/mainwindow.cpp" line="248"/>
         <source>Video list</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="265"/>
+        <location filename="../src/mainwindow.cpp" line="249"/>
         <source>Delete selected items</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="276"/>
+        <location filename="../src/mainwindow.cpp" line="260"/>
         <source>Delete videos</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="277"/>
+        <location filename="../src/mainwindow.cpp" line="261"/>
         <source>Do you really want to delete the selected videos?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="307"/>
-        <location filename="../src/mainwindow.cpp" line="330"/>
+        <location filename="../src/mainwindow.cpp" line="291"/>
+        <location filename="../src/mainwindow.cpp" line="313"/>
         <source>%1 - Positive: %2 Negative: %3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="310"/>
+        <location filename="../src/mainwindow.cpp" line="294"/>
         <source>%1 - Positive detections: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="333"/>
+        <location filename="../src/mainwindow.cpp" line="316"/>
         <source>%1 - Negative detections: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="343"/>
+        <location filename="../src/mainwindow.cpp" line="325"/>
         <source>ERROR: XML file containing the detection area information was not read correctly.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="344"/>
+        <location filename="../src/mainwindow.cpp" line="326"/>
         <source>ERROR: Detection is not working. Select area of detection first in the settings.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="384"/>
+        <location filename="../src/mainwindow.cpp" line="366"/>
         <source>Cannot edit settings when detection process is running. Stop the detection process first.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="409"/>
-        <source>Detection started on %1</source>
+        <location filename="../src/mainwindow.cpp" line="391"/>
+        <source>Detection started at %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="411"/>
+        <location filename="../src/mainwindow.cpp" line="393"/>
         <source>Stop detection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="415"/>
+        <location filename="../src/mainwindow.cpp" line="397"/>
         <source>Failed to start detection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="550"/>
+        <location filename="../src/mainwindow.cpp" line="542"/>
         <source>Error: Selected webcam resolution is NOT ok</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="643"/>
+        <location filename="../src/mainwindow.cpp" line="651"/>
         <source>ERROR: Found webcam but video frame could not be read. Reconnect and check resolution in settings.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="658"/>
-        <location filename="../src/mainwindow.cpp" line="673"/>
-        <source>ERROR: Could not find Raw Video Codec</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/mainwindow.cpp" line="659"/>
-        <location filename="../src/mainwindow.cpp" line="674"/>
-        <source>ERROR: Please contact the developer with the information about your system</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/mainwindow.cpp" line="685"/>
-        <source>ERROR: Could not find video encoder needed for FFV1 Codec.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/mainwindow.cpp" line="686"/>
-        <source>ERROR: Please install ffmpeg or avconv, or contact the developer.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/mainwindow.cpp" line="688"/>
-        <source>Using video encoder %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/mainwindow.cpp" line="698"/>
-        <source>ERROR: Could not find Lagarith Lossless Video Codec</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/mainwindow.cpp" line="699"/>
-        <source>ERROR: Download and install from http://lags.leetcode.net/codec.html</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/mainwindow.cpp" line="848"/>
-        <location filename="../src/mainwindow.cpp" line="853"/>
+        <location filename="../src/mainwindow.cpp" line="811"/>
+        <location filename="../src/mainwindow.cpp" line="816"/>
         <source>Information</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="848"/>
+        <location filename="../src/mainwindow.cpp" line="811"/>
         <source>Select the pixel size of noise that will be ignored in the detection. 
 Recommended value: 2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="853"/>
+        <location filename="../src/mainwindow.cpp" line="816"/>
         <source>Select the threshold filter value that will be used in the motion detection algorithm. 
 Increase the value if clouds are being detected. 
 Recommended value: 10</source>
@@ -506,199 +467,179 @@ Recommended value: 10</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="43"/>
+        <location filename="../src/settingsdialog.ui" line="250"/>
         <source>Width</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="53"/>
+        <location filename="../src/settingsdialog.ui" line="260"/>
         <source>Height</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="65"/>
-        <location filename="../src/settingsdialog.ui" line="79"/>
-        <location filename="../src/settingsdialog.ui" line="257"/>
-        <location filename="../src/settingsdialog.ui" line="344"/>
+        <location filename="../src/settingsdialog.ui" line="88"/>
+        <location filename="../src/settingsdialog.ui" line="189"/>
+        <location filename="../src/settingsdialog.ui" line="196"/>
+        <location filename="../src/settingsdialog.ui" line="210"/>
         <source>...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="72"/>
+        <location filename="../src/settingsdialog.ui" line="172"/>
         <source>UFOID user token</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="89"/>
+        <location filename="../src/settingsdialog.ui" line="47"/>
         <source>Image path</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="97"/>
+        <location filename="../src/settingsdialog.ui" line="122"/>
         <source>Webcam 1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="102"/>
+        <location filename="../src/settingsdialog.ui" line="127"/>
         <source>Webcam 2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="107"/>
+        <location filename="../src/settingsdialog.ui" line="132"/>
         <source>Webcam 3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="112"/>
+        <location filename="../src/settingsdialog.ui" line="137"/>
         <source>Webcam 4</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="120"/>
+        <location filename="../src/settingsdialog.ui" line="152"/>
         <source>Video path</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="127"/>
-        <location filename="../src/settingsdialog.ui" line="207"/>
+        <location filename="../src/settingsdialog.ui" line="54"/>
+        <location filename="../src/settingsdialog.ui" line="61"/>
         <source>?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="134"/>
+        <location filename="../src/settingsdialog.ui" line="312"/>
         <source>Draw rectangle around object in the video</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="151"/>
-        <source>Area Status:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/settingsdialog.ui" line="175"/>
+        <location filename="../src/settingsdialog.ui" line="289"/>
         <source>Save</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="182"/>
+        <location filename="../src/settingsdialog.ui" line="296"/>
         <source>Close</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="194"/>
+        <location filename="../src/settingsdialog.ui" line="108"/>
         <source>Save images</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="230"/>
+        <location filename="../src/settingsdialog.ui" line="217"/>
         <source>Select webcam</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="242"/>
+        <location filename="../src/settingsdialog.ui" line="73"/>
         <source>Minimum required number of positive detections</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="265"/>
-        <source>Raw Video</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/settingsdialog.ui" line="270"/>
-        <source>FFV1 Lossless Video</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/settingsdialog.ui" line="275"/>
-        <source>Lagarith Lossless Video</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/settingsdialog.ui" line="283"/>
+        <location filename="../src/settingsdialog.ui" line="95"/>
         <source>Video codec</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="290"/>
+        <location filename="../src/settingsdialog.ui" line="145"/>
         <source>Detection area file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="312"/>
+        <location filename="../src/settingsdialog.ui" line="239"/>
         <source>Select detection area</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="351"/>
+        <location filename="../src/settingsdialog.ui" line="203"/>
         <source>Select resolution</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="109"/>
-        <location filename="../src/settingsdialog.cpp" line="191"/>
+        <location filename="../src/settingsdialog.cpp" line="118"/>
+        <location filename="../src/settingsdialog.cpp" line="200"/>
         <source>Select Directory</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="132"/>
+        <location filename="../src/settingsdialog.cpp" line="141"/>
         <source>Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="132"/>
+        <location filename="../src/settingsdialog.cpp" line="141"/>
         <source>Unknown camera aspect ratio. Please change camera width and/or height. Settings are not saved.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="138"/>
+        <location filename="../src/settingsdialog.cpp" line="147"/>
         <source>Information</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="138"/>
+        <location filename="../src/settingsdialog.cpp" line="147"/>
         <source>Settings saved successfully. Restart the application to apply the changes.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="182"/>
+        <location filename="../src/settingsdialog.cpp" line="191"/>
         <source>Select the detection area file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="182"/>
+        <location filename="../src/settingsdialog.cpp" line="191"/>
         <source>XML files (*.xml)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="203"/>
+        <location filename="../src/settingsdialog.cpp" line="212"/>
         <source>Warning</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="203"/>
+        <location filename="../src/settingsdialog.cpp" line="212"/>
         <source>Restart the application before creating detection area file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="246"/>
+        <location filename="../src/settingsdialog.cpp" line="255"/>
         <source>Codec Information</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="246"/>
+        <location filename="../src/settingsdialog.cpp" line="255"/>
         <source>Raw Video results is big file sizes. 
 A lossless codec is recommended. 
 Windows 8 users should use the Lagarith Codec.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="251"/>
+        <location filename="../src/settingsdialog.cpp" line="260"/>
         <source>UFOID.net User Token</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="251"/>
+        <location filename="../src/settingsdialog.cpp" line="260"/>
         <source>Copy the user token from your UFOID account into this field to enable the upload feature. 
 The code can be found at http://ufoid.net/profile/edit</source>
         <translation type="unfinished"></translation>
@@ -724,6 +665,24 @@ The code can be found at http://ufoid.net/profile/edit</source>
     <message>
         <location filename="../src/updateapplicationdialog.cpp" line="28"/>
         <source>New version: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>VideoCodecSupportInfo</name>
+    <message>
+        <location filename="../src/videocodecsupportinfo.cpp" line="40"/>
+        <source>Raw Video</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/videocodecsupportinfo.cpp" line="41"/>
+        <source>FFV1 Lossless Video</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/videocodecsupportinfo.cpp" line="42"/>
+        <source>Lagarith Lossless Video</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

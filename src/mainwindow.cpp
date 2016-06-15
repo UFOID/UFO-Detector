@@ -40,7 +40,6 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
     m_cameraViewResolution = Size(width, height);
     const int NOISELEVEL = m_config->noiseFilterPixelSize();
     QString VERSION = m_config->applicationVersion();
-    const int codec = m_config->resultVideoCodec();
 
     if ((VERSION == "") || (VERSION < m_programVersion))
     {
@@ -73,7 +72,7 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
     ui->progressBar->hide();
     ui->outputText->append(tr("For feedback and bug reports contact the developer at contact@ufoid.net"));
 
-    if (checkCameraAndCodec(width, height, codec))
+    if (checkCamera(width, height))
     {
         threadWebcam.reset(new std::thread(&MainWindow::updateWebcamFrame, this));
     }
@@ -634,10 +633,7 @@ void MainWindow::checkDetectionAreaFile()
     }
 }
 
-/*
- * Check camera and codec
- */
-bool MainWindow::checkCameraAndCodec(const int width, const int height, const int codec)
+bool MainWindow::checkCamera(const int width, const int height)
 {
     bool success = false;
     if (checkAndSetResolution(width, height) && !threadWebcam && m_camera->isWebcamOpen())
@@ -645,7 +641,7 @@ bool MainWindow::checkCameraAndCodec(const int width, const int height, const in
         try
         {
             m_webcamFrame = m_camera->getWebcamFrame();
-            cv::resize(m_webcamFrame,m_webcamFrame, m_cameraViewResolution,0, 0, INTER_CUBIC);
+            cv::resize(m_webcamFrame, m_webcamFrame, m_cameraViewResolution, 0, 0, INTER_CUBIC);
             success = true;
         }
         catch( cv::Exception& e )
@@ -658,64 +654,6 @@ bool MainWindow::checkCameraAndCodec(const int width, const int height, const in
     else if (!m_camera->isWebcamOpen())
     {
         ui->outputText->append("ERROR: Could not open webcam. Select webcam in settings");
-    }
-
-
-    if (codec==0)
-    {
-        VideoWriter theVideoWriter;
-        theVideoWriter.open("filename.avi", 0, 25, Size(width, height), true);
-        if (!theVideoWriter.isOpened())
-        {
-            ui->outputText->append(tr("ERROR: Could not find Raw Video Codec"));
-            ui->outputText->append(tr("ERROR: Please contact the developer with the information about your system"));
-        }
-        else
-        {
-            theVideoWriter.release();
-            remove("filename.avi");
-        }
-    }
-    else if (codec==1)
-    {
-        VideoWriter theVideoWriter;
-        theVideoWriter.open("filename.avi",0, 25, Size(width, height), true);
-        if (!theVideoWriter.isOpened())
-        {
-            ui->outputText->append(tr("ERROR: Could not find Raw Video Codec"));
-            ui->outputText->append(tr("ERROR: Please contact the developer with the information about your system"));
-        }
-        else
-        {
-            theVideoWriter.release();
-            remove("filename.avi");
-        }
-
-        QFile ffmpegFile(m_config->videoEncoderLocation());
-        if(!ffmpegFile.exists())
-        {
-            ui->outputText->append(tr("ERROR: Could not find video encoder needed for FFV1 Codec."));
-            ui->outputText->append(tr("ERROR: Please install ffmpeg or avconv, or contact the developer."));
-        } else {
-            ui->outputText->append(tr("Using video encoder %1").arg(m_config->videoEncoderLocation()));
-        }
-
-    }
-    else if (codec==2)
-    {
-        VideoWriter theVideoWriter;
-        theVideoWriter.open("filename.avi",CV_FOURCC('L','A','G','S'), 25, Size(width, height), true);
-        if (!theVideoWriter.isOpened())
-        {
-            ui->outputText->append(tr("ERROR: Could not find Lagarith Lossless Video Codec"));
-            ui->outputText->append(tr("ERROR: Download and install from http://lags.leetcode.net/codec.html"));
-        }
-        else
-        {
-            theVideoWriter.release();
-            remove("filename.avi");
-        }
-
     }
 
     ui->startButton->setEnabled(success);

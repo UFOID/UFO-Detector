@@ -62,7 +62,8 @@ void TestConfig::defaultValues() {
 
     //QVERIFY(m_config->resultDataFile());
     //QVERIFY(m_config->resultVideoDir());
-    QVERIFY(m_config->resultVideoCodec() == 1);
+    QVERIFY(m_config->resultVideoCodecStr() == "FFV1");
+    //QCOMPARE(m_config->resultVideoCodec(), CV_FOURCC('F', 'F', 'V', '1'));
     QVERIFY(m_config->resultVideoWithObjectRectangles() == false);
     //QVERIFY(m_config->videoEncoderLocation());
     //QVERIFY(m_config->resultImageDir());

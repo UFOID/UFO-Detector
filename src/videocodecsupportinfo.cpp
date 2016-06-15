@@ -25,19 +25,21 @@ VideoCodecSupportInfo::VideoCodecSupportInfo(QString externalVideoEncoderLocatio
     m_testFileName = "dummy_Wa8F7bVL3lmF4ngfD0894u32Nd.avi";
     m_isInitialized = false;
 
-    m_codecSupport.insert(toFourcc("IYUV"), QList<int>());
-    m_codecSupport.insert(toFourcc("FFV1"), QList<int>());
-    m_codecSupport.insert(toFourcc("LAGS"), QList<int>());
+    m_rawVideoCodecStr = "IYUV";
+
+    m_codecSupport.insert(stringToFourcc(m_rawVideoCodecStr), QList<int>());
+    m_codecSupport.insert(stringToFourcc("FFV1"), QList<int>());
+    m_codecSupport.insert(stringToFourcc("LAGS"), QList<int>());
 
     // These codes are used by external encoder (ffmpeg/avconv). Use parameter -codecs for list.
-    m_fourccToEncoderStr.insert(toFourcc("IYUV"), "rawvideo");
-    m_fourccToEncoderStr.insert(toFourcc("FFV1"), "ffv1");
-    m_fourccToEncoderStr.insert(toFourcc("LAGS"), "lagarith");
+    m_fourccToEncoderStr.insert(stringToFourcc(m_rawVideoCodecStr), "rawvideo");
+    m_fourccToEncoderStr.insert(stringToFourcc("FFV1"), "ffv1");
+    m_fourccToEncoderStr.insert(stringToFourcc("LAGS"), "lagarith");
 
     // These names are shown to the user for codec selection
-    m_fourccToCodecName.insert(toFourcc("IYUV"), tr("Raw Video"));
-    m_fourccToCodecName.insert(toFourcc("FFV1"), tr("FFV1 Lossless Video"));
-    m_fourccToCodecName.insert(toFourcc("LAGS"), tr("Lagarith Lossless Video"));
+    m_fourccToCodecName.insert(stringToFourcc(m_rawVideoCodecStr), tr("Raw Video"));
+    m_fourccToCodecName.insert(stringToFourcc("FFV1"), tr("FFV1 Lossless Video"));
+    m_fourccToCodecName.insert(stringToFourcc("LAGS"), tr("Lagarith Lossless Video"));
 }
 
 bool VideoCodecSupportInfo::init() {
@@ -69,10 +71,20 @@ bool VideoCodecSupportInfo::isInitialized() {
     return m_isInitialized;
 }
 
-// static
-int VideoCodecSupportInfo::toFourcc(QString fourccStr) {
+int VideoCodecSupportInfo::stringToFourcc(QString fourccStr) {
+    if (fourccStr.length() != 4) {
+        return 0;
+    }
     char* str = fourccStr.toLocal8Bit().data();
     return CV_FOURCC(str[0], str[1], str[2], str[3]);
+}
+
+QString VideoCodecSupportInfo::fourccToString(int fourcc) {
+    QString str;
+    for (int i = 0; i < 4; i++) {
+        str.append(QChar((char)((fourcc >> i*8) & 0xff)));
+    }
+    return str;
 }
 
 bool VideoCodecSupportInfo::isOpencvSupported(int fourcc) {
@@ -99,6 +111,14 @@ QList<int> VideoCodecSupportInfo::supportedCodecs() {
 
 QString VideoCodecSupportInfo::codecName(int fourcc) {
     return m_fourccToCodecName.value(fourcc, "");
+}
+
+QString VideoCodecSupportInfo::fourccToEncoderString(int fourcc) {
+    return m_fourccToEncoderStr.value(fourcc, "");
+}
+
+QString VideoCodecSupportInfo::rawVideoCodecStr() {
+    return m_rawVideoCodecStr;
 }
 
 bool VideoCodecSupportInfo::testOpencvSupport(int fourcc) {

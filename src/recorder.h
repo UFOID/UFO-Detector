@@ -99,9 +99,6 @@ private:
 
     std::chrono::high_resolution_clock::time_point prevTime, currentTime;
 
-    int m_videoCodec;
-    int m_codecSetting;
-
     void recordThread();
     void readFrameThread();
 
@@ -120,13 +117,13 @@ public slots:
 private slots:
 #endif
     /**
-     * @brief Creates a new QProcess that encodes the temporary raw video to FFV1 with ffmpeg/avconv
+     * @brief Creates a new QProcess that encodes the temporary raw video with ffmpeg/avconv
      *
      * @note this method NEEDS to be called via signal-slot system, I guess in order
      * to run it in the main thread. If this is called from detecting thread via direct
      * method call then can't get signals from the encoder process.
      */
-    void startEncodingVideoToFFV1(QString tempVideoFileName, QString targetVideoFileName);
+    void startEncodingVideo(QString tempVideoFileName, QString targetVideoFileName);
 
     void onVideoEncodingFinished();
 
