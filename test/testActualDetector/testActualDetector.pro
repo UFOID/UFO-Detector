@@ -33,6 +33,7 @@ SOURCES += \
     ../mock/mockRecorder.cpp \
     ../mock/mockCTracker.cpp \
     ../mock/mockDetector.cpp \
+    ../mock/mockVideoCodecSupportInfo.cpp \
     testActualDetector.cpp
 
 HEADERS += ../../src/actualdetector.h \
@@ -41,6 +42,7 @@ HEADERS += ../../src/actualdetector.h \
     ../../src/recorder.h \
     ../../src/mainwindow.h \
     ../../src/Ctracker.h \
-    ../../src/Detector.h
+    ../../src/Detector.h \
+    ../../src/videocodecsupportinfo.h
 
 

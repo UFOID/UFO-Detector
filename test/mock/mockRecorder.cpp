@@ -39,7 +39,7 @@ void Recorder::setRectangle(cv::Rect &r, bool isRed) {
 void Recorder::reloadResultDataFile() {
 }
 
-void Recorder::startEncodingVideoToFFV1(QString tempVideoFileName, QString targetVideoFileName) {
+void Recorder::startEncodingVideo(QString tempVideoFileName, QString targetVideoFileName) {
     Q_UNUSED(tempVideoFileName);
     Q_UNUSED(targetVideoFileName);
 }
