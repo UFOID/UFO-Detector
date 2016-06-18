@@ -95,8 +95,10 @@ void Camera::release() {
 
 cv::Mat Camera::getWebcamFrame() {
     if (mockCamera_blockFrameEnabled) {
+        //qDebug() << "lock mutex";
         mockCamera_blockerMutex.lock();
         mockCamera_blockerCond.wait(mockCamera_blockerMutex);
+        //qDebug() << "unlock mutex";
         mockCamera_blockerMutex.unlock();
     }
     return mockCameraNextFrame;

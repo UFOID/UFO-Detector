@@ -70,7 +70,7 @@ QString Config::detectionAreaFile() {
 }
 
 int Config::detectionAreaSize() {
-    return 10000;
+    return this->cameraWidth() * this->cameraHeight();
 }
 
 int Config::noiseFilterPixelSize() {
