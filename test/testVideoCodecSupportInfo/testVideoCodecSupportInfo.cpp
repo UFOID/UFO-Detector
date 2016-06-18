@@ -43,15 +43,21 @@ private Q_SLOTS:
     void codecName();
     void toFromFourcc();
     void rawVideoCodecStr();
+    void removeSupport();
 
 private:
     VideoCodecSupportInfo* m_codecInfo;
+    QHash<int, QList<int>> m_expectedCodecs;   // expected supported codecs
+    QHash<int, QString> m_expectedEncoderStrings;   // expected codec strings for encoder
     QString m_videoEncoderLocation;
     QString m_testFileName;
     int m_frameWidth;
     int m_frameHeight;
     bool localTestOpencvSupport(int fourcc);
     bool localTestEncoderSupport(QString encoderCodecStr);
+
+private slots:
+    void fillExpectedCodecs();
 };
 
 TestVideoCodecSupportInfo::TestVideoCodecSupportInfo()
@@ -67,6 +73,7 @@ TestVideoCodecSupportInfo::TestVideoCodecSupportInfo()
     QVERIFY(!m_videoEncoderLocation.isEmpty());
     m_frameWidth = 640;
     m_frameHeight = 480;
+    fillExpectedCodecs();
 }
 
 void TestVideoCodecSupportInfo::initTestCase() {
@@ -76,6 +83,36 @@ void TestVideoCodecSupportInfo::initTestCase() {
 
 void TestVideoCodecSupportInfo::cleanupTestCase() {
     m_codecInfo->deleteLater();
+}
+
+void TestVideoCodecSupportInfo::fillExpectedCodecs() {
+    m_expectedCodecs.insert(CV_FOURCC('I', 'Y', 'U', 'V'), QList<int>());
+    m_expectedCodecs.insert(CV_FOURCC('F', 'F', 'V', '1'), QList<int>());
+    m_expectedCodecs.insert(CV_FOURCC('L', 'A', 'G', 'S'), QList<int>());
+
+    m_expectedEncoderStrings[CV_FOURCC('I', 'Y', 'U', 'V')] = "rawvideo";
+    m_expectedEncoderStrings[CV_FOURCC('F', 'F', 'V', '1')] = "ffv1";
+    m_expectedEncoderStrings[CV_FOURCC('L', 'A', 'G', 'S')] = "lagarith";
+
+    int codec = 0;
+    QListIterator<int> codecIt(m_expectedCodecs.keys());
+    codecIt.toFront();
+    while (codecIt.hasNext()) {
+        codec = codecIt.next();
+        QList<int> encoderList;
+        if (localTestOpencvSupport(codec)) {
+            encoderList = m_expectedCodecs.value(codec);
+            encoderList.append(VideoCodecSupportInfo::OpenCv);
+            m_expectedCodecs.insert(codec, encoderList);
+            QVERIFY(m_expectedCodecs.value(codec).contains(VideoCodecSupportInfo::OpenCv));
+        }
+        if (localTestEncoderSupport(m_expectedEncoderStrings.value(codec))) {
+            encoderList = m_expectedCodecs.value(codec);
+            encoderList.append(VideoCodecSupportInfo::External);
+            m_expectedCodecs.insert(codec, encoderList);
+            QVERIFY(m_expectedCodecs.value(codec).contains(VideoCodecSupportInfo::External));
+        }
+    }
 }
 
 void TestVideoCodecSupportInfo::constructor() {
@@ -202,40 +239,8 @@ void TestVideoCodecSupportInfo::testEncoderSupport() {
 }
 
 void TestVideoCodecSupportInfo::initialize() {
-    QMap<int, QList<int>> codecSupport;
-    QList<int> codecs;
-    codecs << CV_FOURCC('I', 'Y', 'U', 'V');
-    codecs << CV_FOURCC('F', 'F', 'V', '1');
-    codecs << CV_FOURCC('L', 'A', 'G', 'S');
-    QListIterator<int> codecIt(codecs);
+    QListIterator<int> codecIt(m_expectedCodecs.keys());
     int codec = 0;
-    QMap<int, QString> encoderCodecStrMap;
-    encoderCodecStrMap[CV_FOURCC('I', 'Y', 'U', 'V')] = "rawvideo";
-    encoderCodecStrMap[CV_FOURCC('F', 'F', 'V', '1')] = "ffv1";
-    encoderCodecStrMap[CV_FOURCC('L', 'A', 'G', 'S')] = "lagarith";
-
-    // fill expected results
-    while (codecIt.hasNext()) {
-        codec = codecIt.next();
-        codecSupport.insert(codec, QList<int>());
-    }
-    codecIt.toFront();
-    while (codecIt.hasNext()) {
-        codec = codecIt.next();
-        QList<int> encoderList;
-        if (localTestOpencvSupport(codec)) {
-            encoderList = codecSupport.value(codec);
-            encoderList.append(VideoCodecSupportInfo::OpenCv);
-            codecSupport.insert(codec, encoderList);
-            QVERIFY(codecSupport.value(codec).contains(VideoCodecSupportInfo::OpenCv));
-        }
-        if (localTestEncoderSupport(encoderCodecStrMap.value(codec))) {
-            encoderList = codecSupport.value(codec);
-            encoderList.append(VideoCodecSupportInfo::External);
-            codecSupport.insert(codec, encoderList);
-            QVERIFY(codecSupport.value(codec).contains(VideoCodecSupportInfo::External));
-        }
-    }
 
     QVERIFY(!m_codecInfo->m_isInitialized);
     QVERIFY(!m_codecInfo->isInitialized());
@@ -247,63 +252,26 @@ void TestVideoCodecSupportInfo::initialize() {
     codecIt.toFront();
     while (codecIt.hasNext()) {
         codec = codecIt.next();
-        bool expectedOpencvSupported = codecSupport.value(codec).contains(VideoCodecSupportInfo::OpenCv);
+        bool expectedOpencvSupported = m_expectedCodecs.value(codec).contains(VideoCodecSupportInfo::OpenCv);
         bool actualOpencvSupported = m_codecInfo->m_codecSupport.value(codec).contains(VideoCodecSupportInfo::OpenCv);
         QCOMPARE(actualOpencvSupported, expectedOpencvSupported);
 
-        bool expectedEncoderSupported = codecSupport.value(codec).contains(VideoCodecSupportInfo::External);
+        bool expectedEncoderSupported = m_expectedCodecs.value(codec).contains(VideoCodecSupportInfo::External);
         bool actualEncoderSupported = m_codecInfo->m_codecSupport.value(codec).contains(VideoCodecSupportInfo::External);
         QCOMPARE(actualEncoderSupported, expectedEncoderSupported);
     }
 }
 
 void TestVideoCodecSupportInfo::isSupportedMethods() {
-    QMap<int, QList<int>> codecSupport;
-    QList<int> codecs;
-    codecs << CV_FOURCC('I', 'Y', 'U', 'V');
-    codecs << CV_FOURCC('F', 'F', 'V', '1');
-    codecs << CV_FOURCC('L', 'A', 'G', 'S');
-    QListIterator<int> codecIt(codecs);
-    int codec = 0;
-    QMap<int, QString> encoderCodecStrMap;
-    encoderCodecStrMap[CV_FOURCC('I', 'Y', 'U', 'V')] = "rawvideo";
-    encoderCodecStrMap[CV_FOURCC('F', 'F', 'V', '1')] = "ffv1";
-    encoderCodecStrMap[CV_FOURCC('L', 'A', 'G', 'S')] = "lagarith";
+    QListIterator<int> codecIt(m_expectedCodecs.keys());
 
-    // fill expected results
     while (codecIt.hasNext()) {
-        codec = codecIt.next();
-        codecSupport.insert(codec, QList<int>());
-    }
-    codecIt.toFront();
-    while (codecIt.hasNext()) {
-        codec = codecIt.next();
-        QList<int> encoderList;
-        if (localTestOpencvSupport(codec)) {
-            encoderList = codecSupport.value(codec);
-            encoderList.append(VideoCodecSupportInfo::OpenCv);
-            codecSupport.insert(codec, encoderList);
-            QVERIFY(codecSupport.value(codec).contains(VideoCodecSupportInfo::OpenCv));
-        }
-        if (localTestEncoderSupport(encoderCodecStrMap.value(codec))) {
-            encoderList = codecSupport.value(codec);
-            encoderList.append(VideoCodecSupportInfo::External);
-            codecSupport.insert(codec, encoderList);
-            QVERIFY(codecSupport.value(codec).contains(VideoCodecSupportInfo::External));
-        }
-    }
-
-    m_codecInfo->init();
-
-    // check results
-    codecIt.toFront();
-    while (codecIt.hasNext()) {
-        codec = codecIt.next();
-        bool expectedOpencvSupported = codecSupport.value(codec).contains(VideoCodecSupportInfo::OpenCv);
+        int codec = codecIt.next();
+        bool expectedOpencvSupported = m_expectedCodecs.value(codec).contains(VideoCodecSupportInfo::OpenCv);
         bool actualOpencvSupported = m_codecInfo->isOpencvSupported(codec);
         QCOMPARE(actualOpencvSupported, expectedOpencvSupported);
 
-        bool expectedEncoderSupported = codecSupport.value(codec).contains(VideoCodecSupportInfo::External);
+        bool expectedEncoderSupported = m_expectedCodecs.value(codec).contains(VideoCodecSupportInfo::External);
         bool actualEncoderSupported = m_codecInfo->isEncoderSupported(codec);
         QCOMPARE(actualEncoderSupported, expectedEncoderSupported);
 
@@ -342,6 +310,31 @@ void TestVideoCodecSupportInfo::toFromFourcc() {
 
 void TestVideoCodecSupportInfo::rawVideoCodecStr() {
     QCOMPARE(m_codecInfo->rawVideoCodecStr(), QString("IYUV"));
+}
+
+void TestVideoCodecSupportInfo::removeSupport() {
+    QListIterator<int> codecIt(m_expectedCodecs.keys());
+
+    while (codecIt.hasNext()) {
+        int codec = codecIt.next();
+        bool otherSupport = false;
+        if (m_codecInfo->isEncoderSupported(codec)) {
+            if (m_codecInfo->isOpencvSupported(codec)) {
+                otherSupport = true;
+            }
+            m_codecInfo->removeSupport(codec, VideoCodecSupportInfo::External);
+            QVERIFY(!m_codecInfo->isEncoderSupported(codec));
+            if (otherSupport) {
+                QVERIFY(m_codecInfo->isOpencvSupported(codec));
+            }
+        }
+        if (m_codecInfo->isOpencvSupported(codec)) {
+            m_codecInfo->removeSupport(codec, VideoCodecSupportInfo::OpenCv);
+            QVERIFY(!m_codecInfo->isOpencvSupported(codec));
+        }
+        QVERIFY(!m_codecInfo->supportedCodecs().contains(codec));
+    }
+    QVERIFY(m_codecInfo->supportedCodecs().isEmpty());
 }
 
 

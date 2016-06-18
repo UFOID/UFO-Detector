@@ -121,6 +121,14 @@ QString VideoCodecSupportInfo::rawVideoCodecStr() {
     return m_rawVideoCodecStr;
 }
 
+void VideoCodecSupportInfo::removeSupport(int fourcc, int encoder) {
+    if (m_codecSupport.keys().contains(fourcc)) {
+        QList<int> supportList = m_codecSupport.value(fourcc);
+        supportList.removeAll(encoder);
+        m_codecSupport.insert(fourcc, supportList);
+    }
+}
+
 bool VideoCodecSupportInfo::testOpencvSupport(int fourcc) {
     cv::VideoWriter writer;
     cv::Mat frame;

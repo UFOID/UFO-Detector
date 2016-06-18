@@ -117,6 +117,13 @@ public:
      */
     QString rawVideoCodecStr();
 
+    /**
+     * @brief Remove encoder support for codec.
+     * @param fourcc
+     * @param encoder
+     */
+    void removeSupport(int fourcc, int encoder);
+
 #ifndef _UNIT_TEST_
 private:
 #endif

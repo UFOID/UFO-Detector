@@ -63,6 +63,11 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
     m_detectionStatusStyleOn = "color: #55FF55;";
     m_detectionStatusStyleOff = "color: #FF5555;";
 
+#if defined(Q_OS_WINDOWS)
+    VideoCodecSupportInfo* codecInfo = m_config->videoCodecSupportInfo();
+    codecInfo->removeSupport(CV_FOURCC('F', 'F', 'V', '1'), VideoCodecSupportInfo::OpenCv);
+#endif
+
     checkFolders();
     readLogFileAndGetRootElement();
     checkDetectionAreaFile();
