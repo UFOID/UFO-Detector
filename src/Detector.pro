@@ -44,7 +44,8 @@ SOURCES += main.cpp\
     cameraresolutiondialog.cpp \
     videolist.cpp \
     videouploaderdialog.cpp \
-    updateapplicationdialog.cpp
+    updateapplicationdialog.cpp \
+    videocodecsupportinfo.cpp
 
 HEADERS  += \
     recorder.h \
@@ -69,7 +70,8 @@ HEADERS  += \
     cameraresolutiondialog.h \
     videolist.h \
     videouploaderdialog.h \
-    updateapplicationdialog.h
+    updateapplicationdialog.h \
+    videocodecsupportinfo.h
 
 FORMS    += \
     mainwindow.ui \

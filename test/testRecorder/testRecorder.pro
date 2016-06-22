@@ -28,11 +28,13 @@ INCLUDEPATH += . \
 SOURCES += testrecorder.cpp \
     ../mock/mockcamera.cpp \
     ../mock/mockconfig.cpp \
+    ../../src/videocodecsupportinfo.cpp \
     ../../src/recorder.cpp \
     ../../src/camerainfo.cpp
 
 HEADERS += ../../src/recorder.h \
     ../../src/config.h \
+    ../../src/videocodecsupportinfo.h \
     ../../src/camera.h \
     ../../src/camerainfo.h
 

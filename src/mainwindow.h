@@ -121,16 +121,13 @@ private:
     void checkDetectionAreaFile();
 
     /**
-     * @brief checkCameraAndCodec
-     *
-     * @todo refactor to checkCamera() and checkCodec()  (cleaner code)
+     * @brief Verify camera is working normally.
      *
      * @param width
      * @param height
-     * @param codec
      * @return
      */
-    bool checkCameraAndCodec(const int width, const int height, const int codec);
+    bool checkCamera(const int width, const int height);
 
     /**
      * Check that the folder for the images and videos exist

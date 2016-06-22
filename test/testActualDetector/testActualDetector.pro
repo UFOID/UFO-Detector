@@ -31,8 +31,13 @@ SOURCES += \
     ../mock/mockcamera.cpp \
     ../mock/mockMainWindow.cpp \
     ../mock/mockRecorder.cpp \
-    ../mock/mockCTracker.cpp \
-    ../mock/mockDetector.cpp \
+    ../../src/Ctracker.cpp \
+    ../../src/Detector.cpp \
+    ../../src/Kalman.cpp \
+    ../../src/HungarianAlg.cpp \
+    ../../src/BackgroundSubtract.cpp \
+    ../../src/VIBE.cpp \
+    ../mock/mockVideoCodecSupportInfo.cpp \
     testActualDetector.cpp
 
 HEADERS += ../../src/actualdetector.h \
@@ -41,6 +46,11 @@ HEADERS += ../../src/actualdetector.h \
     ../../src/recorder.h \
     ../../src/mainwindow.h \
     ../../src/Ctracker.h \
-    ../../src/Detector.h
+    ../../src/Detector.h \
+    ../../src/Kalman.h \
+    ../../src/HungarianAlg.h \
+    ../../src/BackgroundSubtract.h \
+    ../../src/VIBE.h \
+    ../../src/videocodecsupportinfo.h
 
 

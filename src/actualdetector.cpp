@@ -30,19 +30,20 @@ ActualDetector::ActualDetector(MainWindow *parent, Camera *cameraPtr, Config *co
     HEIGHT = m_config->cameraHeight();
     willRecordWithRect = m_config->resultVideoWithObjectRectangles();
     minPositiveRequired = m_config->minPositiveDetections();
+    isMainThreadRunning = false;
 
     detectionAreaFile = DETECTION_AREA_FILE.toStdString();
     pathname = IMAGEPATH.toStdString();
     noiseLevel = getStructuringElement(MORPH_RECT, Size(1,1));
 
-    theRecorder = new Recorder(camPtr, m_config);
+    m_recorder = new Recorder(camPtr, m_config);
 
-    qDebug() << "Actualdetector constructed";
+    qDebug() << "ActualDetector constructed";
 }
 
 ActualDetector::~ActualDetector()
 {
-    theRecorder->deleteLater();
+    m_recorder->deleteLater();
 }
 
 /*
@@ -50,7 +51,6 @@ ActualDetector::~ActualDetector()
  */
 bool ActualDetector::initialize()
 {
-
     prev_frame = camPtr->getWebcamFrame();
     result = prev_frame;
     current_frame = camPtr->getWebcamFrame();
@@ -179,7 +179,7 @@ void ActualDetector::detectingThread()
                                 {
                                     Mat tempImg = result.clone();
                                     rectangle(tempImg,croppedRectangle,Scalar(255,0,0),1);
-                                    theRecorder->startRecording(tempImg);
+                                    m_recorder->startRecording(tempImg);
                                     if(willRecordWithRect) willParseRectangle=true;
                                     startedRecording=true;
                                     auto output_text = tr("Positive detection - starting video recording");
@@ -221,7 +221,7 @@ void ActualDetector::detectingThread()
                 }
                 if(willParseRectangle)
                 {
-                    theRecorder->setRectangle(rect,isPositiveRectangle);
+                    m_recorder->setRectangle(rect,isPositiveRectangle);
                 }
 
             }
@@ -247,7 +247,7 @@ void ActualDetector::detectingThread()
                 }
                 if(!tracker.removedTrackWithPositive)
                 { //+++all detected objects had more negative than positive detections or was a bird
-                    theRecorder->stopRecording(false);
+                    m_recorder->stopRecording(false);
                     auto output_text = tr("Finished recording - All found objects negative: removed video");
                     emit broadcastOutputText(output_text);
 
@@ -256,13 +256,13 @@ void ActualDetector::detectingThread()
                 {//+++one object had more positive than negative detections
                     if(posCounter>=minPositiveRequired)
                     {
-                        theRecorder->stopRecording(true);
+                        m_recorder->stopRecording(true);
                         auto output_text = tr("Finished recording - At least one object found positive: saved video");
                         emit broadcastOutputText(output_text);
                     }
                     else
                     {
-                        theRecorder->stopRecording(false);
+                        m_recorder->stopRecording(false);
                         auto output_text = tr("Finished recording - Minimum required positive detections not met: removed video");
                         emit broadcastOutputText(output_text);
                     }
@@ -501,7 +501,6 @@ pair<int,int> ActualDetector::checkBrightness(int totalLight)
  */
 void ActualDetector::checkIfNight()
 {
-
     bool isRunning=true;
     vector<Point> regionBackup=region;
     vector<Point> regionNew;
@@ -756,7 +755,6 @@ bool ActualDetector::parseDetectionAreaFile(string file_region, vector<Point> &r
 
                 if (count%1000 == 0)
                 {
-
                     float division = (float)size / (float)count;
                     int percentage =  85/division;
                     emit progressValueChanged(percentage);
@@ -786,7 +784,7 @@ void ActualDetector::stopThread()
 {
     region.clear();
     isMainThreadRunning = false;  
-    theRecorder->stopRecording(true);
+    m_recorder->stopRecording(true);
     if (pThread)
     {
         pThread->join();
@@ -847,13 +845,13 @@ void ActualDetector::setThresholdLevel(int level)
 void ActualDetector::startRecording()
 {
     Mat firstFrame = result.clone();
-    theRecorder->startRecording(firstFrame);
+    m_recorder->startRecording(firstFrame);
 }
 
 
 Recorder* ActualDetector::getRecorder()
 {
-    return theRecorder;
+    return m_recorder;
 }
 
 void ActualDetector::showCameraVideo(bool show)
