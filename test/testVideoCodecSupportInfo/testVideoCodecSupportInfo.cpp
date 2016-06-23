@@ -71,6 +71,8 @@ TestVideoCodecSupportInfo::TestVideoCodecSupportInfo()
     m_videoEncoderLocation = QCoreApplication::applicationDirPath()+"/ffmpeg.exe";
 #endif
     QVERIFY(!m_videoEncoderLocation.isEmpty());
+    QFile encoderExecutable(m_videoEncoderLocation);
+    QVERIFY(encoderExecutable.exists());
     m_frameWidth = 640;
     m_frameHeight = 480;
     fillExpectedCodecs();
