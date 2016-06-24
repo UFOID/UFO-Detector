@@ -55,8 +55,6 @@ private:
     int m_frameHeight;
     bool localTestOpencvSupport(int fourcc);
     bool localTestEncoderSupport(QString encoderCodecStr);
-
-private slots:
     void fillExpectedCodecs();
 };
 
@@ -65,22 +63,22 @@ TestVideoCodecSupportInfo::TestVideoCodecSupportInfo()
     m_codecInfo = NULL;
     m_testFileName = "dummy.avi";
     m_videoEncoderLocation = "";
+    m_frameWidth = 640;
+    m_frameHeight = 480;
 #if defined(Q_OS_LINUX) || defined(Q_OS_UNIX)
     m_videoEncoderLocation = "/usr/bin/avconv";
 #elif defined(Q_OS_WIN)
     m_videoEncoderLocation = QCoreApplication::applicationDirPath()+"/ffmpeg.exe";
 #endif
-    QVERIFY(!m_videoEncoderLocation.isEmpty());
-    QFile encoderExecutable(m_videoEncoderLocation);
-    QVERIFY(encoderExecutable.exists());
-    m_frameWidth = 640;
-    m_frameHeight = 480;
-    fillExpectedCodecs();
 }
 
 void TestVideoCodecSupportInfo::initTestCase() {
+    QVERIFY(!m_videoEncoderLocation.isEmpty());
+    QFile encoderExecutable(m_videoEncoderLocation);
+    QVERIFY(encoderExecutable.exists());
     m_codecInfo = new VideoCodecSupportInfo(m_videoEncoderLocation);
     QVERIFY(NULL != m_codecInfo);
+    fillExpectedCodecs();
 }
 
 void TestVideoCodecSupportInfo::cleanupTestCase() {
