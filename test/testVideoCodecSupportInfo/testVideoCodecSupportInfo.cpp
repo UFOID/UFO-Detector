@@ -97,22 +97,31 @@ void TestVideoCodecSupportInfo::fillExpectedCodecs() {
     m_expectedEncoderStrings[CV_FOURCC('L', 'A', 'G', 'S')] = "lagarith";
 
     int codec = 0;
+    QString codecStr;
     QListIterator<int> codecIt(m_expectedCodecs.keys());
     codecIt.toFront();
+    qDebug() << "Codec support";
     while (codecIt.hasNext()) {
         codec = codecIt.next();
+        codecStr = m_expectedEncoderStrings[codec];
         QList<int> encoderList;
         if (localTestOpencvSupport(codec)) {
             encoderList = m_expectedCodecs.value(codec);
             encoderList.append(VideoCodecSupportInfo::OpenCv);
             m_expectedCodecs.insert(codec, encoderList);
             QVERIFY(m_expectedCodecs.value(codec).contains(VideoCodecSupportInfo::OpenCv));
+            qDebug() << codecStr << "in OpenCV: yes";
+        } else {
+            qDebug() << codecStr << "in OpenCV: no";
         }
         if (localTestEncoderSupport(m_expectedEncoderStrings.value(codec))) {
             encoderList = m_expectedCodecs.value(codec);
             encoderList.append(VideoCodecSupportInfo::External);
             m_expectedCodecs.insert(codec, encoderList);
             QVERIFY(m_expectedCodecs.value(codec).contains(VideoCodecSupportInfo::External));
+            qDebug() << codecStr << "in ffmpeg/avconv: yes";
+        } else {
+            qDebug() << codecStr << "in ffmpeg/avconv: no";
         }
     }
 }
