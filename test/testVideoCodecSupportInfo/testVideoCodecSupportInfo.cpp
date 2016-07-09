@@ -66,7 +66,7 @@ TestVideoCodecSupportInfo::TestVideoCodecSupportInfo()
     m_frameWidth = 640;
     m_frameHeight = 480;
 #if defined(Q_OS_LINUX) || defined(Q_OS_UNIX)
-    m_videoEncoderLocation = "/usr/bin/avconv";
+    m_videoEncoderLocation = "/usr/bin/ffmpeg";
 #elif defined(Q_OS_WIN)
     m_videoEncoderLocation = QCoreApplication::applicationDirPath()+"/ffmpeg.exe";
 #endif
@@ -195,7 +195,7 @@ bool TestVideoCodecSupportInfo::localTestEncoderSupport(QString encoderCodecStr)
         QString line = listIt.next();
         // Find encoder name and verify it can encode videos (E = encode, V = video).
         // Check the output of avconv/ffmpeg -codecs for more info.
-        QRegExp regex("^.EV...\\ " + encoderCodecStr + ".*$");
+        QRegExp regex("^ *.EV...\\ " + encoderCodecStr + ".*$");
         if (regex.exactMatch(line)) {
             //qDebug() << "Found:" << line;
             return true;

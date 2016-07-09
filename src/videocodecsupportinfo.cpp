@@ -181,7 +181,7 @@ bool VideoCodecSupportInfo::testEncoderSupport(int fourcc) {
     while (listIt.hasNext()) {
         QString line = listIt.next();
         // Find encoder name and verify it can encode videos.
-        QRegExp regex("^.EV...\\ " + encoderCodecStr + ".*$");
+        QRegExp regex("^ *.EV...\\ " + encoderCodecStr + ".*$");
         if (regex.exactMatch(line)) {
             return true;
         }
