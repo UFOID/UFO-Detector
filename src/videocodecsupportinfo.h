@@ -25,6 +25,7 @@
 #include <QHash>
 #include <QFile>
 #include <QDebug>
+#include <QRegularExpression>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
