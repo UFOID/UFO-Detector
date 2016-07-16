@@ -12,8 +12,9 @@ public:
 private Q_SLOTS:
     void init();
     void cleanup();
-    void testDefaultValues();
-    void testMotionThreshold();
+    void defaultValues();
+    void motionThreshold();
+    void videoCodecSupportInfo();
 
 private:
     Config* m_config;
@@ -42,7 +43,7 @@ void TestConfig::cleanup() {
     m_config = NULL;
 }
 
-void TestConfig::testDefaultValues() {
+void TestConfig::defaultValues() {
     QVERIFY(m_config->applicationVersion() == "");
     QVERIFY(m_config->checkApplicationUpdates() == true);
 
@@ -61,7 +62,8 @@ void TestConfig::testDefaultValues() {
 
     //QVERIFY(m_config->resultDataFile());
     //QVERIFY(m_config->resultVideoDir());
-    QVERIFY(m_config->resultVideoCodec() == 1);
+    QVERIFY(m_config->resultVideoCodecStr() == "FFV1");
+    //QCOMPARE(m_config->resultVideoCodec(), CV_FOURCC('F', 'F', 'V', '1'));
     QVERIFY(m_config->resultVideoWithObjectRectangles() == false);
     //QVERIFY(m_config->videoEncoderLocation());
     //QVERIFY(m_config->resultImageDir());
@@ -70,7 +72,7 @@ void TestConfig::testDefaultValues() {
     QVERIFY(m_config->userTokenAtUfoId() == "");
 }
 
-void TestConfig::testMotionThreshold() {
+void TestConfig::motionThreshold() {
     QFile settingsFile;
     QVERIFY("motionThreshold" == m_config->m_settingKeys[Config::MotionThreshold]);
     QVERIFY(!m_config->m_settings->contains(m_config->m_settingKeys[Config::MotionThreshold]));
@@ -83,6 +85,11 @@ void TestConfig::testMotionThreshold() {
     QVERIFY(settingsFile.exists());
 }
 
-QTEST_APPLESS_MAIN(TestConfig)
+void TestConfig::videoCodecSupportInfo() {
+    QVERIFY(m_config->videoCodecSupportInfo() != NULL);
+    QVERIFY(m_config->videoCodecSupportInfo()->isInitialized());
+}
+
+QTEST_MAIN(TestConfig)
 
 #include "testconfig.moc"

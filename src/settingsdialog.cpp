@@ -57,7 +57,17 @@ SettingsDialog::SettingsDialog(QWidget *parent, Camera *camPtr, Config *configPt
     ui->lineImagePath->setText(m_config->resultImageDir());
     ui->lineMinPosRequired->setText(QString::number(m_config->minPositiveDetections()));
 
-    ui->comboBoxCodec->setCurrentIndex(m_config->resultVideoCodec());
+    VideoCodecSupportInfo* codecInfo = m_config->videoCodecSupportInfo();
+    QListIterator<int> supportedCodecsIt(codecInfo->supportedCodecs());
+    while (supportedCodecsIt.hasNext()) {
+        int codec = supportedCodecsIt.next();
+        ui->comboBoxCodec->addItem(codecInfo->codecName(codec), QVariant(codecInfo->fourccToString(codec)));
+    }
+    ui->comboBoxCodec->setCurrentIndex(ui->comboBoxCodec->findData(
+        QVariant(m_config->resultVideoCodecStr())));
+    if (ui->comboBoxCodec->currentIndex() < 0) {
+        ui->comboBoxCodec->setCurrentIndex(0);
+    }
     setWindowFlags(Qt::FramelessWindowHint);
     setWindowFlags(Qt::WindowTitleHint);
     m_detectionAreaDialogIsOpen=false;
@@ -78,7 +88,7 @@ void SettingsDialog::saveSettings()
     m_config->setResultImageDir(ui->lineImagePath->text());
     m_config->setResultVideoWithObjectRectangles(ui->checkBoxRectangle->isChecked());
     m_config->setMinPositiveDetections(ui->lineMinPosRequired->text().toInt());
-    m_config->setResultVideoCodec(ui->comboBoxCodec->currentIndex());
+    m_config->setResultVideoCodec(ui->comboBoxCodec->currentData().toString());
     m_config->setUserTokenAtUfoId(ui->lineToken->text());
 }
 

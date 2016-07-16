@@ -17,11 +17,28 @@
  */
 
 #include "config.h"
+#include <QTest>
 
 QString mockConfigResultDataDir;
+int mockConfigResultVideoCodec;
+QString mockConfigResultVideoCodecStr;
 
 Config::Config(QObject *parent) {
     Q_UNUSED(parent);
+    mockConfigResultVideoCodec = 0;
+    mockConfigResultVideoCodecStr = "";
+    QString encoderLocation = "";
+#if defined(Q_OS_LINUX) || defined(Q_OS_UNIX)
+    encoderLocation = "/usr/bin/avconv";
+#elif defined(Q_OS_WIN)
+    encoderLocation = QCoreApplication::applicationDirPath()+"/ffmpeg.exe";
+#endif
+    QVERIFY(!encoderLocation.isEmpty());
+    m_videoCodecSupportInfo = new VideoCodecSupportInfo(encoderLocation);
+    m_videoCodecSupportInfo->init();
+}
+
+Config::~Config() {
 }
 
 QString Config::applicationVersion() {
@@ -53,7 +70,7 @@ QString Config::detectionAreaFile() {
 }
 
 int Config::detectionAreaSize() {
-    return 10000;
+    return this->cameraWidth() * this->cameraHeight();
 }
 
 int Config::noiseFilterPixelSize() {
@@ -80,8 +97,12 @@ QString Config::resultVideoDir() {
     return "./videos";
 }
 
+QString Config::resultVideoCodecStr() {
+    return mockConfigResultVideoCodecStr;
+}
+
 int Config::resultVideoCodec() {
-    return 0;
+    return mockConfigResultVideoCodec;
 }
 
 bool Config::resultVideoWithObjectRectangles() {
@@ -102,6 +123,10 @@ bool Config::saveResultImages() {
 
 QString Config::userTokenAtUfoId() {
     return "";
+}
+
+VideoCodecSupportInfo* Config::videoCodecSupportInfo() {
+    return m_videoCodecSupportInfo;
 }
 
 void Config::setApplicationVersion(QString version) {
@@ -147,8 +172,8 @@ void Config::setResultVideoDir(QString dirName) {
     Q_UNUSED(dirName);
 }
 
-void Config::setResultVideoCodec(int codec) {
-    Q_UNUSED(codec);
+void Config::setResultVideoCodec(QString codec) {
+    mockConfigResultVideoCodecStr = codec;
 }
 
 void Config::setResultVideoWithObjectRectangles(bool drawRectangles) {

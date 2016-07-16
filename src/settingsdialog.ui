@@ -97,23 +97,7 @@
      </widget>
     </item>
     <item row="2" column="1">
-     <widget class="QComboBox" name="comboBoxCodec">
-      <item>
-       <property name="text">
-        <string>Raw Video</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>FFV1 Lossless Video</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Lagarith Lossless Video</string>
-       </property>
-      </item>
-     </widget>
+     <widget class="QComboBox" name="comboBoxCodec"/>
     </item>
     <item row="7" column="0" colspan="2">
      <widget class="QCheckBox" name="checkBoxsaveImages">

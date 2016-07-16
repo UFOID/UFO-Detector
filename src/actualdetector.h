@@ -72,7 +72,7 @@ public:
 #ifndef _UNIT_TEST_
 private:
 #endif
-    Recorder* theRecorder;
+    Recorder* m_recorder;
     Camera* camPtr;
     Config* m_config;
     MainWindow* m_mainWindow;

@@ -19,6 +19,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include "videocodecsupportinfo.h"
 #include <QObject>
 #include <QSettings>
 #include <QApplication>
@@ -61,6 +62,8 @@ public:
     };
 
     explicit Config(QObject *parent = 0);
+
+    ~Config();
 
     /**
      * @brief applicationVersion Application version number
@@ -141,9 +144,16 @@ public:
     QString resultVideoDir();
 
     /**
-     * @brief resultVideoCodec result video codec
-     * 0: raw video, 1: lossless FFV1, 2: lossless Lagarith
-     * @return
+     * @brief Get result video codec.
+     *
+     * @return FOURCC code of the codec as string
+     */
+    QString resultVideoCodecStr();
+
+    /**
+     * @brief Get result video codec.
+     *
+     * @return FOURCC code of the codec
      */
     int resultVideoCodec();
 
@@ -176,6 +186,8 @@ public:
      * @return
      */
     QString userTokenAtUfoId();
+
+    VideoCodecSupportInfo* videoCodecSupportInfo();
 
     /**
      * @brief setApplicationVersion set application version. Format: major.minor.subminor
@@ -243,10 +255,10 @@ public:
     void setResultVideoDir(QString dirName);
 
     /**
-     * @brief setResultVideoCodec set result video codec
-     * @param codec
+     * @brief Set result video codec.
+     * @param codec FOURCC code of the codec as string
      */
-    void setResultVideoCodec(int codec);
+    void setResultVideoCodec(QString codec);
 
     /**
      * @brief setResultVideoWithObjectRectangles set whether to draw rectangles around objects in result videos
@@ -298,13 +310,15 @@ private:
     QString m_defaultResultDataFileName; ///< default file name for result data file (result database)
     QString m_defaultResultDocumentDir; ///< default root directory for result images and videos
     QString m_defaultResultVideoDir;    ///< default directory for result videos
-    int m_defaultVideoCodec;
+    QString m_defaultVideoCodecStr;        ///< default video codec as FOURCC string
     bool m_defaultResultVideoWithRectangles; ///< whether to draw rectanges into result video
     QString m_defaultVideoEncoderLocation;
     QString m_defaultResultImageDir;    ///< default directory for result images
     bool m_defaultSaveResultImages;     ///< whether to save result images by default
 
     QString m_defaultUserTokenAtUfoId;  ///< default user token for ufoid.net: empty value by default
+
+    VideoCodecSupportInfo* m_videoCodecSupportInfo; ///< info about video codec support
 
 signals:
     /**

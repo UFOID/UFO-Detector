@@ -18,6 +18,10 @@
 
 #include "recorder.h"
 
+int mockRecorderStartCount;
+int mockRecorderStopCount;
+
+
 Recorder::Recorder(Camera* cameraPtr, Config* configPtr) {
     Q_UNUSED(cameraPtr);
     Q_UNUSED(configPtr);
@@ -25,10 +29,14 @@ Recorder::Recorder(Camera* cameraPtr, Config* configPtr) {
 
 void Recorder::startRecording(cv::Mat &firstFrame) {
     Q_UNUSED(firstFrame);
+    m_recording = true;
+    mockRecorderStartCount++;
 }
 
 void Recorder::stopRecording(bool willSaveVideo) {
     Q_UNUSED(willSaveVideo);
+    m_recording = false;
+    mockRecorderStopCount++;
 }
 
 void Recorder::setRectangle(cv::Rect &r, bool isRed) {
@@ -39,7 +47,7 @@ void Recorder::setRectangle(cv::Rect &r, bool isRed) {
 void Recorder::reloadResultDataFile() {
 }
 
-void Recorder::startEncodingVideoToFFV1(QString tempVideoFileName, QString targetVideoFileName) {
+void Recorder::startEncodingVideo(QString tempVideoFileName, QString targetVideoFileName) {
     Q_UNUSED(tempVideoFileName);
     Q_UNUSED(targetVideoFileName);
 }
