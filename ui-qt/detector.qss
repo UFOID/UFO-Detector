@@ -1,0 +1,73 @@
+/*
+ * UFO Detector | www.UFOID.net
+ *
+ * Copyright (C) 2016 UFOID
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/* NOTE: detection status indicator styles are hard-coded in MainWindow.cpp */
+
+/* Can't set QWidget on top level because overrides windows/dialogs. No idea why. */
+/* QWidget { background-color: #3c4a62; color: white; } */
+/* neither can set QMainWindow QWidget { } because overrides again */
+
+QMainWindow, QDialog {
+    background-color: #515c65;
+    color: white;
+}
+
+QPushButton, QToolButton, QLineEdit, QComboBox, QTextEdit, QListView, QTreeView {
+    background-color: #3c4a62;
+    color: white;
+}
+
+QLabel, QCheckBox, QScrollBar {
+    background-color: #515c65;
+    color: white;
+}
+
+QSlider, QProgressBar {
+    background-color: #515c65;
+    color: white;
+}
+
+QComboBox QListView {
+    background-color: #515c65;
+    color: white;
+}
+
+#videoList {
+    background-color: #515c65;
+}
+
+#videoList:item {
+    background-color: #3c4a62;
+    border: 1px solid #515c65;
+}
+
+#videoList:item:selected {
+    background-color: #4d7499;
+}
+
+VideoWidget ClickableLabel, VideoWidget QLabel {
+    background-color: #3c4a62;
+    border: 1px solid #777777;
+}
+
+QLineEdit:disabled
+{
+    background-color: #515c65;
+    color: grey;
+}
+
