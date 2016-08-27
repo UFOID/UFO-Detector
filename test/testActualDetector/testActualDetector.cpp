@@ -48,7 +48,8 @@ private Q_SLOTS:
      */
     void mockCameraBlockNextFrame();
 
-    void detectObjects();
+    void detectBrightObjects();
+    void detectDarkObjects();
 
 private:
     ActualDetector* m_actualDetector;
@@ -142,7 +143,7 @@ void TestActualDetector::mockCameraBlockNextFrame() {
     QVERIFY(2 == m_cameraFramesConsumed);
 }
 
-void TestActualDetector::detectObjects() {
+void TestActualDetector::detectBrightObjects() {
     int numFrames = 25;
     int objectRadius = 0;           // object radius in pixels
     int objectBrightness = 255;     // brightness value (0-255)
@@ -173,6 +174,7 @@ void TestActualDetector::detectObjects() {
     // just before threads start. Luckily, progress value tells when it can be done.
     connect(m_actualDetector, SIGNAL(progressValueChanged(int)), this, SLOT(onActualDetectorStartProgressChanged(int)));
     QVERIFY(m_actualDetector->start());
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
     for (objectX = 0; objectX < m_config->cameraWidth(); objectX += (m_config->cameraWidth() / numFrames)) {
         mockCameraNextFrame = cv::Mat(m_config->cameraHeight(), m_config->cameraWidth(), CV_8UC3, backgroundColor);
@@ -184,12 +186,59 @@ void TestActualDetector::detectObjects() {
     qDebug() << "Test stopping actual detector";
     mockCamera_setFrameBlockingEnabled(false);
     mockCamera_releaseNextFrame();
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
     m_actualDetector->stopThread();
 
     QVERIFY(!m_actualDetector->m_recorder->m_recording);
+    // verify recorder started
     QVERIFY(mockRecorderStartCount > 0);
     QVERIFY(mockRecorderStopCount > 0);
-    //QVERIFY(detectionAreaFile.remove());
+}
+
+void TestActualDetector::detectDarkObjects() {
+    int numFrames = 25;
+    int objectRadius = 5;           // object radius in pixels
+    int objectBrightness = 0;     // brightness value (0-255)
+    int backgroundLightness = 127;   // lightness value (0-255)
+    int objectX = 0;
+    int objectY = 0;
+    cv::Scalar objectColor;
+    cv::Scalar backgroundColor;
+    QFile detectionAreaFile(m_config->detectionAreaFile());
+
+    // case: 50% lightness in background, 0% brightness in one small object,
+    // object moving left to right in the middle area of video
+
+    objectY = m_config->cameraHeight() / 2;
+    mockRecorderStartCount = 0;
+    mockRecorderStopCount = 0;
+    objectColor = cv::Scalar(objectBrightness, objectBrightness, objectBrightness);
+    backgroundColor = cv::Scalar(backgroundLightness, backgroundLightness, backgroundLightness);
+
+    if (!detectionAreaFile.exists()) {
+        makeDetectionAreaFile();
+    }
+    mockCameraNextFrame = cv::Mat(m_config->cameraHeight(), m_config->cameraWidth(), CV_8UC3, backgroundColor);
+
+    connect(m_actualDetector, SIGNAL(progressValueChanged(int)), this, SLOT(onActualDetectorStartProgressChanged(int)));
+    QVERIFY(m_actualDetector->start());
+
+    for (objectX = 0; objectX < m_config->cameraWidth(); objectX += (m_config->cameraWidth() / numFrames)) {
+        mockCameraNextFrame = cv::Mat(m_config->cameraHeight(), m_config->cameraWidth(), CV_8UC3, backgroundColor);
+        cv::circle(mockCameraNextFrame, Point(objectX, objectY), objectRadius, objectColor, -1);
+        mockCamera_releaseNextFrame();
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000 / m_cameraFps));
+    }
+
+    mockCamera_setFrameBlockingEnabled(false);
+    mockCamera_releaseNextFrame();
+    m_actualDetector->stopThread();
+
+    QVERIFY(!m_actualDetector->m_recorder->m_recording);
+    // verify recorded didn't start
+    QVERIFY(0 == mockRecorderStartCount);
+    // stop is called always
+    QVERIFY(mockRecorderStopCount > 0);
 }
 
 void TestActualDetector::makeDetectionAreaFile() {
