@@ -64,7 +64,7 @@ public:
     Recorder* getRecorder();
 
     /**
-     * @brief Set whether to show camera video. A still image is shown if the video is not shown.
+     * @brief Set whether to show camera output from ActualDetector. A still frame is shown if the video is not shown.
      * @param show true = show, false = don't show
      */
     void showCameraVideo(bool show);
