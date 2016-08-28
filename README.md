@@ -26,7 +26,6 @@ The UFO Detector is a software that allows the autonomous video recording of pos
   **Ubuntu Linux**
 
   In a single command in Ubuntu Linux (at least 16.04, other versions shouldn't differ too much): ```sudo apt-get install qtbase5-dev libopencv-core-dev libopencv-calib3d-dev libopencv-features2d-dev libopencv-flann-dev libopencv-highgui-dev libopencv-imgproc-dev libopencv-ml-dev libopencv-objdetect-dev libopencv-video-dev avconv```
-2. Open the Qt project file, currently UFO-Detector/src/Detector.pro, in Qt Creator.
 3. First build the project and then run either in Qt Creator or in command line in build target folder.
 
 ### Detection Algorithm:
