@@ -7,19 +7,27 @@ The UFO Detector is a software that allows the autonomous video recording of pos
   - Interface to manage all the recorded videos
   - Sharing of captured video with UFOID.net
   - Selection of specific detection area
-  - (Planned) Cross-platform support
+  - Currently support in Windows and Linux. Raspberry Pi has been planned (https://github.com/UFOID/UFO-Detecor-Pi).
   
 ### Requirements:
   - USB Webcam
-  - OpenCV 3.0
-  - Qt 5.6.0
+  - OpenCV 3.0 (2.4 will work, too)
+  - Qt 5
   - FFmpeg / avconv
   
 ### ToDo:
   - Interface to support more video devices
-  - Cross-platform support
   - Improve detection algorithm
   - Many bug fixes
+
+### Building and Running
+1. Install the prerequisites, see the list above.
+
+  **Ubuntu Linux**
+
+  In a single command in Ubuntu Linux (at least 16.04, other versions shouldn't differ too much): ```sudo apt-get install qtbase5-dev libopencv-core-dev libopencv-calib3d-dev libopencv-features2d-dev libopencv-flann-dev libopencv-highgui-dev libopencv-imgproc-dev libopencv-ml-dev libopencv-objdetect-dev libopencv-video-dev avconv```
+2. Open the Qt project file, currently UFO-Detector/src/Detector.pro, in Qt Creator.
+3. First build the project and then run either in Qt Creator or in command line in build target folder.
 
 ### Detection Algorithm:
 Since the objects that the software looks for are not well defined (i.e. being “unknown”) false positive detections are expected.  We use a combination of following algorithms in order to narrow down the results:
