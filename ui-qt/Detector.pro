@@ -20,58 +20,35 @@ CONFIG += c++11
 
 RC_ICONS = app.ico
 
-include(opencv.pri)
+VPATH += ../ufo-detector-engine
+INCLUDEPATH += ../ufo-detector-engine
+include(../ufo-detector-engine/ufo-detector-engine.pri)
 
 SOURCES += main.cpp\
-    recorder.cpp \
     mainwindow.cpp \
     graphicsscene.cpp \
-    actualdetector.cpp \
     videowidget.cpp \
     clickablelabel.cpp \
-    camera.cpp \
     imageexplorer.cpp \
-    Ctracker.cpp\
-    Detector.cpp\
-    Kalman.cpp\
-    HungarianAlg.cpp\
-    BackgroundSubtract.cpp\
-    VIBE.cpp \
     settingsdialog.cpp \
-    config.cpp \
     detectionareaeditdialog.cpp \
-    camerainfo.cpp \
     cameraresolutiondialog.cpp \
     videolist.cpp \
     videouploaderdialog.cpp \
-    updateapplicationdialog.cpp \
-    videocodecsupportinfo.cpp
+    updateapplicationdialog.cpp
 
 HEADERS  += \
-    recorder.h \
     mainwindow.h \
     graphicsscene.h \
-    actualdetector.h \
     videowidget.h \
     clickablelabel.h \
-    camera.h \
     imageexplorer.h \
-    Ctracker.h \
-    Detector.h \
-    Kalman.h \
-    HungarianAlg.h \
-    BackgroundSubtract.h \
-    VIBE.h \
-    OpencvInclude.h \
     settingsdialog.h \
-    config.h \
     detectionareaeditdialog.h \
-    camerainfo.h \
     cameraresolutiondialog.h \
     videolist.h \
     videouploaderdialog.h \
-    updateapplicationdialog.h \
-    videocodecsupportinfo.h
+    updateapplicationdialog.h
 
 FORMS    += \
     mainwindow.ui \

@@ -21,12 +21,12 @@ CONFIG += c++11
 DEFINES += SRCDIR=\\\"$$PWD/\\\" \
     _UNIT_TEST_
 
-include(../../src/opencv.pri)
+include(../../opencv.pri)
 
-INCLUDEPATH += ../../src
+INCLUDEPATH += ../..
 
-HEADERS += ../../src/videocodecsupportinfo.h
+HEADERS += ../../videocodecsupportinfo.h
 
 SOURCES += testVideoCodecSupportInfo.cpp \
-    ../../src/videocodecsupportinfo.cpp
+    ../../videocodecsupportinfo.cpp
 

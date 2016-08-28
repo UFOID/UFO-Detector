@@ -5,5 +5,6 @@ SUBDIRS = \
     testConfig \
     testCameraInfo \
     testRecorder \
-    testActualDetector
+    testActualDetector \
+    testVideoCodecSupportInfo
 

@@ -14,14 +14,14 @@ CONFIG   -= app_bundle
 
 TEMPLATE = app
 
-include(../../src/opencv.pri)
+include(../../opencv.pri)
 
-INCLUDEPATH += ../../src
+INCLUDEPATH += ../..
 
-HEADERS += ../../src/camerainfo.h
+HEADERS += ../../camerainfo.h
 
 SOURCES += testcamerainfo.cpp \
-    ../../src/camerainfo.cpp
+    ../../camerainfo.cpp
 
 DEFINES += SRCDIR=\\\"$$PWD/\\\" \
     _UNIT_TEST_

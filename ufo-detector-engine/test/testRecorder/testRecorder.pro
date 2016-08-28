@@ -19,22 +19,22 @@ CONFIG += c++11
 DEFINES += SRCDIR=\\\"$$PWD/\\\" \
     _UNIT_TEST_
 
-include(../../src/opencv.pri)
+include(../../opencv.pri)
 
 INCLUDEPATH += . \
-    ../../src \
+    ../.. \
     ../mock
 
 SOURCES += testrecorder.cpp \
     ../mock/mockcamera.cpp \
     ../mock/mockconfig.cpp \
-    ../../src/videocodecsupportinfo.cpp \
-    ../../src/recorder.cpp \
-    ../../src/camerainfo.cpp
+    ../../videocodecsupportinfo.cpp \
+    ../../recorder.cpp \
+    ../../camerainfo.cpp
 
-HEADERS += ../../src/recorder.h \
-    ../../src/config.h \
-    ../../src/videocodecsupportinfo.h \
-    ../../src/camera.h \
-    ../../src/camerainfo.h
+HEADERS += ../../recorder.h \
+    ../../config.h \
+    ../../videocodecsupportinfo.h \
+    ../../camera.h \
+    ../../camerainfo.h
 

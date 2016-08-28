@@ -17,10 +17,9 @@
  */
 
 #include "recorder.h"
-#include "actualdetector.h"
+//#include "actualdetector.h"
 #include "camera.h"
 #include "config.h"
-#include "mainwindow.h"
 #include <QtTest>
 #include <QString>
 #include <QFile>

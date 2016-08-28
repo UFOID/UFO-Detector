@@ -131,7 +131,7 @@ private:
     QString m_videoEncoderLocation; ///< video encoder executable location
     bool m_isInitialized;           ///< object initialized
     /// @todo table model would be clearer. Columns: fourcc, encoderStr, codecName, encoderList
-    QMap<int, QList<int>> m_codecSupport;      ///< encoder fourcc -> support provider list
+    QMap<int, QList<int> > m_codecSupport;      ///< encoder fourcc -> support provider list
     QHash<int, QString> m_fourccToEncoderStr;   ///< encoder fourcc -> encoder ID string used by encoder
     QHash<int, QString> m_fourccToCodecName;    ///< clear text name of codec (max. few words)
 

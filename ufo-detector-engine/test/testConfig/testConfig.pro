@@ -16,16 +16,16 @@ TEMPLATE = app
 
 DEFINES += _UNIT_TEST_
 
-include(../../src/opencv.pri)
-
-INCLUDEPATH += ../../src \
+INCLUDEPATH += ../.. \
     ../mock
 
+include(../../opencv.pri)
+
 SOURCES += testconfig.cpp \
-    ../../src/config.cpp \
+    ../../config.cpp \
     ../mock/mockVideoCodecSupportInfo.cpp
 
-HEADERS += ../../src/config.h \
-    ../../src/videocodecsupportinfo.h
+HEADERS += ../../config.h \
+    ../../videocodecsupportinfo.h
 
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
