@@ -120,17 +120,27 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
  */
 void MainWindow::updateWebcamFrame()
 {
-    cv::Mat resizedFrame;
+    cv::Mat frame;
+    int availableFrameTime = 1000/24;   // ms per frame
+    qint64 frameStartTime;
+    qint64 frameEndTime;
+    int frameTimeLeft;
     while (m_showCameraVideo)
     {
+        frameStartTime = QDateTime::currentMSecsSinceEpoch();
+
         m_webcamFrame = m_camera->getWebcamFrame();
-        /// @todo sync because displayResolution could change at any moment
-        cv::resize(m_webcamFrame,resizedFrame, m_cameraViewResolution,0, 0, INTER_CUBIC);
-        cv::cvtColor(resizedFrame, resizedFrame, CV_BGR2RGB);
-        m_cameraViewImageMutex.lock();
-        m_cameraViewImage = QImage((uchar*)resizedFrame.data, resizedFrame.cols, resizedFrame.rows, resizedFrame.step, QImage::Format_RGB888);
-        m_cameraViewImageMutex.unlock();
+        cv::cvtColor(m_webcamFrame, frame, CV_BGR2RGB);
+        m_cameraViewImage = QImage((uchar*)frame.data, frame.cols, frame.rows, frame.step, QImage::Format_RGB888);
         emit updatePixmap(m_cameraViewImage);
+
+        frameEndTime = QDateTime::currentMSecsSinceEpoch();
+        frameTimeLeft = availableFrameTime - (frameEndTime - frameStartTime);
+        // Sleep to keep frame rate of camera view ~constant,
+        // but more importantly if not sleeping then emitting signals too fast
+        if (frameTimeLeft > 0) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(frameTimeLeft));
+        }
         std::this_thread::yield();
     }
 }
@@ -138,7 +148,10 @@ void MainWindow::updateWebcamFrame()
 void MainWindow::displayPixmap(QImage image)
 {
     m_cameraViewImageMutex.lock();
-    ui->cameraView->setPixmap(QPixmap::fromImage(image));
+    m_latestCameraViewVideoFrame = image.copy();
+    QImage scaledImage = image.scaled(m_cameraViewResolution.width, m_cameraViewResolution.height,
+            Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    ui->cameraView->setPixmap(QPixmap::fromImage(scaledImage));
     m_cameraViewImageMutex.unlock();
 }
 
@@ -157,7 +170,6 @@ void MainWindow::setSignalsAndSlots(ActualDetector* actualDetector)
     connect(this, SIGNAL(elementWasRemoved()), m_actualDetector->getRecorder(), SLOT(reloadResultDataFile()));
     connect(m_actualDetector, SIGNAL(progressValueChanged(int)), this, SLOT(on_progressBar_valueChanged(int)));
     connect(m_actualDetector, SIGNAL(broadcastOutputText(QString)), this, SLOT(update_output_text(QString)));
-    connect(this, SIGNAL(cameraViewFrameSizeChanged(QSize)), m_actualDetector, SLOT(onCameraViewFrameSizeChanged(QSize)));
     connect(this, SIGNAL(updatePixmap(QImage)), this, SLOT(displayPixmap(QImage)));
     connect(ui->videoList, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(onVideoListContextMenuRequested(const QPoint&)));
 }
@@ -553,27 +565,12 @@ void MainWindow::adjustCameraViewFrameSize()
     QSize cameraFrameSize(m_config->cameraWidth(), m_config->cameraHeight());
     cameraFrameSize.scale(ui->cameraView->width(), ui->cameraView->height(), Qt::KeepAspectRatio);
     m_cameraViewResolution = Size(cameraFrameSize.width(), cameraFrameSize.height());
-    // if image is not resized anywhere else do it here
+    // if image is not shown anywhere else do it here
     if (m_detecting && !ui->checkBoxDisplayWebcam->isChecked())
     {
-        cv::Mat resizedFrame;
-        cv::resize(m_webcamFrame, resizedFrame, m_cameraViewResolution, 0, 0, INTER_CUBIC);
-        cv::cvtColor(resizedFrame, resizedFrame, CV_BGR2RGB);
-        m_cameraViewImageMutex.lock();
-        m_cameraViewImage = QImage((uchar*)resizedFrame.data, resizedFrame.cols, resizedFrame.rows, resizedFrame.step, QImage::Format_RGB888);
-        m_cameraViewImageMutex.unlock();
-        displayPixmap(m_cameraViewImage);   // slot
+        displayPixmap(m_latestCameraViewVideoFrame);   // slot
     }
     emit cameraViewFrameSizeChanged(cameraFrameSize);
-}
-
-
-/*
- * Get the DisplayImages checkbox state for the ActualDetector
- */
-bool MainWindow::getCheckboxDisplayWebcamState()
-{
-    return ui->checkBoxDisplayWebcam->isChecked();
 }
 
 void MainWindow::readLogFileAndGetRootElement()
@@ -819,31 +816,5 @@ void MainWindow::on_toolButtonNoise_clicked()
 void MainWindow::on_toolButtonThresh_clicked()
 {
     QMessageBox::information(this, tr("Information"), tr("Select the threshold filter value that will be used in the motion detection algorithm. \nIncrease the value if clouds are being detected. \nRecommended value: 10"));
-}
-
-Size MainWindow::getCameraViewSize()
-{
-    return m_cameraViewResolution;
-}
-
-QMutex* MainWindow::cameraViewImageMutex()
-{
-    return &m_cameraViewImageMutex;
-}
-
-void MainWindow::setLatestStillFrame(Mat& frame)
-{
-    if (m_detecting && !ui->checkBoxDisplayWebcam->isChecked())
-    {
-        m_webcamFrame = frame.clone();
-        /// @todo converting & scaling camera frame into QImage repeats many times -> refactor
-        cv::Mat resizedFrame;
-        cv::resize(m_webcamFrame, resizedFrame, m_cameraViewResolution, 0, 0, INTER_CUBIC);
-        cv::cvtColor(resizedFrame, resizedFrame, CV_BGR2RGB);
-        m_cameraViewImageMutex.lock();
-        m_cameraViewImage = QImage((uchar*)resizedFrame.data, resizedFrame.cols, resizedFrame.rows, resizedFrame.step, QImage::Format_RGB888);
-        m_cameraViewImageMutex.unlock();
-        displayPixmap(m_cameraViewImage);   // slot
-    }
 }
 

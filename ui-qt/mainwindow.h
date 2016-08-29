@@ -67,18 +67,8 @@ public:
     explicit MainWindow(QWidget *parent = 0, Camera *cameraPtr = 0, Config *configPtr = 0);
     ~MainWindow();
     void addOutputText(QString msg);
-    bool getCheckboxDisplayWebcamState();
 
     void setSignalsAndSlots(ActualDetector *actualDetector);
-    cv::Size getCameraViewSize();
-    QMutex* cameraViewImageMutex();
-
-    /**
-     * @brief Set latest still frame to be shown during detection if no video is shown.
-     * This doesn't have effect during detection if the video is being shown.
-     * @param frame
-     */
-    void setLatestStillFrame(cv::Mat& frame);
 
 private:
     Ui::MainWindow *ui;
@@ -95,6 +85,7 @@ private:
     std::unique_ptr<std::thread> threadWebcam;
     cv::Size m_cameraViewResolution;    ///< frame size of camera view
     QImage m_cameraViewImage;           ///< image to be drawn in camera view
+    QImage m_latestCameraViewVideoFrame;///< latest video frame
     QMutex m_cameraViewImageMutex;      ///< syncing camera view image
     QString m_detectionStatusStyleOn;   ///< detection status indicator style when detection on
     QString m_detectionStatusStyleOff;  ///< detection status indicator style when detection off
