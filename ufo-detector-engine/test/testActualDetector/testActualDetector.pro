@@ -30,7 +30,6 @@ SOURCES += \
     ../../actualdetector.cpp \
     ../mock/mockconfig.cpp \
     ../mock/mockcamera.cpp \
-    ../mock/mockMainWindow.cpp \
     ../mock/mockRecorder.cpp \
     ../../Ctracker.cpp \
     ../../Detector.cpp \
@@ -45,7 +44,6 @@ HEADERS += ../../actualdetector.h \
     ../../config.h \
     ../../camera.h \
     ../../recorder.h \
-    ../../../ui-qt/mainwindow.h \
     ../../Ctracker.h \
     ../../Detector.h \
     ../../Kalman.h \

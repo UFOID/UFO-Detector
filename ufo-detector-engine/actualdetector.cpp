@@ -18,25 +18,26 @@
 
 #include "actualdetector.h"
 
-ActualDetector::ActualDetector(MainWindow *parent, Camera *cameraPtr, Config *configPtr) :
-    QObject(parent), camPtr(cameraPtr)
+ActualDetector::ActualDetector(Camera *cameraPtr, Config *configPtr, QObject *parent) :
+    QObject(parent), m_camPtr(cameraPtr)
 {
     m_config = configPtr;
-    m_mainWindow = parent;
     const QString DETECTION_AREA_FILE = m_config->detectionAreaFile();
     const QString IMAGEPATH = m_config->resultImageDir() + "/";
-    willSaveImages = m_config->saveResultImages();
-    WIDTH = m_config->cameraWidth();
-    HEIGHT = m_config->cameraHeight();
-    willRecordWithRect = m_config->resultVideoWithObjectRectangles();
-    minPositiveRequired = m_config->minPositiveDetections();
-    isMainThreadRunning = false;
+    m_willSaveImages = m_config->saveResultImages();
+    m_cameraWidth = m_config->cameraWidth();
+    m_cameraHeight = m_config->cameraHeight();
+    m_willRecordWithRect = m_config->resultVideoWithObjectRectangles();
+    m_minPositiveRequired = m_config->minPositiveDetections();
+    m_isMainThreadRunning = false;
+    m_showCameraVideo = false;
+    m_startedRecording = false;
 
-    detectionAreaFile = DETECTION_AREA_FILE.toStdString();
-    pathname = IMAGEPATH.toStdString();
-    noiseLevel = getStructuringElement(MORPH_RECT, Size(1,1));
+    m_detectionAreaFile = DETECTION_AREA_FILE.toStdString();
+    m_resultImageDirNameBase = IMAGEPATH.toStdString();
+    m_noiseLevel = getStructuringElement(MORPH_RECT, Size(1,1));
 
-    m_recorder = new Recorder(camPtr, m_config);
+    m_recorder = new Recorder(m_camPtr, m_config);
 
     qDebug() << "ActualDetector constructed";
 }
@@ -46,56 +47,51 @@ ActualDetector::~ActualDetector()
     m_recorder->deleteLater();
 }
 
-/*
- * Initialize the Detector
- */
 bool ActualDetector::initialize()
 {
-    prev_frame = camPtr->getWebcamFrame();
-    result = prev_frame;
-    current_frame = camPtr->getWebcamFrame();
-    next_frame = camPtr->getWebcamFrame();
-    cvtColor(current_frame, current_frame, CV_RGB2GRAY);
-    cvtColor(prev_frame, prev_frame, CV_RGB2GRAY);
-    cvtColor(next_frame, next_frame, CV_RGB2GRAY);
+    m_prevFrame = m_camPtr->getWebcamFrame();
+    m_resultFrame = m_prevFrame;
+    m_currentFrame = m_camPtr->getWebcamFrame();
+    m_nextFrame = m_camPtr->getWebcamFrame();
+    cvtColor(m_currentFrame, m_currentFrame, CV_RGB2GRAY);
+    cvtColor(m_prevFrame, m_prevFrame, CV_RGB2GRAY);
+    cvtColor(m_nextFrame, m_nextFrame, CV_RGB2GRAY);
 
-    minAmountOfMotion = 2;
-    max_deviation = 20;
-    imageCount = 0;
-    ext =".jpg";
+    m_minAmountOfMotion = 2;
+    m_maxDeviation = 20;
+    m_imageCount = 0;
+    m_savedImageExtension =".jpg";
 
+    bool success = parseDetectionAreaFile(m_detectionAreaFile, m_region);
 
-    bool success = parseDetectionAreaFile(detectionAreaFile, region);
-
-    m_showCameraVideo= qobject_cast <MainWindow*>(parent())->getCheckboxDisplayWebcamState();
-    willParseRectangle=false;
-    if(willSaveImages)
+    m_willParseRectangle = false;
+    if(m_willSaveImages)
     {
         string dateTime=QDateTime::currentDateTime().toString("yyyy-MM-dd--hh-mm-ss").toStdString();
         QDir dir = QDir::root();
-        dir.mkpath(QString::fromStdString(pathname + dateTime));
-        fileDir = (QString::fromStdString(pathname + dateTime +"/"+"image")).toLatin1().toStdString();
-        pathnameThresh = fileDir + "Thresh";
+        dir.mkpath(QString::fromStdString(m_resultImageDirNameBase + dateTime));
+        m_resultImageDirName = (QString::fromStdString(m_resultImageDirNameBase + dateTime +"/"+"image")).toLatin1().toStdString();
+        m_pathNameThresh = m_resultImageDirName + "Thresh";
     }
 
-    isInNightMode = false;
-    isCascadeFound = true;
-    if (!birds_cascade.load(m_config->birdClassifierTrainingFile().toStdString()))
+    m_isInNightMode = false;
+    m_isCascadeFound = true;
+    if (!m_birdsCascade.load(m_config->birdClassifierTrainingFile().toStdString()))
     {
         auto output_text = tr("WARNING: could not load bird detection data (cascade classifier file)");
         emit broadcastOutputText(output_text);
-        isInNightMode = true;
-        isCascadeFound = false;
+        m_isInNightMode = true;
+        m_isCascadeFound = false;
     }
 
     qDebug() << "Initialized ActualDetector";
     this_thread::sleep_for(std::chrono::seconds(1));
-    startedRecording = false;
+    m_startedRecording = false;
 
 
-    rect = Rect(Point(0,0),Point(WIDTH,HEIGHT));
-    treshImg = result.clone();
-    treshImg.setTo(Scalar(0,0,0));
+    m_rect = Rect(Point(0,0),Point(m_cameraWidth,m_cameraHeight));
+    m_treshImg = m_resultFrame.clone();
+    m_treshImg.setTo(Scalar(0,0,0));
     return success;
 }
 
@@ -104,7 +100,6 @@ bool ActualDetector::initialize()
  */
 void ActualDetector::detectingThread()
 {
-    qDebug() << "Started detection thread";
     Mat tempImage;
     int posCounter = 0;
     int negAndNoMotionCounter = 0;
@@ -112,59 +107,57 @@ void ActualDetector::detectingThread()
     int counterBlackDetecor = 0;
     int counterLight = 0;
     bool isPositiveRectangle;
-    m_cameraViewFrameSize = qobject_cast <MainWindow*>(parent())->getCameraViewSize();
     int threadYieldPauseUsec = 1000;
 	
     CTracker tracker(0.2,0.5,60.0,15,15);
-    CDetector* detector=new CDetector(current_frame);
+    CDetector* detector=new CDetector(m_currentFrame);
     vector<Point2d> centers;
     Scalar Colors[]={Scalar(255,0,0),Scalar(0,255,0),Scalar(0,0,255),Scalar(255,255,0),Scalar(0,255,255),Scalar(255,0,255),Scalar(255,127,255),Scalar(127,0,255),Scalar(127,0,127)};
     pair < vector<Point2d>,vector<Rect> > centerAndRectPair;
 
-    while (isMainThreadRunning)
+    while (m_isMainThreadRunning)
     {
-        prev_frame = current_frame;
-        current_frame = next_frame;
-        tempImage = camPtr->getWebcamFrame();
+        m_prevFrame = m_currentFrame;
+        m_currentFrame = m_nextFrame;
+        tempImage = m_camPtr->getWebcamFrame();
 
-        next_frame = tempImage.clone();
-        result = next_frame;
-        m_latestStillFrame = next_frame;
-        cvtColor(next_frame, next_frame, CV_RGB2GRAY);
+        m_nextFrame = tempImage.clone();
+        m_resultFrame = m_nextFrame;
+        cvtColor(m_nextFrame, m_nextFrame, CV_RGB2GRAY);
 
-        absdiff(prev_frame, next_frame, d1);
-        absdiff(current_frame, next_frame, d2);
-        bitwise_and(d1, d2, motion);
-        threshold(motion, motion, thresholdLevel, 255, CV_THRESH_BINARY);
+        absdiff(m_prevFrame, m_nextFrame, m_d1);
+        absdiff(m_currentFrame, m_nextFrame, m_d2);
+        bitwise_and(m_d1, m_d2, m_motion);
+        threshold(m_motion, m_motion, m_thresholdLevel, 255, CV_THRESH_BINARY);
 
-        erode(motion, motion, noiseLevel);
+        erode(m_motion, m_motion, m_noiseLevel);
 
-        numberOfChanges = detectMotion(motion, result, result_cropped, region, max_deviation);
+        m_numberOfChanges = detectMotion(m_motion, m_resultFrame, m_resultFrameCropped, m_region, m_maxDeviation);
 
-        if(numberOfChanges>=minAmountOfMotion)
+        if(m_numberOfChanges>=m_minAmountOfMotion)
         {
-            centerAndRectPair = detector->Detect(treshImg,rect);
+            centerAndRectPair = detector->Detect(m_treshImg,m_rect);
             centers = centerAndRectPair.first;
-            detectorRectVec = centerAndRectPair.second;
+            m_detectorRectVec = centerAndRectPair.second;
             counterNoMotion=0;
             if(centers.size()>0)
             {
                 tracker.Update(centers);
             }
             //loop through detected objects
-            if (detectorRectVec.size()<10)
+            if (m_detectorRectVec.size()<10)
             {
                 isPositiveRectangle=false;
-                for ( unsigned int i=0;i<detectorRectVec.size();i++)
+                for ( unsigned int i=0;i<m_detectorRectVec.size();i++)
                 {
-                    Rect croppedRectangle = detectorRectVec[i];
-                    Mat temp = result(croppedRectangle);
+                    Rect croppedRectangle = m_detectorRectVec[i];
+                    Mat temp = m_resultFrame(croppedRectangle);
                     Mat croppedImage = temp.clone();
                     //+++check if there was light in object
                     if(lightDetection(croppedRectangle,croppedImage))
                     {
                         //object was bright
-                        if (!isInNightMode && checkIfBird())
+                        if (!m_isInNightMode && checkIfBird())
                         {
                             tracker.tracks[i]->birdCounter++;
                             tracker.tracks[i]->negCounter++;
@@ -175,18 +168,18 @@ void ActualDetector::detectingThread()
                             if(counterLight>2)counterBlackDetecor=0;
                             if(counterBlackDetecor<5)
                             {
-                                if(!startedRecording)
+                                if(!m_startedRecording)
                                 {
-                                    Mat tempImg = result.clone();
+                                    Mat tempImg = m_resultFrame.clone();
                                     rectangle(tempImg,croppedRectangle,Scalar(255,0,0),1);
                                     m_recorder->startRecording(tempImg);
-                                    if(willRecordWithRect) willParseRectangle=true;
-                                    startedRecording=true;
+                                    if(m_willRecordWithRect) m_willParseRectangle=true;
+                                    m_startedRecording=true;
                                     auto output_text = tr("Positive detection - starting video recording");
                                     emit broadcastOutputText(output_text);
                                 }
 
-                                if(willParseRectangle)
+                                if(m_willParseRectangle)
                                 {
                                     isPositiveRectangle=true;
                                 }
@@ -195,9 +188,10 @@ void ActualDetector::detectingThread()
                                 tracker.tracks[i]->posCounter++;
                                 emit positiveMessage();
 
-                                if(willSaveImages)
+                                if(m_willSaveImages)
                                 {
-                                    saveImg(fileDir, croppedImage); imageCount++;
+                                    saveImg(m_resultImageDirName, croppedImage);
+                                    m_imageCount++;
                                     //saveImg(pathnameThresh, treshImg);
                                 }
                             }
@@ -212,16 +206,16 @@ void ActualDetector::detectingThread()
                                 saveImg(fileDir, result_cropped); imageCount++;
                                 saveImg(pathnameThresh, treshImg); imageCount++;
                             }*/
-                        if (startedRecording)
+                        if (m_startedRecording)
                         {
                             negAndNoMotionCounter++;
                         }
                         emit negativeMessage();
                     }
                 }
-                if(willParseRectangle)
+                if(m_willParseRectangle)
                 {
-                    m_recorder->setRectangle(rect,isPositiveRectangle);
+                    m_recorder->setRectangle(m_rect,isPositiveRectangle);
                 }
 
             }
@@ -231,14 +225,14 @@ void ActualDetector::detectingThread()
             counterLight=0;
             counterBlackDetecor=0;
             counterNoMotion++;
-            if (startedRecording)
+            if (m_startedRecording)
             {
                 negAndNoMotionCounter++;
             }
             tracker.updateEmpty();
             centers.clear();
-            detectorRectVec.clear();
-            if ((startedRecording && counterNoMotion > 150) || (negAndNoMotionCounter > 700))
+            m_detectorRectVec.clear();
+            if ((m_startedRecording && counterNoMotion > 150) || (negAndNoMotionCounter > 700))
             { //+++no motion for 150 checks after recording started
                 if(tracker.wasBird)
                 {
@@ -254,7 +248,7 @@ void ActualDetector::detectingThread()
                 }
                 else
                 {//+++one object had more positive than negative detections
-                    if(posCounter>=minPositiveRequired)
+                    if(posCounter>=m_minPositiveRequired)
                     {
                         m_recorder->stopRecording(true);
                         auto output_text = tr("Finished recording - At least one object found positive: saved video");
@@ -271,19 +265,17 @@ void ActualDetector::detectingThread()
                 tracker.wasBird=false;
                 negAndNoMotionCounter=0;
                 posCounter=0;
-                willParseRectangle=false;
-                startedRecording=false;
+                m_willParseRectangle=false;
+                m_startedRecording=false;
             }
         }
-
-
 
         if (m_showCameraVideo)
         {
             for(unsigned int i=0; i<centers.size(); i++)
             {
                 //rectangle(result,detectorRectVec[i],color,1);
-                circle(result,centers[i],3,Scalar(0,255,0),1,CV_AA);
+                circle(m_resultFrame,centers[i],3,Scalar(0,255,0),1,CV_AA);
                 // stringstream ss;
                 // char str[256] = "";
                 // snprintf(str, sizeof(str), "%zu", tracker.tracks[i]->track_id);
@@ -298,17 +290,14 @@ void ActualDetector::detectingThread()
                     {
                         for(unsigned int j=0;j<tracker.tracks[i]->trace.size()-1;j++)
                         {
-                            line(result,tracker.tracks[i]->trace[j],tracker.tracks[i]->trace[j+1],Colors[tracker.tracks[i]->track_id%9],2,CV_AA);
+                            line(m_resultFrame,tracker.tracks[i]->trace[j],tracker.tracks[i]->trace[j+1],Colors[tracker.tracks[i]->track_id%9],2,CV_AA);
                         }
                     }
                 }
             }
 
-            cv::resize(result, result, m_cameraViewFrameSize, 0, 0, INTER_CUBIC);
-            cv::cvtColor(result, result, CV_BGR2RGB);
-            m_mainWindow->cameraViewImageMutex()->lock();
-            m_cameraViewImage = QImage((uchar*)result.data, result.cols, result.rows, result.step, QImage::Format_RGB888);
-            m_mainWindow->cameraViewImageMutex()->unlock();
+            cv::cvtColor(m_resultFrame, m_resultFrame, CV_BGR2RGB);
+            m_cameraViewImage = QImage((uchar*)m_resultFrame.data, m_resultFrame.cols, m_resultFrame.rows, m_resultFrame.step, QImage::Format_RGB888);
             emit updatePixmap(m_cameraViewImage);
         }
         // give chance to other threads to run
@@ -360,18 +349,18 @@ inline int ActualDetector::detectMotion(const Mat & motion, Mat & result, Mat & 
 
             Point x(min_x,min_y);
             Point y(max_x,max_y);
-            rect = Rect(x,y);
-            Mat croppedThresh = motion(rect);
-            croppedThresh.copyTo(treshImg);
-            Mat cropped = result(rect);
+            m_rect = Rect(x,y);
+            Mat croppedThresh = motion(m_rect);
+            croppedThresh.copyTo(m_treshImg);
+            Mat cropped = result(m_rect);
             cropped.copyTo(result_cropped);
 
         }
         else
         {
-            rect = Rect(Point(0,0),Point(WIDTH,HEIGHT));
-            treshImg = result.clone();
-            treshImg.setTo(Scalar(0,0,0));
+            m_rect = Rect(Point(0,0),Point(m_cameraWidth,m_cameraHeight));
+            m_treshImg = result.clone();
+            m_treshImg.setTo(Scalar(0,0,0));
         }
         return number_of_changes;
     }
@@ -390,9 +379,9 @@ bool ActualDetector::lightDetection(Rect &rectangle, Mat &croppedImage)
     int lightCounter=0;
     int blackCounter=0;
     Mat croppedImageThreshTemp, croppedImageThresh;
-    croppedImageThreshTemp = motion(rectangle);
+    croppedImageThreshTemp = m_motion(rectangle);
     croppedImageThreshTemp.copyTo(croppedImageThresh);
-    cvtColor(croppedImage, croppedImageGray , CV_RGB2GRAY);
+    cvtColor(croppedImage, m_croppedImageGray , CV_RGB2GRAY);
 
     int light=0;
     int totalLight=0;
@@ -402,7 +391,7 @@ bool ActualDetector::lightDetection(Rect &rectangle, Mat &croppedImage)
     {
         for(int x = 0; x < croppedImage.cols; x++)
         {
-            light+=static_cast<int>(croppedImageGray.at<uchar>(y,x));
+            light+=static_cast<int>(m_croppedImageGray.at<uchar>(y,x));
             if(static_cast<int>(croppedImageThresh.at<uchar>(y,x)) == 255)
             {
                 Point2f p(x,y);
@@ -419,11 +408,11 @@ bool ActualDetector::lightDetection(Rect &rectangle, Mat &croppedImage)
     {
         x = detectionRegion[j].x;
         y = detectionRegion[j].y;
-        if(static_cast<int>(croppedImageGray.at<uchar>(y,x)) > minAndMaxLight.first)
+        if(static_cast<int>(m_croppedImageGray.at<uchar>(y,x)) > minAndMaxLight.first)
         {
             lightCounter++;
         }
-        if(static_cast<int>(croppedImageGray.at<uchar>(y,x)) < minAndMaxLight.second)
+        if(static_cast<int>(m_croppedImageGray.at<uchar>(y,x)) < minAndMaxLight.second)
         {
             blackCounter++;
         }
@@ -501,8 +490,8 @@ pair<int,int> ActualDetector::checkBrightness(int totalLight)
  */
 void ActualDetector::checkIfNight()
 {
-    bool isRunning=true;
-    vector<Point> regionBackup=region;
+    bool isRunning = true;
+    vector<Point> regionBackup=m_region;
     vector<Point> regionNew;
     bool changedRegion=false;
     int timerSeconds=300;
@@ -513,25 +502,25 @@ void ActualDetector::checkIfNight()
         int total=0;
         long light=0;
         Mat temp;
-        temp = camPtr->getWebcamFrame();
+        temp = m_camPtr->getWebcamFrame();
         Mat frame = temp.clone();
         cvtColor(frame, frame , CV_RGB2GRAY);
 
-        for(unsigned int i = 0; i<region.size(); i++)
+        for(unsigned int i = 0; i<m_region.size(); i++)
         {
-            int x = region[i].x;
-            int y = region[i].y;
+            int x = m_region[i].x;
+            int y = m_region[i].y;
             light+=static_cast<int>(frame.at<uchar>(y,x));
         }
 
-        total = light/region.size();
+        total = light/m_region.size();
         qDebug() << "total light " << total;
 
         if (total<100)
         {
             stopOnlyDetecting();
-            region=regionBackup;
-            isInNightMode=true;
+            m_region=regionBackup;
+            m_isInNightMode=true;
 
 
             vector<Rect> constants = getConstantRecs(total);
@@ -549,7 +538,7 @@ void ActualDetector::checkIfNight()
                 }
 
                 //find rectangle coordinates in region and remove them
-                regionNew=region;
+                regionNew=m_region;
                 vector<Point>::iterator it = regionNew.begin();
                 for ( ; it != regionNew.end(); )
                 {
@@ -565,22 +554,22 @@ void ActualDetector::checkIfNight()
                 changedRegion=true;
 
             }
-            if (!pThread)
+            if (!m_mainThread)
             {
                 if(changedRegion)
                 {
-                    region=regionNew;
+                    m_region=regionNew;
                     changedRegion=false;
                 }
                 regionNew.clear();
-                isMainThreadRunning=true;
-                pThread.reset(new std::thread(&ActualDetector::detectingThread, this));
+                m_isMainThreadRunning=true;
+                m_mainThread.reset(new std::thread(&ActualDetector::detectingThread, this));
             }
 
         }
-        else if (isCascadeFound)
+        else if (m_isCascadeFound)
         {
-            isInNightMode=false;
+            m_isInNightMode=false;
         }
 
 
@@ -589,17 +578,17 @@ void ActualDetector::checkIfNight()
         bool isSleeping=true;
         while(isSleeping)
         {
-            if(isMainThreadRunning && counter<timerSeconds)
+            if(m_isMainThreadRunning && counter<timerSeconds)
             {
                 this_thread::sleep_for(chrono::seconds(1));
                 counter++;
             }
-            else if(isMainThreadRunning && counter==timerSeconds)
+            else if(m_isMainThreadRunning && counter==timerSeconds)
             {
                 isSleeping=false;
                 qDebug() << "re run loop and timer";
             }
-            else if(!isMainThreadRunning)
+            else if(!m_isMainThreadRunning)
             {
                 isSleeping=false;
                 isRunning=false;
@@ -613,7 +602,7 @@ void ActualDetector::checkIfNight()
  */
 void ActualDetector::stopOnlyDetecting()
 {
-    if(startedRecording)
+    if(m_startedRecording)
     {
         qDebug() << "wait till stopped recording";
         this_thread::sleep_for(chrono::seconds(1));
@@ -621,11 +610,11 @@ void ActualDetector::stopOnlyDetecting()
     }
     else
     {
-        if (pThread)
+        if (m_mainThread)
         {
-            isMainThreadRunning=false;
-            pThread->join();
-            pThread.reset();
+            m_isMainThreadRunning=false;
+            m_mainThread->join();
+            m_mainThread.reset();
         }
     }
 }
@@ -633,7 +622,7 @@ void ActualDetector::stopOnlyDetecting()
 bool ActualDetector::checkIfBird()
 {
     std::vector<Rect> birds;
-    birds_cascade.detectMultiScale(croppedImageGray, birds, 1.1, 2, 0|CV_HAAR_SCALE_IMAGE, Size(40, 40) );
+    m_birdsCascade.detectMultiScale(m_croppedImageGray, birds, 1.1, 2, 0|CV_HAAR_SCALE_IMAGE, Size(40, 40) );
 
     if(birds.size()>0)
     {
@@ -648,20 +637,20 @@ bool ActualDetector::checkIfBird()
 std::vector<Rect> ActualDetector::getConstantRecs(int totalLight)
 {
     vector<Rect> rectVec;
-    Mat image = camPtr->getWebcamFrame();
+    Mat image = m_camPtr->getWebcamFrame();
     Mat imageGray;
     cvtColor(image, imageGray , CV_RGB2GRAY);
 
     int y, x, size;
-    size=region.size();
+    size=m_region.size();
     int minLight = checkBrightness(totalLight).first;
 
     //find bright pixels in webcam frame and paint pixels in binary image
     Mat imageBinary(image.rows,image.cols,CV_THRESH_BINARY, Scalar(0,0,0));
     for(int i = 0; i < size; i++)
     {
-        x = region[i].x;
-        y = region[i].y;
+        x = m_region[i].x;
+        y = m_region[i].y;
         if(static_cast<int>(imageGray.at<uchar>(y,x)) > minLight+10)
         {
             rectangle(imageBinary,Point(x,y),Point(x,y),Scalar(255,255,255),-1);
@@ -738,7 +727,7 @@ bool ActualDetector::parseDetectionAreaFile(string file_region, vector<Point> &r
                     QDomElement element = node.toElement();
                     x = element.attribute("x").toInt();
                     y = element.attribute("y").toInt();
-                    if(y>HEIGHT || x>WIDTH)
+                    if(y>m_cameraHeight || x>m_cameraWidth)
                     {
                         qDebug() << y;
                         qDebug() << x;
@@ -773,7 +762,7 @@ bool ActualDetector::parseDetectionAreaFile(string file_region, vector<Point> &r
 void ActualDetector::saveImg(string path, Mat & image)
 {
     stringstream ss;
-    ss << path << imageCount << ext;
+    ss << path << m_imageCount << m_savedImageExtension;
     imwrite(ss.str(), image );
 }
 
@@ -782,37 +771,34 @@ void ActualDetector::saveImg(string path, Mat & image)
  */
 void ActualDetector::stopThread()
 {
-    region.clear();
-    isMainThreadRunning = false;  
+    m_region.clear();
+    m_isMainThreadRunning = false;
     m_recorder->stopRecording(true);
-    if (pThread)
+    if (m_mainThread)
     {
-        pThread->join();
-        pThread.reset();
+        m_mainThread->join();
+        m_mainThread.reset();
         this_thread::sleep_for(chrono::seconds(1));
-        threadNightChecker->join(); threadNightChecker.reset();
+        m_nightCheckerThread->join(); m_nightCheckerThread.reset();
     }
 }
 
-/*
- * Called from MainWindow to start the Detection process
- */
 bool ActualDetector::start()
 {
-    if (!pThread)
+    if (!m_mainThread)
     {
         emit progressValueChanged(1);
         if(initialize())
         {
-            isMainThreadRunning=true;
-            threadNightChecker.reset(new std::thread(&ActualDetector::checkIfNight, this));
+            m_isMainThreadRunning=true;
+            m_nightCheckerThread.reset(new std::thread(&ActualDetector::checkIfNight, this));
             emit progressValueChanged(90);
             this_thread::sleep_for(chrono::seconds(1));
             emit progressValueChanged(100);
 
-            if (!pThread)
+            if (!m_mainThread)
             {
-                pThread.reset(new std::thread(&ActualDetector::detectingThread, this));
+                m_mainThread.reset(new std::thread(&ActualDetector::detectingThread, this));
             }
             return true;
         }
@@ -834,17 +820,17 @@ Rect ActualDetector::enlargeROI(Mat &frm, Rect &boundingBox, int padding)
 
 void ActualDetector::setNoiseLevel(int level)
 {
-    noiseLevel=getStructuringElement(MORPH_RECT, Size(level,level));
+    m_noiseLevel=getStructuringElement(MORPH_RECT, Size(level,level));
 }
 
 void ActualDetector::setThresholdLevel(int level)
 {
-    thresholdLevel=level;
+    m_thresholdLevel=level;
 }
 
 void ActualDetector::startRecording()
 {
-    Mat firstFrame = result.clone();
+    Mat firstFrame = m_resultFrame.clone();
     m_recorder->startRecording(firstFrame);
 }
 
@@ -854,18 +840,8 @@ Recorder* ActualDetector::getRecorder()
     return m_recorder;
 }
 
-void ActualDetector::showCameraVideo(bool show)
+void ActualDetector::setShowCameraVideo(bool show)
 {
     m_showCameraVideo = show;
-    if (!m_showCameraVideo && isMainThreadRunning)
-    {
-        m_mainWindow->setLatestStillFrame(m_latestStillFrame);
-    }
-}
-
-void ActualDetector::onCameraViewFrameSizeChanged(QSize newSize)
-{
-    Q_UNUSED(newSize);
-    m_cameraViewFrameSize = qobject_cast <MainWindow*>(parent())->getCameraViewSize();
 }
 

@@ -476,11 +476,11 @@ void MainWindow::on_checkBoxDisplayWebcam_stateChanged(int arg1)
 {
     if (Qt::Unchecked == arg1)
     {
-        m_actualDetector->showCameraVideo(false);
+        m_actualDetector->setShowCameraVideo(false);
     }
     else if (Qt::Checked == arg1)
     {
-        m_actualDetector->showCameraVideo(true);
+        m_actualDetector->setShowCameraVideo(true);
     }
 }
 
