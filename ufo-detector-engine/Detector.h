@@ -28,7 +28,7 @@ using namespace cv;
 using namespace std;
 
 /**
- * @brief Class to detect objects from image
+ * @brief Class to detect moving objects from image.
  */
 class CDetector
 {
@@ -42,7 +42,7 @@ public:
     CDetector(Mat& gray);
 
     /**
-     * Find all objects in binary image
+     * @brief Find all moving objects in image.
      * Return pair of vectors that contains the center point of each object and the rectangle around each object
      * Problem: Sometimes one object is detected as two because the binary image does not show one object as a continuous area
      *

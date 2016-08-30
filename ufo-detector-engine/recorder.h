@@ -49,7 +49,7 @@ using hr_duration = std::chrono::high_resolution_clock::duration;
 class ActualDetector;
 
 /**
- * @brief The class for recording videos from web camera
+ * @brief The class for recording videos from web camera.
  */
 class Recorder : public QObject {
 Q_OBJECT
@@ -117,7 +117,7 @@ public slots:
 private slots:
 #endif
     /**
-     * @brief Creates a new QProcess that encodes the temporary raw video with ffmpeg/avconv
+     * @brief Creates a new QProcess that encodes the temporary raw video with ffmpeg/avconv.
      *
      * @note this method NEEDS to be called via signal-slot system, I guess in order
      * to run it in the main thread. If this is called from detecting thread via direct

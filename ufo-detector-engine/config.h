@@ -66,47 +66,47 @@ public:
     ~Config();
 
     /**
-     * @brief applicationVersion Application version number
+     * @brief Application version number.
      * @return version string in format major.minor.subminor
      */
     QString applicationVersion();
 
     /**
-     * @brief checkApplicationUpdates whether to automatically check application updates on startup
+     * @brief Whether to automatically check application updates on startup.
      * This is a developer setting and needs to be added manually into the settings file.
      * @return true: check, false: don't check
      */
     bool checkApplicationUpdates();
 
     /**
-     * @brief cameraIndex web camera index as defined by OpenCV
+     * @brief Web camera index as defined by OpenCV.
      */
     int cameraIndex();
 
     /**
-     * @brief cameraWidth web camera width in pixels
+     * @brief Web camera width in pixels.
      */
     int cameraWidth();
 
     /**
-     * @brief cameraHeight web camera height in pixels
+     * @brief Web camera height in pixels.
      */
     int cameraHeight();
 
     /**
-     * @brief checkCameraAspectRatio checking web camera aspect ratio
+     * @brief Whether to check web camera aspect ratio.
      * This is a developer setting and needs to be added manually into the settings file.
      * @return true if checking, false if not
      */
     bool checkCameraAspectRatio();
 
     /**
-     * @brief detectionAreaFile full name of file containing detection area definition
+     * @brief Full name of the file containing detection area definition.
      */
     QString detectionAreaFile();
 
     /**
-     * @brief detectionAreaSize size of detection area in pixels -- will be calculated automatically
+     * @brief Size of detection area in pixels. This will be calculated automatically.
      * Detection area size will be calculated automatically when defining
      * it in the settings dialog, so don't edit it.
      * @return
@@ -114,142 +114,154 @@ public:
     int detectionAreaSize();
 
     /**
-     * @brief noiseFilterPixelSize pixel size for noise filter
+     * @brief Pixel size for noise filter.
      */
     int noiseFilterPixelSize();
 
     /**
-     * @brief motionThreshold threshold value for motion detection
+     * @brief Threshold value for motion detection.
+     *
+     * @todo explain threshold value
      */
     int motionThreshold();
 
     /**
-     * @brief minPositiveDetections minimum number motion detections to start video recording
+     * @brief Minimum number of motion detections to start video recording.
      */
     int minPositiveDetections();
 
     /**
-     * @brief birdClassifierTrainingFile bird classifier training data (using cascade classifier)
+     * @brief Bird classifier training data (using cascade classifier).
      */
     QString birdClassifierTrainingFile();
 
     /**
-     * @brief resultDataFile full name of result data file / detection log
+     * @brief Full name of result data file / detection log.
      */
     QString resultDataFile();
 
     /**
-     * @brief resultVideoDir directory for result videos
+     * @brief Directory where the result videos are saved.
      */
     QString resultVideoDir();
 
     /**
-     * @brief Get result video codec.
+     * @brief Result video codec string.
      *
      * @return FOURCC code of the codec as string
      */
     QString resultVideoCodecStr();
 
     /**
-     * @brief Get result video codec.
+     * @brief Result video codec. The value is a FOURCC code.
      *
      * @return FOURCC code of the codec
      */
     int resultVideoCodec();
 
     /**
-     * @brief resultVideoWithObjectRectangles whether to draw rectangles around objects in result video
+     * @brief Whether to draw rectangles around objects in the result video.
      * @return
      */
     bool resultVideoWithObjectRectangles();
 
     /**
-     * @brief videoEncoderLocation video encoder location (ffmpeg, avconv)
+     * @brief Location of video encoder (ffmpeg, avconv).
      * @return
      */
     QString videoEncoderLocation();
 
     /**
-     * @brief resultImageDir directory for result images
+     * @brief Directory for result images.
      */
     QString resultImageDir();
 
     /**
-     * @brief saveResultImages whether to save result images
+     * @brief Whether to save result images.
      * @return true: save images, false: don't save images
      */
     bool saveResultImages();
 
     /**
-     * @brief userToken user's credentials at ufoid.net
-     * The credentials are available at request from ufoid.net
+     * @brief User credentials at ufoid.net.
+     * The credentials are available at request from ufoid.net.
      * @return
      */
     QString userTokenAtUfoId();
 
+    /**
+     * @brief Get video codec support info object. The object has been initialized.
+     * @return pointer to initialized VideoCodecSupportInfo
+     */
     VideoCodecSupportInfo* videoCodecSupportInfo();
 
     /**
-     * @brief setApplicationVersion set application version. Format: major.minor.subminor
+     * @brief Set application version. Format: major.minor.subminor.
+     * @note This is for internal usage.
      * @param version
      */
     void setApplicationVersion(QString version);
 
     /**
-     * @brief setCameraIndex set web camera index as used by OpenCV
+     * @brief Set web camera index as used by OpenCV.
      * @param index
      */
     void setCameraIndex(int index);
 
     /**
-     * @brief setCameraWidth set web camera width
+     * @brief Set web camera width.
+     * The final result depends on the camera. Check the camera documentation and
+     * Camera::availableResolutions() for supported resolutions.
+     * available resolutions.
      * @param width
      */
     void setCameraWidth(int width);
 
     /**
-     * @brief setCameraHeight set web camera height
+     * @brief Set web camera height.
+     * The final result depends on the camera. Check the camera documentation and
+     * Camera::availableResolutions() for supported resolutions.
      * @param height
      */
     void setCameraHeight(int height);
 
     /**
-     * @brief setDetectionAreaFile set full name of detection area file
+     * @brief Set full name of detection area file.
      * @param fileName
      */
     void setDetectionAreaFile(QString fileName);
 
     /**
-     * @brief resetDetectionAreaFile reset detection area file name to default value
+     * @brief Reset detection area file name to default value.
      */
     void resetDetectionAreaFile();
 
     /**
-     * @brief setDetectionAreaSize set detection area size in pixels
+     * @brief Set detection area size in pixels.
      * @param areaSize
      */
     void setDetectionAreaSize(int areaSize);
 
     /**
-     * @brief setNoiseFilterPixelSize set noise filter pixel size
+     * @brief Set noise filter pixel size.
      * @param size
      */
     void setNoiseFilterPixelSize(int size);
 
     /**
-     * @brief setMotionThreshold set motion threshold
+     * @brief Set motion threshold.
      * @param threshold
      */
     void setMotionThreshold(int threshold);
 
     /**
-     * @brief setMinPositiveDetections set minimum number of positive detections to start video recording
+     * @brief Set minimum number of positive detections to start video recording.
      * @param detectionCount
      */
     void setMinPositiveDetections(int detectionCount);
 
     /**
-     * @brief setResultVideoDir set directory for video saving
+     * @brief Set directory for video saving.
      * @param dirName
      */
     void setResultVideoDir(QString dirName);
@@ -261,25 +273,25 @@ public:
     void setResultVideoCodec(QString codec);
 
     /**
-     * @brief setResultVideoWithObjectRectangles set whether to draw rectangles around objects in result videos
+     * @brief Set whether to draw rectangles around objects in result videos.
      * @param drawRectangles true: draw rectangles, false: don't draw rectangles
      */
     void setResultVideoWithObjectRectangles(bool drawRectangles);
 
     /**
-     * @brief setResultImageDir set directory for result image saving
+     * @brief Set directory for result image saving.
      * @param dirName
      */
     void setResultImageDir(QString dirName);
 
     /**
-     * @brief setSaveResultImages save result images
+     * @brief Save result images.
      * @param save true: save, false: don't save
      */
     void setSaveResultImages(bool save);
 
     /**
-     * @brief setUserTokenAtUfoId set user token at ufoid.net
+     * @brief Set user token at ufoid.net.
      * @param token
      */
     void setUserTokenAtUfoId(QString token);
@@ -322,7 +334,7 @@ private:
 
 signals:
     /**
-     * @brief settingsChanged emitted when any of the settings changed
+     * @brief Emitted when any of the settings changed.
      */
     void settingsChanged();
 };

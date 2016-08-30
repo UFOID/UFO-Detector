@@ -17,8 +17,8 @@
  */
 
 /*
-* Author(s): BeS 2013
-*/
+ * Author(s): BeS 2013
+ */
 
 #ifndef __CV_VIBE_H__
 #define __CV_VIBE_H__
@@ -31,22 +31,22 @@
 
 typedef struct
 {
-	unsigned char *samples;
-	unsigned int numberOfSamples;
-	unsigned int sizeOfSample;
-}pixel;
+    unsigned char *samples;
+    unsigned int numberOfSamples;
+    unsigned int sizeOfSample;
+} pixel;
 
 typedef struct
 {
-	pixel *pixels;
-	unsigned int width;
-	unsigned int height;
-	unsigned int stride;
-	unsigned int numberOfSamples;
-	unsigned int matchingThreshold;
-	unsigned int matchingNumber;
-	unsigned int updateFactor;
-}vibeModel;
+    pixel *pixels;
+    unsigned int width;
+    unsigned int height;
+    unsigned int stride;
+    unsigned int numberOfSamples;
+    unsigned int matchingThreshold;
+    unsigned int matchingNumber;
+    unsigned int updateFactor;
+} vibeModel;
 
 typedef vibeModel vibeModel_t;
 
