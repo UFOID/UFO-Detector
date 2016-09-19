@@ -24,13 +24,19 @@ The UFO Detector is a software that allows the autonomous video recording of pos
 
 First, get the source code for UFO Detector by either cloning this repository or downloading the source as a ZIP package. See the "Clone or download" button above.
 
-####Windows
+#### Windows
 
 1. Install the prerequisites, see the list above.
 2. Open the project file ...\UFO-Detector\ui-qt\Detector.pro in Qt Creator. Edit OpenCV paths in opencv.pri so they point to correct locations.
 3. Build the project. You can run the application from Qt Creator or from command line in the build directory.
 
-####Ubuntu 14
+#### Generic Notes for Building in Linux
+
+If your distribution has OpenCV version other than 2.4.9 through 3.0.0, you *should* be able to build UFO Detector with the development packages from the normal repositories. In that case, read the instructions for Ubuntu Linux 14 and apply them to your distribution. If UFO Detector has problem writing videos correctly you know you have the buggy version of OpenCV, in which case read the next paragraph.
+
+OpenCV versions between 2.4.8 through 3.0.0 have a [bug](https://github.com/opencv/opencv/issues/5439), at least in Ubuntu Linux, causing video writing to fail. This means OpenCV >=3.1.0 need to be installed by hand. For that, read the instructions for Ubuntu Linux >=15 and apply them to your distribution.
+
+#### Ubuntu Linux 14
 
 First, install Qt5, avconv/ffmpeg, and OpenCV development packages:
 
@@ -38,11 +44,11 @@ First, install Qt5, avconv/ffmpeg, and OpenCV development packages:
 
 If this is not enough, check if you need to install other development packages as well.
 
-Build and run UFO Detector the same way as it's done in Windows, see the instructions above. The only difference is the project file path: .../UFO-Detector/ui-qt/Detector.pro.
+Open the project file .../UFO-Detector/ui-qt/Detector.pro in Qt Creator and build it. You can run the application from Qt Creator or from command line in the build directory.
 
-####Ubuntu 16
+#### Ubuntu Linux >=15
 
-In Ubuntu 16, first install Qt5 and avconv/ffmpeg, plus the necessary packages for compiling OpenCV. Installing libopencv-dev package is optional because it will not be used.
+In Ubuntu Linux >=15, first install Qt5 and avconv/ffmpeg, plus the necessary packages for compiling OpenCV. Installing libopencv-dev package is optional because it will not be used.
 
 ```sudo apt-get install qtbase5-dev avconv build-essential cmake libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev```
 
@@ -61,7 +67,7 @@ If you use IPP ICV, turn it ON and figure how to make it work (didn't work out o
 
 For more info about OpenCV, please refer to [OpenCV building instructions](http://docs.opencv.org/2.4/doc/tutorials/introduction/linux_install/linux_install.html).
 
-Build and run UFO Detector the same way as it's done in Windows, see the instructions above. The only difference is the project file path: ui-qt/Detector.pro.
+Open the project file .../UFO-Detector/ui-qt/Detector.pro in Qt Creator and build it. You can run the application from Qt Creator or from command line in the build directory.
 
 ### Detection Algorithm:
 Since the objects that the software looks for are not well defined (i.e. being “unknown”) false positive detections are expected.  We use a combination of following algorithms in order to narrow down the results:
