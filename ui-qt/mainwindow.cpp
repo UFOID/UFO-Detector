@@ -100,6 +100,8 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
         }
         node = node.nextSibling();
     }
+    ui->videoList->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+    ui->videoList->scrollToBottom();
 
     //Check for new version
     if (m_config->checkApplicationUpdates())
@@ -179,14 +181,25 @@ void MainWindow::setSignalsAndSlots(ActualDetector* actualDetector)
  */
 void MainWindow::addVideoToVideoList(QString filename, QString datetime, QString videoLength)
 {
+    bool scroll = false;
     VideoWidget* newWidget = new VideoWidget(this, filename, datetime, videoLength);
     connect(newWidget->deleteButton(), SIGNAL(clicked()),this,SLOT(onVideoDeleteClicked()));
     connect(newWidget->uploadButton(), SIGNAL(clicked()),this,SLOT(onVideoUploadClicked()));
     connect(newWidget->playButton(), SIGNAL(clicked()),this,SLOT(onVideoPlayClicked()));
     QListWidgetItem* item = new QListWidgetItem;
     item->setSizeHint(QSize(150,100));
+
+    QScrollBar* scrollBar = ui->videoList->verticalScrollBar();
+    if (scrollBar && (scrollBar->value() == scrollBar->maximum())) {
+        scroll = true;
+    }
+
     ui->videoList->addItem(item);
     ui->videoList->setItemWidget(item,newWidget);
+
+    if (scroll) {
+        ui->videoList->scrollToBottom();
+    }
 
     recordingCounter_++;
     ui->lineCount->setText(QString::number(recordingCounter_));
