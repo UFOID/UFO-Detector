@@ -102,12 +102,12 @@ private:
     void adjustCameraViewFrameSize();    ///< fit camera frame into camera view
 
     /**
-     * @brief readLogFileAndGetRootElement Read logfile containing existing video info
+     * @brief Read logfile containing existing video info
      */
     void readLogFileAndGetRootElement();
 
     /**
-     * @brief checkDetectionAreaFile Check detection area file and create if doesn't exist
+     * @brief Check detection area file and create if doesn't exist
      */
     void checkDetectionAreaFile();
 
@@ -121,13 +121,13 @@ private:
     bool checkCamera(const int width, const int height);
 
     /**
-     * Check that the folder for the images and videos exist
+     * @brief Check that the folder for the images and videos exist
      */
     void checkFolders();
     void on_stopButton_clicked();
 
     /**
-     * @brief removeVideo remove all video related data: video list item, item from result data file, video, thumbnail
+     * @brief Remove all video related data: video list item, item from result data file, video, thumbnail
      * @param dateTime timestamp formatted as YYYY-MM-DD--hh-mm-ss
      */
     void removeVideo(QString dateTime);
@@ -162,12 +162,13 @@ private slots:
     void onVideoUploadClicked();
 
     /**
-     * @brief onVideoListContextMenuRequested
+     * @brief Show context menu in video list.
      * @param pos
      *
      * @todo prevent right-click on VideoWidget small buttons to pop up context menu
      */
     void onVideoListContextMenuRequested(const QPoint& pos);
+
     void onDeleteSelectedVideosClicked();
     void setPositiveMessage();
     void setNegativeMessage();

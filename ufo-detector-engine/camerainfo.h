@@ -35,7 +35,7 @@ class CameraInfo : public QObject
     Q_OBJECT
 public:
     /**
-     * @brief CameraInfo
+     * @brief CameraInfo constructor.
      * @param cameraIndex index of camera as used by OpenCV
      * @param parent
      * @param openCvBackend backend for OpenCV VideoCapture object which is used by this class. Refer to VideoCapture::VideoCapture(int) for details.

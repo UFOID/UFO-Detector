@@ -43,7 +43,7 @@ public:
 
 signals:
     /**
-     * @brief resolutionAccepted emitted when user has selected and accepted a resolution and the dialog is closing
+     * @brief Emitted when user has selected and accepted a resolution and the dialog is closing
      * @param resolution camera resolution
      */
     void resolutionAccepted(QSize resolution);

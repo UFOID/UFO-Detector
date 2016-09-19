@@ -43,7 +43,7 @@ using namespace cv;
 class Recorder;
 
 /**
- * @brief Main class to detect moving objects in video stream
+ * @brief Main class to detect moving objects in video stream.
  */
 class ActualDetector : public QObject
 {
@@ -149,7 +149,7 @@ private:
     void stopOnlyDetecting();
 
     /**
-     * Check if single (!) object is a bird
+     * @brief Check if single (!) object is a bird.
      * @todo Improve to only look for single objects
      */
     bool checkIfBird();

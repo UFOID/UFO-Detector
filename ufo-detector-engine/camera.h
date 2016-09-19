@@ -41,7 +41,7 @@ class Camera : public QObject
 
 public:
     /**
-     * @brief Camera create camera. You need to call Camera::init() to actually start using the camera.
+     * @brief Camera constructor. You need to call Camera::init() to actually start using the camera.
      * @param index camera index as used by OpenCV
      * @param width camera frame width
      * @param height camera frame height
@@ -51,24 +51,24 @@ public:
     Camera(int index, int width, int height);
 
     /**
-     * @brief init initialize and open camera
+     * @brief Initialize and open camera.
      * @return true if initialization was successful, false if it failed
      */
     bool init();
 
     /**
-     * @brief isInitialized whether the camera is initialized
+     * @brief Whether the camera is initialized.
      * @return true if camera is initialized, false if not
      */
     bool isInitialized();
 
     /**
-     * @brief release stop and close camera
+     * @brief Stop and close camera.
      */
     void release();
 
     /**
-     * @brief getWebcamFrame get the current/newest frame from camera
+     * @brief Get the current/newest frame from camera.
      * @return
      */
     cv::Mat getWebcamFrame();
@@ -76,25 +76,25 @@ public:
     bool isWebcamOpen();
 
     /**
-     * @brief index camera index
+     * @brief Camera index.
      * @return
      */
     int index();
 
     /**
-     * @brief queryAvailableResolutions run web camera resolution query
+     * @brief Run web camera resolution query.
      * @return
      */
     bool queryAvailableResolutions();
 
     /**
-     * @brief availableResolutions list of available web camera resolutions
+     * @brief List of available web camera resolutions.
      * @return list of resolutions, or an empty list if queryAvailableResolutions() was not called previously
      */
     QList<QSize> availableResolutions();
 
     /**
-     * @brief knownAspectRatios list of known aspect ratios. List may grow on queryAvailableResolutions().
+     * @brief List of known aspect ratios. List may grow on queryAvailableResolutions().
      * @return
      */
     QList<int> knownAspectRatios();
@@ -117,7 +117,7 @@ private:
 
 signals:
     /**
-     * @brief queryProgressChanged emitted when querying available resolutions progresses
+     * @brief Emitted when querying available resolutions progresses.
      * @param percent percent of querying ready
      */
     void queryProgressChanged(int percent);
