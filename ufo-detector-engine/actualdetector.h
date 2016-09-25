@@ -31,7 +31,6 @@
 #include <chrono>
 #include <stdio.h>
 #include "camera.h"
-#include "mainwindow.h"
 #include <QDir>
 #include <QDateTime>
 #include <QDebug>
@@ -42,21 +41,34 @@
 using namespace cv;
 
 class Recorder;
-class MainWindow;
 
 /**
- * @brief Main class to detect moving objects in video stream
+ * @brief Main class to detect moving objects in video stream.
  */
 class ActualDetector : public QObject
 {
  Q_OBJECT
 
 public:
-    ActualDetector(MainWindow *parent, Camera *cameraPtr = 0, Config *configPtr = 0);
+    ActualDetector(Camera *cameraPtr = 0, Config *configPtr = 0, QObject *parent = 0);
     ~ActualDetector();
-    bool start();
+
+    /**
+     * @brief Initialize ActualDetector. Need to be called before calling start().
+     * @return
+     */
     bool initialize();
+
+    /**
+     * @brief Start the detection process.
+     */
+    bool start();
+
+    /**
+     * @brief Stop the detection process.
+     */
     void stopThread();
+
     void setNoiseLevel(int level);
     void setThresholdLevel(int level);
     void setFilename(std::string msg);    
@@ -64,60 +76,70 @@ public:
     Recorder* getRecorder();
 
     /**
-     * @brief Set whether to show camera output from ActualDetector. A still frame is shown if the video is not shown.
-     * @param show true = show, false = don't show
+     * @brief Set whether to show camera video during detection.
+     *
+     * Video showing is done by emitting updatePixmap() signal for each video frame.
+     * Actual showing must be done by the camera view in the UI side.
+     * When camera video is not shown, no updatePixmap() signals are emitted.
+     *
+     * @param show true = show video, false = don't show video	 
      */
-    void showCameraVideo(bool show);
+    void setShowCameraVideo(bool show);
 
 #ifndef _UNIT_TEST_
 private:
 #endif
     Recorder* m_recorder;
-    Camera* camPtr;
+    Camera* m_camPtr;
     Config* m_config;
-    MainWindow* m_mainWindow;
-    cv::Mat result, result_cropped;
-    cv::Mat prev_frame, current_frame, next_frame;
-    cv::Mat m_latestStillFrame;             ///< latest still frame, shown if no video is shown
-    std::atomic<bool> m_showCameraVideo;    ///< whether the camera video is shown
+    cv::Mat m_resultFrame;
+    cv::Mat m_resultFrameCropped;
+    cv::Mat m_prevFrame;
+    cv::Mat m_currentFrame;
+    cv::Mat m_nextFrame;
+    std::atomic<bool> m_showCameraVideo; ///< whether the camera video is shown (updatePixmap signal emitted)
     QImage m_cameraViewImage;   ///< image to be given out with signal updatePixmap()
-    cv::Mat d1, d2, motion, treshImg;
-    cv::Mat croppedImageGray;
-    cv::Mat noiseLevel;
-    cv::Rect rect;
-    int numberOfChanges;
-    int minAmountOfMotion, max_deviation;
-    std::string pathname, pathnameThresh, fileDir;
-    std::string ext;
-    int imageCount;
-    int thresholdLevel;
-    int WIDTH;
-    int HEIGHT;
-    cv::Size m_cameraViewFrameSize;     ///< frame size of MainWindow's camera view
-    int minPositiveRequired;
-    bool willRecordWithRect;
-    cv::CascadeClassifier birds_cascade;
+    cv::Mat m_d1;
+    cv::Mat m_d2;
+    cv::Mat m_motion;
+    cv::Mat m_treshImg;
+    cv::Mat m_croppedImageGray;
+    cv::Mat m_noiseLevel;
+    cv::Rect m_rect;
+    int m_numberOfChanges;
+    int m_minAmountOfMotion;
+    int m_maxDeviation;
+    std::string m_resultImageDirNameBase; ///< base for result image folder name
+    std::string m_pathNameThresh;
+    std::string m_resultImageDirName;   ///< complete result image folder name
+    std::string m_savedImageExtension;
+    int m_imageCount;
+    int m_thresholdLevel;
+    int m_cameraWidth;
+    int m_cameraHeight;
+    int m_minPositiveRequired;
+    bool m_willRecordWithRect;
+    cv::CascadeClassifier m_birdsCascade;
 
 
-    std::vector<cv::Point> region;
-    std::string detectionAreaFile;
+    std::vector<cv::Point> m_region;
+    std::string m_detectionAreaFile;
 
-    std::atomic<bool> isMainThreadRunning;
-    std::atomic<bool> willParseRectangle;
-    bool isInNightMode;
-    std::atomic<bool> startedRecording;
-    bool willSaveImages;
-    bool isCascadeFound;
-    std::unique_ptr<std::thread> pThread;
-    std::unique_ptr<std::thread> threadNightChecker;
-    std::vector <cv::Rect> detectorRectVec;
+    std::atomic<bool> m_isMainThreadRunning;
+    std::atomic<bool> m_willParseRectangle;
+    bool m_isInNightMode;
+    std::atomic<bool> m_startedRecording;
+    bool m_willSaveImages;
+    bool m_isCascadeFound;
+    std::unique_ptr<std::thread> m_mainThread;
+    std::unique_ptr<std::thread> m_nightCheckerThread;
+    std::vector <cv::Rect> m_detectorRectVec;
 
 
-
-    inline int detectMotion(const cv::Mat & motion, cv::Mat & result, cv::Mat & result_cropped,
-                     std::vector<cv::Point> &region,
-                     int max_deviation);
-    bool parseDetectionAreaFile(std::string file_region, std::vector<cv::Point> &region);
+    inline int detectMotion(const cv::Mat & m_motion, cv::Mat & m_resultFrame, cv::Mat & m_resultFrameCropped,
+                     std::vector<cv::Point> &m_region,
+                     int m_maxDeviation);
+    bool parseDetectionAreaFile(std::string file_region, std::vector<cv::Point> &m_region);
     bool lightDetection(cv::Rect &rectangle, cv::Mat &croppedImage);
     void detectingThread();
     void detectingThreadHigh();
@@ -127,7 +149,7 @@ private:
     void stopOnlyDetecting();
 
     /**
-     * Check if single (!) object is a bird
+     * @brief Check if single (!) object is a bird.
      * @todo Improve to only look for single objects
      */
     bool checkIfBird();
@@ -142,9 +164,6 @@ signals:
 	void broadcastOutputText(QString output_text);
 	void progressValueChanged(int value);
     void updatePixmap(QImage img);
-
-public slots:
-    void onCameraViewFrameSizeChanged(QSize newSize);   ///< frame size of camera view has changed
 };
 
 #endif // ACTUALREC_H

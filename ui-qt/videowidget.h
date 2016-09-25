@@ -29,7 +29,7 @@ class VideoWidget;
 }
 
 /**
- * @brief video widget to be used as list item
+ * @brief Video widget to be used as list item.
  *
  * @todo currently data is stored at run-time in this widget: make a separate model and put data into it (model <-> view)
  */
@@ -39,7 +39,7 @@ class VideoWidget : public QWidget
 
 public:
     /**
-     * @brief VideoWidget
+     * @brief Constructor.
      * @param parent
      * @param filepath folder for video and thumbnails. Thumbnails are in thumbnails subfolder.
      * @param theDateTime timestamp formatted as YYYY-MM-DD--hh-mm-ss

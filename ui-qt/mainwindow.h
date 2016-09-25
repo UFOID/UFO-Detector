@@ -47,6 +47,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMutex>
+#include <QScrollBar>
 
 using namespace cv;
 
@@ -67,18 +68,8 @@ public:
     explicit MainWindow(QWidget *parent = 0, Camera *cameraPtr = 0, Config *configPtr = 0);
     ~MainWindow();
     void addOutputText(QString msg);
-    bool getCheckboxDisplayWebcamState();
 
     void setSignalsAndSlots(ActualDetector *actualDetector);
-    cv::Size getCameraViewSize();
-    QMutex* cameraViewImageMutex();
-
-    /**
-     * @brief Set latest still frame to be shown during detection if no video is shown.
-     * This doesn't have effect during detection if the video is being shown.
-     * @param frame
-     */
-    void setLatestStillFrame(cv::Mat& frame);
 
 private:
     Ui::MainWindow *ui;
@@ -95,6 +86,7 @@ private:
     std::unique_ptr<std::thread> threadWebcam;
     cv::Size m_cameraViewResolution;    ///< frame size of camera view
     QImage m_cameraViewImage;           ///< image to be drawn in camera view
+    QImage m_latestCameraViewVideoFrame;///< latest video frame
     QMutex m_cameraViewImageMutex;      ///< syncing camera view image
     QString m_detectionStatusStyleOn;   ///< detection status indicator style when detection on
     QString m_detectionStatusStyleOff;  ///< detection status indicator style when detection off
@@ -111,12 +103,12 @@ private:
     void adjustCameraViewFrameSize();    ///< fit camera frame into camera view
 
     /**
-     * @brief readLogFileAndGetRootElement Read logfile containing existing video info
+     * @brief Read logfile containing existing video info
      */
     void readLogFileAndGetRootElement();
 
     /**
-     * @brief checkDetectionAreaFile Check detection area file and create if doesn't exist
+     * @brief Check detection area file and create if doesn't exist
      */
     void checkDetectionAreaFile();
 
@@ -130,13 +122,13 @@ private:
     bool checkCamera(const int width, const int height);
 
     /**
-     * Check that the folder for the images and videos exist
+     * @brief Check that the folder for the images and videos exist
      */
     void checkFolders();
     void on_stopButton_clicked();
 
     /**
-     * @brief removeVideo remove all video related data: video list item, item from result data file, video, thumbnail
+     * @brief Remove all video related data: video list item, item from result data file, video, thumbnail
      * @param dateTime timestamp formatted as YYYY-MM-DD--hh-mm-ss
      */
     void removeVideo(QString dateTime);
@@ -171,12 +163,13 @@ private slots:
     void onVideoUploadClicked();
 
     /**
-     * @brief onVideoListContextMenuRequested
+     * @brief Show context menu in video list.
      * @param pos
      *
      * @todo prevent right-click on VideoWidget small buttons to pop up context menu
      */
     void onVideoListContextMenuRequested(const QPoint& pos);
+
     void onDeleteSelectedVideosClicked();
     void setPositiveMessage();
     void setNegativeMessage();

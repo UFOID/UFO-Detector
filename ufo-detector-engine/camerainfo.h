@@ -35,7 +35,7 @@ class CameraInfo : public QObject
     Q_OBJECT
 public:
     /**
-     * @brief CameraInfo
+     * @brief CameraInfo constructor.
      * @param cameraIndex index of camera as used by OpenCV
      * @param parent
      * @param openCvBackend backend for OpenCV VideoCapture object which is used by this class. Refer to VideoCapture::VideoCapture(int) for details.
@@ -43,7 +43,7 @@ public:
     explicit CameraInfo(int cameraIndex, QObject *parent = 0, int openCvBackend = CV_CAP_ANY);
 
     /**
-     * @brief init initialize
+     * @brief Initialize object.
      *
      * NOTE: web camera must not be reserved when calling this method so release
      * the camera first
@@ -53,26 +53,26 @@ public:
     bool init();
 
     /**
-     * @brief isInitialized check whether this instance of CameraInfo is initialized
+     * @brief Check whether this instance of CameraInfo is initialized.
      * @return true if initialized, false otherwise
      */
     bool isInitialized();
 
     /**
-     * @brief availableResolutions get list of available resolutions
+     * @brief Get list of available resolutions.
      * @return list of available resolutions
      */
     QList<QSize> availableResolutions();
 
     /**
-     * @brief knownAspectRatios list of known web camera aspect ratios
+     * @brief Get list of known web camera aspect ratios.
      * @return
      */
     QList<int> knownAspectRatios();
 
     /**
-     * @brief compareResolutionsWidthFirst compare resolutions giving precedence to width
-     * This method is suitable to be given to std::sort as compare function
+     * @brief Compare resolutions giving precedence to width.
+     * This method is suitable to be given to std::sort() as compare function
      * @param res1
      * @param res2
      * @return true if res1 < res2 (precedence is on width)
@@ -91,19 +91,19 @@ private:
     bool m_initialized;
 
     /**
-     * @brief queryResolutions query available resolutions from web camera
+     * @brief Query available resolutions from web camera.
      * @return true if querying succeeded, false if it failed
      */
     bool queryResolutions();
 
     /**
-     * @brief updateAspectRatios update aspect ratio list based on common and available resolutions
+     * @brief Update aspect ratio list based on common and available resolutions.
      */
     void updateAspectRatios();
 
 signals:
     /**
-     * @brief queryProgressChanged emitted when querying progresses
+     * @brief This signal is emitted when querying available resolutions progresses.
      * @param percent percent of query ready
      */
     void queryProgressChanged(int percent);

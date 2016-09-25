@@ -28,7 +28,7 @@ using namespace cv;
 using namespace std;
 
 /**
- * @brief Track of a moving object
+ * @brief Track of a moving object.
  */
 class CTrack
 {
@@ -48,7 +48,7 @@ public:
 };
 
 /**
- * @brief Track object movement
+ * @brief Track object movement.
  */
 class CTracker
 {

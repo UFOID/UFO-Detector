@@ -18,16 +18,6 @@ windows {
 }
 
 unix {
-    INCLUDEPATH += /usr/include/opencv2/
-    LIBS += -lopencv_core
-    LIBS += -lopencv_highgui
-    LIBS += -lopencv_imgproc
-    LIBS += -lopencv_calib3d
-    LIBS += -lopencv_features2d
-    LIBS += -lopencv_flann
-    LIBS += -lopencv_ml
-    LIBS += -lopencv_objdetect
-    LIBS += -lopencv_video
-    #LIBS += -lopencv_videoio
-    #LIBS += -lopencv_imgcodecs
+    CONFIG += link_pkgconfig
+    PKGCONFIG += opencv
 }

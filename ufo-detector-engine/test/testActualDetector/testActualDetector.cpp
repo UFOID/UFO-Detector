@@ -17,7 +17,6 @@
  */
 
 #include "actualdetector.h"
-#include "mainwindow.h"
 #include "config.h"
 #include "camera.h"
 #include <QString>
@@ -42,6 +41,7 @@ private Q_SLOTS:
     void initTestCase();
     void cleanupTestCase();
     void constructor();
+    void initialize();
 
     /**
      * Test blocking Camera::getWebcamFrame(). See a basic non-blocking test in Recorder unit test.
@@ -51,9 +51,10 @@ private Q_SLOTS:
     void detectBrightObjects();
     void detectDarkObjects();
 
+    void setShowCameraVideo();
+
 private:
     ActualDetector* m_actualDetector;
-    MainWindow* m_mainWindow;
     Config* m_config;
     Camera* m_camera;
 
@@ -65,34 +66,39 @@ private:
     bool m_cameraFrameConsumerRunning;  ///< camera frame consumer thread is running
 
     int m_cameraFps;    ///< frames per second for mock camera
+    int m_cameraFrameUpdatedCounter; ///< how many times onActualDetectorCameraFrameUpdated has been called
 
     void makeDetectionAreaFile();
 
 private slots:
     void onActualDetectorStartProgressChanged(int progress);
+    void onActualDetectorCameraFrameUpdated(QImage pixmap);
 };
 
-TestActualDetector::TestActualDetector()
-{
+TestActualDetector::TestActualDetector() {
+    m_actualDetector = NULL;
+    m_config = NULL;
+    m_camera = NULL;
+    m_cameraFrameConsumerThread = NULL;
+    m_cameraFramesConsumed = 0;
+    m_consumeCameraFrames = false;
+    m_cameraFrameConsumerRunning = false;
+    m_cameraFps = 0;
+    m_cameraFrameUpdatedCounter = 0;
 }
 
-void TestActualDetector::initTestCase()
-{
+void TestActualDetector::initTestCase() {
     m_config = new Config();
     QVERIFY(NULL != m_config);
     m_camera = new Camera(m_config->cameraIndex(), m_config->cameraWidth(), m_config->cameraHeight());
     QVERIFY(NULL != m_camera);
-    m_mainWindow = new MainWindow(NULL, m_camera, m_config);
-    QVERIFY(NULL != m_mainWindow);
-    m_actualDetector = new ActualDetector(m_mainWindow, m_camera, m_config);
+    m_actualDetector = new ActualDetector(m_camera, m_config, NULL);
     QVERIFY(NULL != m_actualDetector);
     m_cameraFps = 25;
 }
 
-void TestActualDetector::cleanupTestCase()
-{
+void TestActualDetector::cleanupTestCase() {
     m_actualDetector->deleteLater();
-    m_mainWindow->deleteLater();
     m_camera->deleteLater();
     m_config->deleteLater();
 }
@@ -106,14 +112,37 @@ void TestActualDetector::cameraFrameConsumerThreadFunc() {
     m_cameraFrameConsumerRunning = false;
 }
 
-void TestActualDetector::constructor()
-{
-    QVERIFY(NULL != m_actualDetector->m_mainWindow);
+void TestActualDetector::constructor() {
     QVERIFY(NULL != m_actualDetector->m_config);
-    QVERIFY(NULL != m_actualDetector->camPtr);
-    QVERIFY(m_mainWindow == m_actualDetector->m_mainWindow);
+    QVERIFY(NULL != m_actualDetector->m_camPtr);
     QVERIFY(m_config == m_actualDetector->m_config);
-    QVERIFY(m_camera == m_actualDetector->camPtr);
+    QVERIFY(m_camera == m_actualDetector->m_camPtr);
+    QVERIFY(!m_actualDetector->m_showCameraVideo);
+}
+
+void TestActualDetector::initialize() {
+    QVERIFY(m_actualDetector->m_currentFrame.empty());
+    QVERIFY(m_actualDetector->m_nextFrame.empty());
+    QVERIFY(m_actualDetector->m_prevFrame.empty());
+    QVERIFY(m_actualDetector->m_resultFrame.empty());
+    QVERIFY(!m_actualDetector->m_showCameraVideo);
+    QVERIFY(!m_actualDetector->m_startedRecording);
+
+    mockCameraNextFrame = cv::Mat(m_config->cameraHeight(), m_config->cameraWidth(),
+                                  CV_8UC3, cv::Scalar(127, 127, 127));
+    mockCamera_setFrameBlockingEnabled(false);
+    m_actualDetector->m_showCameraVideo = true;
+
+    QVERIFY(m_actualDetector->initialize());
+
+    QVERIFY(!m_actualDetector->m_currentFrame.empty());
+    QVERIFY(!m_actualDetector->m_nextFrame.empty());
+    QVERIFY(!m_actualDetector->m_prevFrame.empty());
+    QVERIFY(!m_actualDetector->m_resultFrame.empty());
+    QVERIFY(!m_actualDetector->m_startedRecording);
+    // must not change m_showCameraVideo
+    QVERIFY(m_actualDetector->m_showCameraVideo);
+    m_actualDetector->m_showCameraVideo = false;
 }
 
 void TestActualDetector::mockCameraBlockNextFrame() {
@@ -169,10 +198,10 @@ void TestActualDetector::detectBrightObjects() {
     }
     mockCameraNextFrame = cv::Mat(m_config->cameraHeight(), m_config->cameraWidth(), CV_8UC3, backgroundColor);
 
-    qDebug() << "Test starting actual detector";
     // ActualDetector::start() uses getCameraFrame() outside threads so only enable blocking
     // just before threads start. Luckily, progress value tells when it can be done.
-    connect(m_actualDetector, SIGNAL(progressValueChanged(int)), this, SLOT(onActualDetectorStartProgressChanged(int)));
+    connect(m_actualDetector, SIGNAL(progressValueChanged(int)), this,
+            SLOT(onActualDetectorStartProgressChanged(int)));
     QVERIFY(m_actualDetector->start());
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
@@ -183,16 +212,17 @@ void TestActualDetector::detectBrightObjects() {
         std::this_thread::sleep_for(std::chrono::milliseconds(1000 / m_cameraFps));
     }
 
-    qDebug() << "Test stopping actual detector";
     mockCamera_setFrameBlockingEnabled(false);
     mockCamera_releaseNextFrame();
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
     m_actualDetector->stopThread();
 
     QVERIFY(!m_actualDetector->m_recorder->m_recording);
     // verify recorder started
     QVERIFY(mockRecorderStartCount > 0);
     QVERIFY(mockRecorderStopCount > 0);
+
+    disconnect(m_actualDetector, SIGNAL(progressValueChanged(int)), this,
+            SLOT(onActualDetectorStartProgressChanged(int)));
 }
 
 void TestActualDetector::detectDarkObjects() {
@@ -222,6 +252,7 @@ void TestActualDetector::detectDarkObjects() {
 
     connect(m_actualDetector, SIGNAL(progressValueChanged(int)), this, SLOT(onActualDetectorStartProgressChanged(int)));
     QVERIFY(m_actualDetector->start());
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
     for (objectX = 0; objectX < m_config->cameraWidth(); objectX += (m_config->cameraWidth() / numFrames)) {
         mockCameraNextFrame = cv::Mat(m_config->cameraHeight(), m_config->cameraWidth(), CV_8UC3, backgroundColor);
@@ -239,6 +270,75 @@ void TestActualDetector::detectDarkObjects() {
     QVERIFY(0 == mockRecorderStartCount);
     // stop is called always
     QVERIFY(mockRecorderStopCount > 0);
+
+    disconnect(m_actualDetector, SIGNAL(progressValueChanged(int)), this,
+            SLOT(onActualDetectorStartProgressChanged(int)));
+}
+
+void TestActualDetector::setShowCameraVideo() {
+    QVERIFY(false == m_actualDetector->m_showCameraVideo);
+    m_actualDetector->setShowCameraVideo(true);
+    QVERIFY(m_actualDetector->m_showCameraVideo);
+
+    int numFrames = 24;
+    cv::Scalar backgroundColor = cv::Scalar(127, 127, 127);
+    QFile detectionAreaFile(m_config->detectionAreaFile());
+
+    if (!detectionAreaFile.exists()) {
+        makeDetectionAreaFile();
+    }
+
+    mockCameraNextFrame = cv::Mat(m_config->cameraHeight(), m_config->cameraWidth(), CV_8UC3, backgroundColor);
+    mockCamera_setFrameBlockingEnabled(false);
+
+    // queued signals don't arrive at the test so using direct connection
+    qWarning() << "Testing frame update signal with Qt::DirectConnection";
+    connect(m_actualDetector, SIGNAL(updatePixmap(QImage)), this,
+            SLOT(onActualDetectorCameraFrameUpdated(QImage)), Qt::DirectConnection);
+
+    // case: camera video is shown ( = frames emitted by signal)
+
+    m_cameraFrameUpdatedCounter = 0;
+    connect(m_actualDetector, SIGNAL(progressValueChanged(int)), this,
+            SLOT(onActualDetectorStartProgressChanged(int)));
+
+    QVERIFY(m_actualDetector->start());
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+    for (int i = 0; i < numFrames; i++) {
+        mockCamera_releaseNextFrame();
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000 / m_cameraFps));
+        //qDebug() << "round " << (i+1) << " counter =" << m_cameraFrameUpdatedCounter;
+        QVERIFY((i + 1) == m_cameraFrameUpdatedCounter);
+        QVERIFY(m_actualDetector->m_showCameraVideo);
+    }
+    mockCamera_setFrameBlockingEnabled(false);
+    mockCamera_releaseNextFrame();
+    m_actualDetector->stopThread();
+
+    // case: camera video is not shown (= no frames emitted by signal)
+
+    m_actualDetector->setShowCameraVideo(false);
+    m_cameraFrameUpdatedCounter = 0;
+
+    QVERIFY(m_actualDetector->start());
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+    for (int i = 0; i < numFrames; i++) {
+        mockCamera_releaseNextFrame();
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000 / m_cameraFps));
+        //qDebug() << "round " << (i+1) << " counter =" << m_cameraFrameUpdatedCounter;
+        QVERIFY(0 == m_cameraFrameUpdatedCounter);
+        QVERIFY(!m_actualDetector->m_showCameraVideo);
+    }
+    mockCamera_setFrameBlockingEnabled(false);
+    mockCamera_releaseNextFrame();
+    m_actualDetector->stopThread();
+
+    disconnect(m_actualDetector, SIGNAL(progressValueChanged(int)), this,
+            SLOT(onActualDetectorStartProgressChanged(int)));
+    disconnect(m_actualDetector, SIGNAL(updatePixmap(QImage)), this,
+            SLOT(onActualDetectorCameraFrameUpdated(QImage)));
 }
 
 void TestActualDetector::makeDetectionAreaFile() {
@@ -260,6 +360,11 @@ void TestActualDetector::onActualDetectorStartProgressChanged(int progress) {
     if (90 == progress) {
         mockCamera_setFrameBlockingEnabled(true);
     }
+}
+
+void TestActualDetector::onActualDetectorCameraFrameUpdated(QImage pixmap) {
+    Q_UNUSED(pixmap);
+    m_cameraFrameUpdatedCounter++;
 }
 
 QTEST_MAIN(TestActualDetector)

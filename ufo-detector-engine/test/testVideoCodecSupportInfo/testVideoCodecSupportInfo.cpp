@@ -137,9 +137,14 @@ bool TestVideoCodecSupportInfo::localTestOpencvSupport(int fourcc) {
     std::string testFileNameStd(m_testFileName.toLocal8Bit().data());
 
     // try opening & writing file
-    if (!writer.open(testFileNameStd, fourcc, 25, cv::Size(m_frameWidth, m_frameHeight))) {
+    try {
+        if (!writer.open(testFileNameStd, fourcc, 25, cv::Size(m_frameWidth, m_frameHeight))) {
+            return false;
+        }
+    } catch (cv::Exception& e) {
         return false;
     }
+
     if (!writer.isOpened()) {
         return false;
     }

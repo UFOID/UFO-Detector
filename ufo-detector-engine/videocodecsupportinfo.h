@@ -49,7 +49,7 @@ public:
     };
 
     /**
-     * @brief VideoCodecSupportInfo constructor.
+     * @brief Constructor.
      * @param externalVideoEncoderLocation full path to external video encoder
      * @param parent
      */

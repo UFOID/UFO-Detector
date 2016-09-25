@@ -56,12 +56,12 @@ private:
     GraphicsScene *scene;
 
     /**
-     * Get all points inside the selected area and pass vector with points to savePointsAsXML()
+     * @brief Get all points inside the selected area and pass vector with points to savePointsAsXML()
      */
     void getPointsInContour(std::vector<cv::Point2f> & contour);
 
     /**
-     * Save the points to area xml
+     * @brief Save the points to area xml
      */
     void savePointsAsXML(std::vector<cv::Point2f> & contour);
     int WIDTH;
