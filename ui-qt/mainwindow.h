@@ -94,8 +94,9 @@ private:
     Config* m_config;
 
     QDomDocument m_resultDataDomDocument;
-    QFile m_resultDataFile;  ///< result data file (XML)
+    QFile m_resultDataFile;  ///< result (log) data file (XML)
     QString m_programVersion;
+    QString m_classifierVersion;
     QNetworkAccessManager *m_networkAccessManager;
 
     void updateWebcamFrame();
@@ -177,6 +178,7 @@ private slots:
     void addVideoToVideoList(QString filename, QString datetime, QString videoLength);
     void on_aboutButton_clicked();
     void checkForUpdate(QNetworkReply* reply);
+    void downloadClassifier(QNetworkReply* reply);
 
     void on_buttonImageExpl_clicked();
     void on_sliderThresh_sliderMoved(int position);

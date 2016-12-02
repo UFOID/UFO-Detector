@@ -40,8 +40,7 @@ void CDetector::DetectContour(Mat& img, vector<Rect>& Rects,vector<Point2d>& cen
 	Mat edges=img.clone();
     //Canny(img, edges, 50, 190, 3);
 
-    findContours(edges,contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point());
-    //findContours( edges, contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE );
+    findContours(edges,contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
     if(contours.size()>0)
 	{
         for(int i = 0; i < (int)contours.size(); i++)

@@ -97,7 +97,7 @@ private:
     QFile m_resultDataFile;
     QDomElement m_resultDataRootElement;
 
-    std::chrono::high_resolution_clock::time_point prevTime, currentTime;
+
 
     void recordThread();
     void readFrameThread();

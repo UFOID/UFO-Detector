@@ -726,7 +726,8 @@ void MainWindow::checkForUpdate(QNetworkReply *reply)
     {
         QDomElement root;
         root=versionXML.firstChildElement();
-        QString versionInXML;
+        QString currentVersion;
+        QString currentClassifierVersion;
         std::queue<QString> messageInXML;
 
         QDomNode node = root.firstChild();
@@ -737,7 +738,12 @@ void MainWindow::checkForUpdate(QNetworkReply *reply)
                 if(node.nodeName()=="version")
                 {
                     QDomElement element = node.toElement();
-                    versionInXML=element.text();
+                    currentVersion=element.text();
+                }
+                if(node.nodeName()=="classifier")
+                {
+                    QDomElement element = node.toElement();
+                    currentClassifierVersion=element.text();
                 }
                 if(node.nodeName()=="message")
                 {
@@ -748,18 +754,41 @@ void MainWindow::checkForUpdate(QNetworkReply *reply)
             node = node.nextSibling();
         }
 
-        if(versionInXML>m_programVersion)
+        if(currentVersion>m_programVersion)
         {
-            qDebug() << messageInXML.size();
-            m_updateApplicationDialog = new UpdateApplicationDialog(this, versionInXML, messageInXML);
+            m_updateApplicationDialog = new UpdateApplicationDialog(this, currentVersion, messageInXML);
             m_updateApplicationDialog->show();
             m_updateApplicationDialog->setAttribute(Qt::WA_DeleteOnClose);
+        }
+        else if (currentClassifierVersion>m_classifierVersion){
+            disconnect(m_networkAccessManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(checkForUpdate(QNetworkReply*)) );
+            connect(m_networkAccessManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(downloadClassifier(QNetworkReply*)) );
+            QNetworkRequest request;
+            request.setUrl(QUrl("http://ufoid.net/cascade.xml"));
+            request.setRawHeader( "User-Agent" , "Mozilla Firefox" );
+            m_networkAccessManager->get(request);
         }
     }
 
     delete reply;
     reply = nullptr;
 
+}
+
+void MainWindow::downloadClassifier(QNetworkReply *reply)
+{
+    if(reply->error() == QNetworkReply::NoError)
+    {
+        QByteArray data = reply->readAll();
+        qDebug() <<  "Downloaded classifier data," << data.size() << "bytes";
+        QFile file(m_config->birdClassifierTrainingFile());
+        file.open(QIODevice::WriteOnly);
+        file.write(data);
+        file.close();
+        qDebug() <<  "Updated bird classifier file";
+    }
+    delete reply;
+    reply = nullptr;
 }
 
 void MainWindow::onRecordingStarted()

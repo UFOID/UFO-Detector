@@ -145,7 +145,7 @@ void ActualDetector::detectingThread()
                 tracker.Update(centers);
             }
             //loop through detected objects
-            if (m_detectorRectVec.size()<10)
+            if (m_detectorRectVec.size()< MAX_OBJECTS_IN_FRAME)
             {
                 isPositiveRectangle=false;
                 for ( unsigned int i=0;i<m_detectorRectVec.size();i++)
@@ -202,10 +202,7 @@ void ActualDetector::detectingThread()
                         counterBlackDetecor++;
                         counterLight=0;
                         tracker.tracks[i]->negCounter++;
-                        /*if(willSaveImages){
-                                saveImg(fileDir, result_cropped); imageCount++;
-                                saveImg(pathnameThresh, treshImg); imageCount++;
-                            }*/
+
                         if (m_startedRecording)
                         {
                             negAndNoMotionCounter++;
@@ -270,7 +267,7 @@ void ActualDetector::detectingThread()
             }
         }
 
-        if (m_showCameraVideo)
+        if (m_showCameraVideo && centers.size() < MAX_OBJECTS_IN_FRAME )
         {
             for(unsigned int i=0; i<centers.size(); i++)
             {
@@ -286,7 +283,7 @@ void ActualDetector::detectingThread()
             {
                 for(unsigned int i=0;i<tracker.tracks.size();i++)
                 {
-                    if(tracker.tracks[i]->trace.size()>1)
+                    if(!tracker.tracks[i]->trace.empty())
                     {
                         for(unsigned int j=0;j<tracker.tracks[i]->trace.size()-1;j++)
                         {
@@ -623,13 +620,9 @@ void ActualDetector::stopOnlyDetecting()
 bool ActualDetector::checkIfBird()
 {
     std::vector<Rect> birds;
-    m_birdsCascade.detectMultiScale(m_croppedImageGray, birds, 1.1, 2, 0|CV_HAAR_SCALE_IMAGE, Size(40, 40) );
+    m_birdsCascade.detectMultiScale(m_croppedImageGray, birds, 1.1, 2, 0|CV_HAAR_SCALE_IMAGE, Size(CLASSIFIER_DIMENSION_SIZE, CLASSIFIER_DIMENSION_SIZE) );
 
-    if(birds.size()>0)
-    {
-        return true;
-    }
-    else return false;
+    return (!birds.empty());
 }
 
 /*

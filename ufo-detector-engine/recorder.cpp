@@ -107,7 +107,7 @@ void Recorder::recordThread(){
         qDebug() << "ERROR: Failed to write temporary video" << filenameTemp;
         return;
     }
-
+    std::chrono::high_resolution_clock::time_point prevTime, currentTime;
     prevTime = std::chrono::high_resolution_clock::now();
     currentTime = prevTime + std::chrono::high_resolution_clock::duration(40000000);
     auto difference = currentTime - prevTime;
