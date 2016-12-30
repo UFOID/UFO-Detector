@@ -727,7 +727,7 @@ void MainWindow::checkForUpdate(QNetworkReply *reply)
         QDomElement root;
         root=versionXML.firstChildElement();
         QString currentVersion;
-        QString currentClassifierVersion;
+        int currentClassifierVersion = 1;
         std::queue<QString> messageInXML;
 
         QDomNode node = root.firstChild();
@@ -743,7 +743,7 @@ void MainWindow::checkForUpdate(QNetworkReply *reply)
                 if(node.nodeName()=="classifier")
                 {
                     QDomElement element = node.toElement();
-                    currentClassifierVersion=element.text();
+                    currentClassifierVersion=element.text().toInt();
                 }
                 if(node.nodeName()=="message")
                 {
@@ -760,7 +760,7 @@ void MainWindow::checkForUpdate(QNetworkReply *reply)
             m_updateApplicationDialog->show();
             m_updateApplicationDialog->setAttribute(Qt::WA_DeleteOnClose);
         }
-        else if (currentClassifierVersion>m_classifierVersion){
+        else if (currentClassifierVersion>m_config->classifierVersion()){
             disconnect(m_networkAccessManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(checkForUpdate(QNetworkReply*)) );
             connect(m_networkAccessManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(downloadClassifier(QNetworkReply*)) );
             QNetworkRequest request;
@@ -785,6 +785,7 @@ void MainWindow::downloadClassifier(QNetworkReply *reply)
         file.open(QIODevice::WriteOnly);
         file.write(data);
         file.close();
+        m_config->setClassifierVersion(m_config->classifierVersion()+1);
         qDebug() <<  "Updated bird classifier file";
     }
     delete reply;

@@ -1,56 +1,28 @@
-/*
- * UFO Detector | www.UFOID.net
- *
- * Copyright (C) 2016 UFOID
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
-
-#ifndef DETECTOR_H
-#define DETECTOR_H
-
-#include "opencv2/opencv.hpp"
+#pragma once
 #include "BackgroundSubtract.h"
 #include <iostream>
 #include <vector>
+#include "defines.h"
+#include "opencv2/opencv.hpp"
 
-using namespace cv;
-using namespace std;
-
-/**
- * @brief Class to detect moving objects from image.
- */
 class CDetector
 {
 private:
-    void DetectContour(Mat& img, vector<Rect>& Rects, vector<Point2d>& centers, Rect &croppedRect);
-    BackgroundSubtract* bs;
-    vector<Rect> rects;
-    vector<Point2d> centers;
-    Mat fg;
+    void DetectContour(cv::Mat& img, std::vector<cv::Rect>& Rects,std::vector<cv::Point2d>& centers, cv::Rect& croppedRect);
+
+	std::unique_ptr<BackgroundSubtract> m_bs;
+	std::vector<cv::Rect> m_rects;
+    std::vector<cv::Point2d> m_centers;
+	cv::Mat m_fg;
+
+	cv::Size m_minObjectSize;
+
 public:
-    CDetector(Mat& gray);
+	CDetector(cv::Mat& gray);
+    std::pair<std::vector<cv::Point2d>,std::vector<cv::Rect> > Detect(cv::Mat& gray, cv::Rect &croppedRect);
+	~CDetector(void);
 
-    /**
-     * @brief Find all moving objects in image.
-     * Return pair of vectors that contains the center point of each object and the rectangle around each object
-     * Problem: Sometimes one object is detected as two because the binary image does not show one object as a continuous area
-     *
-     * @todo Improve the detection of objects
-     */
-    pair< vector<Point2d>,vector<Rect> >  Detect(Mat& gray, Rect &croppedRect);
-    vector<Rect> getRecs();
-    ~CDetector(void);
+	void SetMinObjectSize(cv::Size minObjectSize);
+
+	const std::vector<cv::Rect>& GetDetects() const;
 };
-
-#endif // DETECTOR_H

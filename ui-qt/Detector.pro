@@ -1,6 +1,6 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2014-07-04T12:45:22
+# Project created by QtCreator 2016-12-04T12:45:22
 #
 #-------------------------------------------------
 
@@ -14,9 +14,9 @@ TEMPLATE = app
 win32:CONFIG += windows
 win64:CONFIG += windows
 
-QMAKE_CXXFLAGS += -std=c++11
+QMAKE_CXXFLAGS += -std=c++14
 
-CONFIG += c++11
+CONFIG += c++14
 
 RC_ICONS = app.ico
 

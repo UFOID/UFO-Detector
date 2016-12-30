@@ -58,6 +58,7 @@ public:
         ResultImageDir,
         SaveResultImages,
         UserTokenAtUfoId,   // sharing results
+        ClassifierVersion,
         SETTINGS_COUNT
     };
 
@@ -70,6 +71,8 @@ public:
      * @return version string in format major.minor.subminor
      */
     QString applicationVersion();
+
+    int classifierVersion();
 
     /**
      * @brief Whether to automatically check application updates on startup.
@@ -203,6 +206,13 @@ public:
     void setApplicationVersion(QString version);
 
     /**
+     * @brief Set bird classifer version.
+     * @note This is for internal usage.
+     * @param version
+     */
+    void setClassifierVersion(int version);
+
+    /**
      * @brief Set web camera index as used by OpenCV.
      * @param index
      */
@@ -303,6 +313,7 @@ private:
     QString m_settingKeys[Config::SETTINGS_COUNT]; ///< setting key strings
 
     QString m_defaultApplicationVersion;    ///< default app version number: empty by default
+    QString m_defaultClassifierVersion;
     bool m_defaultCheckApplicationUpdates;  ///< default setting for automatic app updates check
 
     int m_defaultCameraIndex;

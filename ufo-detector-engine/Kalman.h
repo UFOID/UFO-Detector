@@ -1,44 +1,16 @@
-/*
- * UFO Detector | www.UFOID.net
- *
- * Copyright (C) 2016 UFOID
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
-
-#ifndef KALMAN_H
-#define KALMAN_H
-
-#include "opencv2/opencv.hpp"
+#pragma once
+#include "defines.h"
 #include <opencv/cv.h>
-using namespace cv;
-using namespace std;
 
-/**
- * @brief Implementation of Kalman filter.
- *
- * @see http://www.morethantechnical.com/2011/06/17/simple-kalman-filter-for-tracking-using-opencv-2-2-w-code/
- */
+// http://www.morethantechnical.com/2011/06/17/simple-kalman-filter-for-tracking-using-opencv-2-2-w-code/
 class TKalmanFilter
 {
 public:
-    KalmanFilter* kalman;
-    double deltatime;	// time increment
-    Point2f LastResult;
-    TKalmanFilter(Point2f p,float dt=0.2,float Accel_noise_mag=0.5);
-    ~TKalmanFilter();
-    Point2f GetPrediction();
-    Point2f Update(Point2f p, bool DataCorrect);
+	cv::KalmanFilter* kalman;
+	track_t deltatime; //приращение времени
+	Point_t LastResult;
+	TKalmanFilter(Point_t p, track_t dt = 0.2, track_t Accel_noise_mag = 0.5);
+	~TKalmanFilter();
+	Point_t GetPrediction();
+	Point_t Update(Point_t p, bool DataCorrect);
 };
-
-#endif // KALMAN_H

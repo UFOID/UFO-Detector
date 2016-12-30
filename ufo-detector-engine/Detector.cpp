@@ -1,89 +1,64 @@
-/*
- * UFO Detector | www.UFOID.net
- *
- * Copyright (C) 2016 UFOID
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
-
 #include "Detector.h"
 
-CDetector::CDetector(Mat& gray)
+CDetector::CDetector(cv::Mat& gray)
 {
-	fg=gray.clone();
-	bs=new BackgroundSubtract;
-	bs->init(gray);
-	vector<Rect> rects;
-	vector<Point2d> centers;
-	
+	m_fg = gray.clone();
+	m_bs = std::make_unique<BackgroundSubtract>(gray.channels());
+	m_bs->init(gray);
+
+	m_minObjectSize.width = std::max(5, gray.cols / 100);
+	m_minObjectSize.height = m_minObjectSize.width;
+}
+
+CDetector::~CDetector(void)
+{
+}
+
+void CDetector::SetMinObjectSize(cv::Size minObjectSize)
+{
+	m_minObjectSize = minObjectSize;
 }
 
 //----------------------------------------------------------------------
 // Detector
 //----------------------------------------------------------------------
-void CDetector::DetectContour(Mat& img, vector<Rect>& Rects,vector<Point2d>& centers, Rect& croppedRect)
+void CDetector::DetectContour(cv::Mat& img, std::vector<cv::Rect>& Rects,std::vector<cv::Point2d>& centers, cv::Rect& croppedRect)
 {
-    Rects.clear();
-	centers.clear();
-	vector<vector<Point> > contours;
-	vector<Vec4i> hierarchy;
-	Mat edges=img.clone();
+	m_rects.clear();
+	m_centers.clear();
+	std::vector<std::vector<cv::Point> > contours;
+	std::vector<cv::Vec4i> hierarchy;
+    cv::Mat edges=img.clone();
     //Canny(img, edges, 50, 190, 3);
 
-    findContours(edges,contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+    cv::findContours(edges,contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
     if(contours.size()>0)
-	{
+    {
         for(int i = 0; i < (int)contours.size(); i++)
-		{
-            Rect r=cv::boundingRect(contours[i]);
-            Point tl = croppedRect.tl()+r.tl();
-            Point br = croppedRect.tl()+r.br();
-            r=Rect(tl,br);
-            Rects.push_back(r);
-            centers.push_back((r.br()+r.tl())*0.5);
-		}
-	}
+        {
+            cv::Rect r=cv::boundingRect(contours[i]);
+            cv::Point tl = croppedRect.tl()+r.tl();
+            cv::Point br = croppedRect.tl()+r.br();
+            r=cv::Rect(tl,br);
+            m_rects.push_back(r);
+            m_centers.push_back((r.br()+r.tl())*0.5);
+
+        }
+    }
 }
 
-pair< vector<Point2d>,vector<Rect> > CDetector::Detect(Mat& gray, Rect& croppedRect){
-
-        //bs->subtract(gray,fg);
-		// rects - bounding rectangles
-		// centers - centers of bounding rectangles
-        /*
-		Mat fg2;
-		fg.convertTo(fg2,CV_32FC1);
-		cv::GaussianBlur(fg2,fg2,Size(5,5),1.0);
-		cv::Laplacian(fg2,fg2,CV_32FC1);
-
-		normalize(fg2,fg2,0,255,cv::NORM_MINMAX);
-		fg2.convertTo(fg2,CV_8UC1);
-		cv::applyColorMap(fg2,fg2,COLORMAP_JET);
-		imshow("Foreground",fg2);
-        */
-        //cv::Mat dilateElement = cv::getStructuringElement( 0, cv::Size( 3, 3 ), cv::Point( -1, -1 ) );
-        //cv::dilate(gray, fg, dilateElement, cv::Point(-1,-1), 2);
-        dilate(gray, fg, getStructuringElement(MORPH_RECT, Size(15,15)));
-        //imshow("Foreground",fg);
-        DetectContour(fg,rects,centers,croppedRect);
-        return make_pair(centers,rects);
-}
-
-vector<Rect> CDetector::getRecs(){
-    return rects;
-}
-
-CDetector::~CDetector(void)
+std::pair<std::vector<cv::Point2d>, std::vector<cv::Rect> > CDetector::Detect(cv::Mat& gray, cv::Rect &croppedRect)
 {
-	delete bs;
+    //m_bs->subtract(gray, m_fg);
+    cv::dilate(gray, m_fg, getStructuringElement(cv::MORPH_RECT, cv::Size(15,15)));
+    //imshow("Foreground",fg);
+    DetectContour(m_fg,m_rects,m_centers,croppedRect);
+
+
+    return make_pair(m_centers,m_rects);
+}
+
+const std::vector<cv::Rect>& CDetector::GetDetects() const
+{
+	return m_rects;
 }

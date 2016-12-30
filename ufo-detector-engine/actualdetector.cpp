@@ -142,10 +142,10 @@ void ActualDetector::detectingThread()
             counterNoMotion=0;
             if(centers.size()>0)
             {
-                tracker.Update(centers);
+                tracker.Update(centers,m_detectorRectVec,CTracker::RectsDist);
             }
             //loop through detected objects
-            if (m_detectorRectVec.size()< MAX_OBJECTS_IN_FRAME)
+            if (m_detectorRectVec.size()<  MAX_OBJECTS_IN_FRAME)
             {
                 isPositiveRectangle=false;
                 for ( unsigned int i=0;i<m_detectorRectVec.size();i++)
@@ -161,6 +161,9 @@ void ActualDetector::detectingThread()
                         {
                             tracker.tracks[i]->birdCounter++;
                             tracker.tracks[i]->negCounter++;
+                            stringstream ss;
+                            ss << "C:/Intel/bird" << m_imageCount << m_savedImageExtension;
+                            imwrite(ss.str(), croppedImage );m_imageCount++;
                         }
                         else
                         {//+++ not in night mode or was not a bird*/

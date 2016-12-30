@@ -40,10 +40,12 @@ Config::Config(QObject *parent) : QObject(parent)
     m_settingKeys[Config::ResultImageDir] = "resultImageDir";
     m_settingKeys[Config::SaveResultImages] = "saveResultImages";
     m_settingKeys[Config::UserTokenAtUfoId] = "userTokenAtUfoId";
+    m_settingKeys[Config::ClassifierVersion] = "classifierVersion";
 
     m_settings = new QSettings("UFOID", "Detector");
 
     m_defaultApplicationVersion = "";
+    m_defaultClassifierVersion = "1";
     m_defaultCheckApplicationUpdates = true;
 
     m_defaultCameraIndex = 0;
@@ -93,6 +95,10 @@ Config::~Config() {
 
 QString Config::applicationVersion() {
     return m_settings->value(m_settingKeys[Config::ApplicationVersion], m_defaultApplicationVersion).toString();
+}
+
+int Config::classifierVersion() {
+    return m_settings->value(m_settingKeys[Config::ClassifierVersion], m_defaultClassifierVersion).toInt();
 }
 
 bool Config::checkApplicationUpdates() {
@@ -271,6 +277,12 @@ void Config::setSaveResultImages(bool save) {
 
 void Config::setUserTokenAtUfoId(QString token) {
     m_settings->setValue(m_settingKeys[Config::UserTokenAtUfoId], QVariant(token));
+    m_settings->sync();
+    emit settingsChanged();
+}
+
+void Config::setClassifierVersion(int version) {
+    m_settings->setValue(m_settingKeys[Config::ClassifierVersion], QVariant(version));
     m_settings->sync();
     emit settingsChanged();
 }
