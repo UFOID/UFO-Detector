@@ -298,7 +298,7 @@ void ActualDetector::detectingThread()
 
             cv::cvtColor(m_resultFrame, m_resultFrame, CV_BGR2RGB);
             m_cameraViewImage = QImage((uchar*)m_resultFrame.data, m_resultFrame.cols, m_resultFrame.rows, m_resultFrame.step, QImage::Format_RGB888);
-            emit updatePixmap(m_cameraViewImage);
+            emit updatePixmap(m_cameraViewImage.copy());
         }
         // give chance to other threads to run
         std::this_thread::yield();
