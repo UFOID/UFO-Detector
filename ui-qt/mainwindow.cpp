@@ -113,6 +113,12 @@ MainWindow::MainWindow(QWidget *parent, Camera *cameraPtr, Config *configPtr) :
         request.setRawHeader( "User-Agent" , "Mozilla Firefox" );
         m_networkAccessManager->get(request);
     }
+
+    // if check for planes
+
+    m_planeChecker = new PlaneChecker(0,"50.842404,-0.107510\n50.798886,-0.062374\n50.806472,-0.134917");
+    m_planeChecker->callApi();
+
     qDebug() << "MainWindow constructed" ;
 }
 
@@ -163,6 +169,7 @@ void MainWindow::displayPixmap(QImage image)
 void MainWindow::setSignalsAndSlots(ActualDetector* actualDetector)
 {
     m_actualDetector = actualDetector;
+m_actualDetector->setPlaneChecker(m_planeChecker);
     connect(m_actualDetector, SIGNAL(positiveMessage()), this, SLOT(setPositiveMessage()));
     connect(m_actualDetector, SIGNAL(negativeMessage()), this, SLOT(setNegativeMessage()));
     connect(m_actualDetector, SIGNAL(errorReadingDetectionAreaFile()), this, SLOT(setErrorReadingDetectionAreaFile()));
@@ -174,6 +181,9 @@ void MainWindow::setSignalsAndSlots(ActualDetector* actualDetector)
     connect(m_actualDetector, SIGNAL(broadcastOutputText(QString)), this, SLOT(update_output_text(QString)));
     connect(this, SIGNAL(updatePixmap(QImage)), this, SLOT(displayPixmap(QImage)));
     connect(ui->videoList, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(onVideoListContextMenuRequested(const QPoint&)));
+    if (m_planeChecker){
+        connect(m_planeChecker,SIGNAL(foundNumberOfPlanes(int)),m_actualDetector, SLOT(setAmountOfPlanes(int)));
+    }
 }
 
 /*

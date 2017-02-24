@@ -1,1 +1,3 @@
 src/Detector.pro.user
+ui-qt/Detector.pro.user
+build*/*
