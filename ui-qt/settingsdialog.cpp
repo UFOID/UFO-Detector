@@ -90,6 +90,8 @@ void SettingsDialog::saveSettings()
     m_config->setMinPositiveDetections(ui->lineMinPosRequired->text().toInt());
     m_config->setResultVideoCodec(ui->comboBoxCodec->currentData().toString());
     m_config->setUserTokenAtUfoId(ui->lineToken->text());
+    m_config->setCheckAirplanes(ui->checkBoxFilterAiplanes->isChecked());
+    m_config->setAirplanesCoordinates(ui->lineEditFilterAirplanes->text());
 }
 
 //void Settings::checkAreaFile()
@@ -258,4 +260,14 @@ void SettingsDialog::on_toolButtonCodecHelp_clicked()
 void SettingsDialog::on_toolButtonTokenHelp_clicked()
 {
     QMessageBox::information(this, tr("UFOID.net User Token"), tr("Copy the user token from your UFOID account into this field to enable the upload feature. \nThe code can be found at http://ufoid.net/profile/edit"));
+}
+
+void SettingsDialog::on_checkBoxFilterAiplanes_clicked()
+{
+    ui->lineEditFilterAirplanes->setEnabled(ui->checkBoxFilterAiplanes->isChecked());
+}
+
+void SettingsDialog::on_toolButtonFilterAirplanes_clicked()
+{
+    QMessageBox::information(this, tr("Plane Filter Information"), tr("To use the airplane filter enter the location coordinates in to the text field.\nVisit http://ufoid.net/airplanes to specify your location. \nThe airplane filter requires an active internet connection."));
 }

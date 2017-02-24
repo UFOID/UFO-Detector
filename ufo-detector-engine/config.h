@@ -59,6 +59,8 @@ public:
         SaveResultImages,
         UserTokenAtUfoId,   // sharing results
         ClassifierVersion,
+        CheckAirplanes,
+        Coordinates,
         SETTINGS_COUNT
     };
 
@@ -305,6 +307,19 @@ public:
      * @param token
      */
     void setUserTokenAtUfoId(QString token);
+
+    /**
+     * @brief Set if check for airplanes.
+     * @param True: check, false: dont check
+     */
+    void setCheckAirplanes(bool check);
+
+    /**
+     * @brief Set the coordinates used by PlaneChecker.
+     * @param coordinates
+     */
+    void setAirplanesCoordinates(QString coordinates);
+
 
 #ifndef _UNIT_TEST_
 private:

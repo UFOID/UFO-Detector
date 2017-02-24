@@ -75,6 +75,10 @@ private slots:
     void on_toolButtonCodecHelp_clicked();
     void on_toolButtonTokenHelp_clicked();
 
+    void on_checkBoxFilterAiplanes_clicked();
+
+    void on_toolButtonFilterAirplanes_clicked();
+
 public slots:
 
 signals:
