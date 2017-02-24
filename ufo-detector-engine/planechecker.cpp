@@ -15,7 +15,7 @@ PlaneChecker::PlaneChecker(QObject *parent, QString info) : QObject(parent)
     url = QString(API_URL) + "?pos1="+par1+"&pos2="+par2+"&pos3="+par3;
 
     manager = new QNetworkAccessManager(this);
-     connect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(readReply(QNetworkReply*)) );
+    connect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(readReply(QNetworkReply*)) );
 }
 
 void PlaneChecker::callApi()
@@ -44,6 +44,7 @@ void PlaneChecker::readReply(QNetworkReply *reply)
             //qDebug() << "amount of planes " + QString(array.size());
         }
 
+        // TODO remove test
         emit foundNumberOfPlanes(1);
         //emit foundNumberOfPlanes(array.size());
     }

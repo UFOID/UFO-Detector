@@ -9,7 +9,7 @@ class PlaneChecker : public QObject
     Q_OBJECT
 public:
     explicit PlaneChecker(QObject *parent = 0, QString info = "");
-    void callApi();
+
 
 private:
     QString url;
@@ -20,7 +20,7 @@ signals:
     void foundNumberOfPlanes(int amount);
 
 public slots:
-
+    void callApi();
 private slots:
     void readReply(QNetworkReply* reply);
 };

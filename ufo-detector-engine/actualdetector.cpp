@@ -163,6 +163,7 @@ void ActualDetector::detectingThread()
                         {
                             tracker.tracks[i]->birdCounter++;
                             tracker.tracks[i]->negCounter++;
+                            // TODO remove debug
                             stringstream ss;
                             ss << "C:/Intel/bird" << m_imageCount << m_savedImageExtension;
                             imwrite(ss.str(), croppedImage );m_imageCount++;
@@ -173,7 +174,7 @@ void ActualDetector::detectingThread()
                             if(counterLight>2)counterBlackDetecor=0;
                             if(counterBlackDetecor<5)
                             {
-                                m_planeChecker->callApi();
+                                emit checkPlane();
                                 if(!m_startedRecording)
                                 {
                                     Mat tempImg = m_resultFrame.clone();

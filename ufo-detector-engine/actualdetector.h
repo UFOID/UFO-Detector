@@ -170,6 +170,7 @@ signals:
     void broadcastOutputText(QString output_text);
     void progressValueChanged(int value);
     void updatePixmap(QImage img);
+    void checkPlane();
 
 private slots:
     void setAmountOfPlanes(int amount);
