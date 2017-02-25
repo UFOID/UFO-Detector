@@ -183,6 +183,16 @@ QString Config::userTokenAtUfoId() {
     return m_settings->value(m_settingKeys[Config::UserTokenAtUfoId], m_defaultUserTokenAtUfoId).toString();
 }
 
+bool Config::checkAirplanes()
+{
+    return m_settings->value(m_settingKeys[Config::CheckAirplanes], false).toBool();
+}
+
+QString Config::coordinates()
+{
+    return m_settings->value(m_settingKeys[Config::Coordinates]).toString();
+}
+
 VideoCodecSupportInfo* Config::videoCodecSupportInfo() {
     return m_videoCodecSupportInfo;
 }

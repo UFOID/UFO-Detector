@@ -180,8 +180,9 @@ void MainWindow::setSignalsAndSlots(ActualDetector* actualDetector)
     connect(ui->videoList, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(onVideoListContextMenuRequested(const QPoint&)));
 
     // TODO if check for planes
-    m_planeChecker = new PlaneChecker(m_actualDetector,"50.842404,-0.107510\n50.798886,-0.062374\n50.806472,-0.134917");
-    if (m_planeChecker){
+
+    if (m_config->checkAirplanes()){
+        m_planeChecker = new PlaneChecker(m_config->coordinates());
         connect(m_planeChecker,SIGNAL(foundNumberOfPlanes(int)),m_actualDetector, SLOT(setAmountOfPlanes(int)));
         connect(m_actualDetector,SIGNAL(checkPlane()),m_planeChecker, SLOT(callApi()));
     }

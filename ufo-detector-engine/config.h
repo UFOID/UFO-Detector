@@ -195,6 +195,17 @@ public:
     QString userTokenAtUfoId();
 
     /**
+     * @brief Whether to check for airplanes.
+     * @return true: check, false: don't check
+     */
+    bool checkAirplanes();
+
+    /**
+     * @brief The coordinates to check for airplanes
+     * @return
+     */
+    QString coordinates();
+    /**
      * @brief Get video codec support info object. The object has been initialized.
      * @return pointer to initialized VideoCodecSupportInfo
      */
