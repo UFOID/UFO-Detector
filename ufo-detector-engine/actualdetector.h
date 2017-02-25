@@ -37,7 +37,6 @@
 #include <QtXml>
 #include "Ctracker.h"
 #include "Detector.h"
-#include "planechecker.h"
 
 using namespace cv;
 
@@ -74,7 +73,6 @@ public:
     void setThresholdLevel(int level);
     void setFilename(std::string msg);
     void startRecording();
-    void setPlaneChecker(PlaneChecker* planeChecker);
     Recorder* getRecorder();
 
     /**
@@ -124,7 +122,6 @@ private:
     const int CLASSIFIER_DIMENSION_SIZE = 30;
     bool m_willRecordWithRect;
     cv::CascadeClassifier m_birdsCascade;
-    PlaneChecker* m_planeChecker;
 
 
     std::vector<cv::Point> m_region;

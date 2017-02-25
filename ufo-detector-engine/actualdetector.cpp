@@ -858,11 +858,6 @@ void ActualDetector::startRecording()
     m_recorder->startRecording(firstFrame);
 }
 
-void ActualDetector::setPlaneChecker(PlaneChecker *planeChecker)
-{
-    m_planeChecker = planeChecker;
-}
-
 
 Recorder* ActualDetector::getRecorder()
 {
