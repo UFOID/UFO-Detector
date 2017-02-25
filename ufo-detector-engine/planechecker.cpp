@@ -23,9 +23,6 @@ void PlaneChecker::callApi()
 
     QNetworkRequest req;
     req.setUrl(QUrl(url));
-
-    qDebug() << url;
-
     manager->get(req);
 
 }
@@ -41,14 +38,12 @@ void PlaneChecker::readReply(QNetworkReply *reply)
         if (array.isEmpty()){
         }
         else {
-            //qDebug() << "amount of planes " + QString(array.size());
+            qDebug() << "amount of planes " + QString(array.size());
         }
 
-        // TODO remove test
-        emit foundNumberOfPlanes(1);
-        //emit foundNumberOfPlanes(array.size());
+        emit foundNumberOfPlanes(array.size());
     }
-    else qDebug() <<  "error calling plane check API" ;
+    else qWarning() <<  "error calling plane check API" ;
 }
 
 

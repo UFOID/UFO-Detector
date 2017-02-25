@@ -162,11 +162,7 @@ void ActualDetector::detectingThread()
                         if (!m_isInNightMode && checkIfBird())
                         {
                             tracker.tracks[i]->birdCounter++;
-                            tracker.tracks[i]->negCounter++;
-                            // TODO remove debug
-                            stringstream ss;
-                            ss << "C:/Intel/bird" << m_imageCount << m_savedImageExtension;
-                            imwrite(ss.str(), croppedImage );m_imageCount++;
+                            tracker.tracks[i]->negCounter++;                           
                         }
                         else
                         {//+++ not in night mode or was not a bird*/
@@ -838,7 +834,6 @@ Rect ActualDetector::enlargeROI(Mat &frm, Rect &boundingBox, int padding)
 void ActualDetector::setAmountOfPlanes(int amount)
 {
     m_numberOfPlanes = amount;
-    qDebug() << m_numberOfPlanes;
 }
 
 
