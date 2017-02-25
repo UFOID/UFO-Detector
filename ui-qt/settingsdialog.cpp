@@ -68,6 +68,11 @@ SettingsDialog::SettingsDialog(QWidget *parent, Camera *camPtr, Config *configPt
     if (ui->comboBoxCodec->currentIndex() < 0) {
         ui->comboBoxCodec->setCurrentIndex(0);
     }
+    if (m_config->checkAirplanes()){
+        ui->checkBoxFilterAiplanes->setChecked(Qt::Checked);
+        ui->lineEditFilterAirplanes->setText(m_config->coordinates());
+        emit on_checkBoxFilterAiplanes_clicked();
+    }
     setWindowFlags(Qt::FramelessWindowHint);
     setWindowFlags(Qt::WindowTitleHint);
     m_detectionAreaDialogIsOpen=false;
