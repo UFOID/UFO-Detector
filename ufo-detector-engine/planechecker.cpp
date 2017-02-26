@@ -3,7 +3,7 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QJsonObject>
-#define API_URL "http://boller.site:8080/myspring/api"
+#define API_URL "http://boller.site:8080/flights/api"
 
 PlaneChecker::PlaneChecker(QObject *parent, QString info) : QObject(parent)
 {
