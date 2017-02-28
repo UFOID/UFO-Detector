@@ -48,6 +48,9 @@ ActualDetector::~ActualDetector()
 
 bool ActualDetector::initialize()
 {
+    if (parseDetectionAreaFile(m_detectionAreaFile, m_region)){
+        return false;
+    }
     state = new DetectorState(this,m_recorder);
     state->MIN_POS_REQUIRED = m_config->minPositiveDetections();
     connect(state, SIGNAL(sendOutputText(QString)), this->parent() , SLOT(update_output_text(QString)));
@@ -66,7 +69,6 @@ bool ActualDetector::initialize()
     m_imageCount = 0;
     m_savedImageExtension =".jpg";
 
-    bool success = parseDetectionAreaFile(m_detectionAreaFile, m_region);
 
     m_willParseRectangle = false;
     if(m_willSaveImages)
@@ -96,7 +98,8 @@ bool ActualDetector::initialize()
     m_rect = Rect(Point(0,0),Point(m_cameraWidth,m_cameraHeight));
     m_treshImg = m_resultFrame.clone();
     m_treshImg.setTo(Scalar(0,0,0));
-    return success;
+
+    return true;
 }
 
 /*
