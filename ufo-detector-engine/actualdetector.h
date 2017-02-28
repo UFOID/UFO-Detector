@@ -37,6 +37,7 @@
 #include <QtXml>
 #include "Ctracker.h"
 #include "Detector.h"
+#include "detectorstate.h"
 
 using namespace cv;
 
@@ -116,8 +117,7 @@ private:
     int m_thresholdLevel;
     int m_cameraWidth;
     int m_cameraHeight;
-    int m_minPositiveRequired;
-    bool m_wasPlane;
+    DetectorState *state;
     const unsigned int MAX_OBJECTS_IN_FRAME = 10;
     const int CLASSIFIER_DIMENSION_SIZE = 30;
     bool m_willRecordWithRect;
@@ -127,7 +127,6 @@ private:
     std::vector<cv::Point> m_region;
     std::string m_detectionAreaFile;
 
-    std::atomic<int> m_numberOfPlanes;
     std::atomic<bool> m_isMainThreadRunning;
     std::atomic<bool> m_willParseRectangle;
     bool m_isInNightMode;

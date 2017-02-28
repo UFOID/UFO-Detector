@@ -27,7 +27,8 @@ SOURCES += $$PWD/recorder.cpp \
     config.cpp \
     camerainfo.cpp \
     videocodecsupportinfo.cpp \
-    $$PWD/planechecker.cpp
+    $$PWD/planechecker.cpp \
+    $$PWD/detectorstate.cpp
 
 HEADERS  += recorder.h \
     actualdetector.h \
@@ -41,4 +42,5 @@ HEADERS  += recorder.h \
     config.h \
     camerainfo.h \
     videocodecsupportinfo.h \
-    $$PWD/planechecker.h
+    $$PWD/planechecker.h \
+    $$PWD/detectorstate.h
