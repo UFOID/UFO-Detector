@@ -48,7 +48,7 @@ ActualDetector::~ActualDetector()
 
 bool ActualDetector::initialize()
 {
-    if (parseDetectionAreaFile(m_detectionAreaFile, m_region)){
+    if (!parseDetectionAreaFile(m_detectionAreaFile, m_region)){
         return false;
     }
     state = new DetectorState(this,m_recorder);
