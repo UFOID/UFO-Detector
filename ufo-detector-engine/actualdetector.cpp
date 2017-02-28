@@ -62,6 +62,7 @@ bool ActualDetector::initialize()
     m_imageCount = 0;
     m_savedImageExtension =".jpg";
     m_wasPlane = false;
+    m_numberOfPlanes = 0;
 
     bool success = parseDetectionAreaFile(m_detectionAreaFile, m_region);
 
@@ -279,11 +280,12 @@ void ActualDetector::detectingThread()
                 m_willParseRectangle=false;
                 m_startedRecording=false;
                 m_wasPlane= false;
+                m_numberOfPlanes = 0;
             }
         }
 
         // check if there was a plane
-        if (m_numberOfPlanes >= centers.size()){
+        if (m_numberOfPlanes && m_numberOfPlanes>= centers.size()){
             m_wasPlane = true;
         }
 
