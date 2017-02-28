@@ -41,6 +41,8 @@ Config::Config(QObject *parent) : QObject(parent)
     m_settingKeys[Config::SaveResultImages] = "saveResultImages";
     m_settingKeys[Config::UserTokenAtUfoId] = "userTokenAtUfoId";
     m_settingKeys[Config::ClassifierVersion] = "classifierVersion";
+    m_settingKeys[Config::CheckAirplanes] = "checkAirplanes";
+    m_settingKeys[Config::Coordinates] = "coordinates";
 
     m_settings = new QSettings("UFOID", "Detector");
 
@@ -181,6 +183,16 @@ QString Config::userTokenAtUfoId() {
     return m_settings->value(m_settingKeys[Config::UserTokenAtUfoId], m_defaultUserTokenAtUfoId).toString();
 }
 
+bool Config::checkAirplanes()
+{
+    return m_settings->value(m_settingKeys[Config::CheckAirplanes], false).toBool();
+}
+
+QString Config::coordinates()
+{
+    return m_settings->value(m_settingKeys[Config::Coordinates]).toString();
+}
+
 VideoCodecSupportInfo* Config::videoCodecSupportInfo() {
     return m_videoCodecSupportInfo;
 }
@@ -277,6 +289,20 @@ void Config::setSaveResultImages(bool save) {
 
 void Config::setUserTokenAtUfoId(QString token) {
     m_settings->setValue(m_settingKeys[Config::UserTokenAtUfoId], QVariant(token));
+    m_settings->sync();
+    emit settingsChanged();
+}
+
+void Config::setCheckAirplanes(bool check)
+{
+    m_settings->setValue(m_settingKeys[Config::CheckAirplanes], QVariant(check));
+    m_settings->sync();
+    emit settingsChanged();
+}
+
+void Config::setAirplanesCoordinates(QString coordinates)
+{
+    m_settings->setValue(m_settingKeys[Config::Coordinates], QVariant(coordinates));
     m_settings->sync();
     emit settingsChanged();
 }

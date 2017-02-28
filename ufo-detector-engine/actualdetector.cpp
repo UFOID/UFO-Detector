@@ -61,6 +61,8 @@ bool ActualDetector::initialize()
     m_maxDeviation = 20;
     m_imageCount = 0;
     m_savedImageExtension =".jpg";
+    m_wasPlane = false;
+    m_numberOfPlanes = 0;
 
     bool success = parseDetectionAreaFile(m_detectionAreaFile, m_region);
 
@@ -108,7 +110,8 @@ void ActualDetector::detectingThread()
     int counterLight = 0;
     bool isPositiveRectangle;
     int threadYieldPauseUsec = 1000;
-	
+    int numberOfChanges = 0;
+
     CTracker tracker(0.2,0.5,60.0,15,15);
     CDetector* detector=new CDetector(m_currentFrame);
     vector<Point2d> centers;
@@ -132,9 +135,9 @@ void ActualDetector::detectingThread()
 
         erode(m_motion, m_motion, m_noiseLevel);
 
-        m_numberOfChanges = detectMotion(m_motion, m_resultFrame, m_resultFrameCropped, m_region, m_maxDeviation);
+        numberOfChanges = detectMotion(m_motion, m_resultFrame, m_resultFrameCropped, m_region, m_maxDeviation);
 
-        if(m_numberOfChanges>=m_minAmountOfMotion)
+        if(numberOfChanges>=m_minAmountOfMotion)
         {
             centerAndRectPair = detector->Detect(m_treshImg,m_rect);
             centers = centerAndRectPair.first;
@@ -160,10 +163,7 @@ void ActualDetector::detectingThread()
                         if (!m_isInNightMode && checkIfBird())
                         {
                             tracker.tracks[i]->birdCounter++;
-                            tracker.tracks[i]->negCounter++;
-                            stringstream ss;
-                            ss << "C:/Intel/bird" << m_imageCount << m_savedImageExtension;
-                            imwrite(ss.str(), croppedImage );m_imageCount++;
+                            tracker.tracks[i]->negCounter++;                           
                         }
                         else
                         {//+++ not in night mode or was not a bird*/
@@ -171,6 +171,7 @@ void ActualDetector::detectingThread()
                             if(counterLight>2)counterBlackDetecor=0;
                             if(counterBlackDetecor<5)
                             {
+                                emit checkPlane();
                                 if(!m_startedRecording)
                                 {
                                     Mat tempImg = m_resultFrame.clone();
@@ -250,9 +251,20 @@ void ActualDetector::detectingThread()
                 {//+++one object had more positive than negative detections
                     if(posCounter>=m_minPositiveRequired)
                     {
-                        m_recorder->stopRecording(true);
-                        auto output_text = tr("Finished recording - At least one object found positive: saved video");
-                        emit broadcastOutputText(output_text);
+                        if (m_wasPlane)
+                        {
+                            m_recorder->stopRecording(true);
+                            auto output_text = tr("Finished recording - was plane +++++ saved video");
+                            emit broadcastOutputText(output_text);
+
+                        }
+                        else
+                        {
+                            m_recorder->stopRecording(true);
+                            auto output_text = tr("Finished recording - At least one object found positive: saved video");
+                            emit broadcastOutputText(output_text);
+                        }
+
                     }
                     else
                     {
@@ -267,7 +279,14 @@ void ActualDetector::detectingThread()
                 posCounter=0;
                 m_willParseRectangle=false;
                 m_startedRecording=false;
+                m_wasPlane= false;
+                m_numberOfPlanes = 0;
             }
+        }
+
+        // check if there was a plane
+        if (m_numberOfPlanes && m_numberOfPlanes>= centers.size()){
+            m_wasPlane = true;
         }
 
         if (m_showCameraVideo && centers.size() < MAX_OBJECTS_IN_FRAME )
@@ -812,6 +831,11 @@ Rect ActualDetector::enlargeROI(Mat &frm, Rect &boundingBox, int padding)
     if (returnRect.x+returnRect.width >= frm.cols)returnRect.width = frm.cols-returnRect.x;
     if (returnRect.y+returnRect.height >= frm.rows)returnRect.height = frm.rows-returnRect.y;
     return returnRect;
+}
+
+void ActualDetector::setAmountOfPlanes(int amount)
+{
+    m_numberOfPlanes = amount;
 }
 
 

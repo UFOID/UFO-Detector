@@ -48,6 +48,7 @@
 #include <QJsonObject>
 #include <QMutex>
 #include <QScrollBar>
+#include "planechecker.h"
 
 using namespace cv;
 
@@ -90,6 +91,7 @@ private:
     QMutex m_cameraViewImageMutex;      ///< syncing camera view image
     QString m_detectionStatusStyleOn;   ///< detection status indicator style when detection on
     QString m_detectionStatusStyleOff;  ///< detection status indicator style when detection off
+    PlaneChecker* m_planeChecker;
 
     Config* m_config;
 
@@ -149,7 +151,7 @@ public slots:
     void onRecordingStarted();
     void onRecordingFinished();
     void on_progressBar_valueChanged(int value);
-	void update_output_text(QString msg);
+    void update_output_text(QString msg);
     void displayPixmap(QImage img);
 
 private slots:

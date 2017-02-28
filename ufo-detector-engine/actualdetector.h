@@ -71,7 +71,7 @@ public:
 
     void setNoiseLevel(int level);
     void setThresholdLevel(int level);
-    void setFilename(std::string msg);    
+    void setFilename(std::string msg);
     void startRecording();
     Recorder* getRecorder();
 
@@ -82,7 +82,7 @@ public:
      * Actual showing must be done by the camera view in the UI side.
      * When camera video is not shown, no updatePixmap() signals are emitted.
      *
-     * @param show true = show video, false = don't show video	 
+     * @param show true = show video, false = don't show video
      */
     void setShowCameraVideo(bool show);
 
@@ -106,7 +106,6 @@ private:
     cv::Mat m_croppedImageGray;
     cv::Mat m_noiseLevel;
     cv::Rect m_rect;
-    int m_numberOfChanges;
     int m_minAmountOfMotion;
     int m_maxDeviation;
     std::string m_resultImageDirNameBase; ///< base for result image folder name
@@ -118,6 +117,7 @@ private:
     int m_cameraWidth;
     int m_cameraHeight;
     int m_minPositiveRequired;
+    bool m_wasPlane;
     const unsigned int MAX_OBJECTS_IN_FRAME = 10;
     const int CLASSIFIER_DIMENSION_SIZE = 30;
     bool m_willRecordWithRect;
@@ -127,6 +127,7 @@ private:
     std::vector<cv::Point> m_region;
     std::string m_detectionAreaFile;
 
+    std::atomic<int> m_numberOfPlanes;
     std::atomic<bool> m_isMainThreadRunning;
     std::atomic<bool> m_willParseRectangle;
     bool m_isInNightMode;
@@ -163,9 +164,13 @@ signals:
     void positiveMessage();
     void negativeMessage();
     void errorReadingDetectionAreaFile();
-	void broadcastOutputText(QString output_text);
-	void progressValueChanged(int value);
+    void broadcastOutputText(QString output_text);
+    void progressValueChanged(int value);
     void updatePixmap(QImage img);
+    void checkPlane();
+
+private slots:
+    void setAmountOfPlanes(int amount);
 };
 
 #endif // ACTUALREC_H

@@ -26,7 +26,8 @@ SOURCES += $$PWD/recorder.cpp \
     VIBE.cpp \
     config.cpp \
     camerainfo.cpp \
-    videocodecsupportinfo.cpp
+    videocodecsupportinfo.cpp \
+    $$PWD/planechecker.cpp
 
 HEADERS  += recorder.h \
     actualdetector.h \
@@ -39,4 +40,5 @@ HEADERS  += recorder.h \
     VIBE.h \
     config.h \
     camerainfo.h \
-    videocodecsupportinfo.h
+    videocodecsupportinfo.h \
+    $$PWD/planechecker.h
