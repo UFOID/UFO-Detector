@@ -115,6 +115,7 @@ void ActualDetector::detectingThread()
     int threadYieldPauseUsec = 1000;
     int numberOfChanges = 0;
 
+
     CDetector* detector=new CDetector(m_currentFrame);
     vector<Point2d> centers;
     Scalar Colors[]={Scalar(255,0,0),Scalar(0,255,0),Scalar(0,0,255),Scalar(255,255,0),Scalar(0,255,255),Scalar(255,0,255),Scalar(255,127,255),Scalar(127,0,255),Scalar(127,0,127)};
@@ -283,8 +284,7 @@ void ActualDetector::detectingThread()
         std::this_thread::yield();
         std::this_thread::sleep_for(std::chrono::microseconds(threadYieldPauseUsec));
     }
-    delete detector;
-    delete state;
+    delete detector;    
 }
 
 
@@ -756,6 +756,7 @@ void ActualDetector::stopThread()
         m_mainThread.reset();
         this_thread::sleep_for(chrono::seconds(1));
         m_nightCheckerThread->join(); m_nightCheckerThread.reset();
+        delete state;
     }
 }
 

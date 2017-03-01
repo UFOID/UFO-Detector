@@ -278,5 +278,5 @@ void SettingsDialog::on_toolButtonFilterAirplanes_clicked()
     msgBox.setWindowTitle("Plane Filter Information");
     msgBox.setTextFormat(Qt::RichText);
     msgBox.setText("To use the airplane filter enter the location coordinates in to the text field.<br/>Visit <a href=http://ufoid.net/airplanes.html>http://ufoid.net/airplanes.html</a> to specify your location. \nThe airplane filter requires an active internet connection.");
-
+    msgBox.exec();
 }
