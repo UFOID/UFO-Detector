@@ -38,7 +38,7 @@ void PlaneChecker::readReply(QNetworkReply *reply)
         if (array.isEmpty()){
         }
         else {
-            qDebug() << "amount of planes " + QString(array.size());
+            qDebug() << "amount of planes " + QString::number(array.size());
         }
 
         emit foundNumberOfPlanes(array.size());

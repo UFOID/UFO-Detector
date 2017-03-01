@@ -28,7 +28,6 @@ ActualDetector::ActualDetector(Camera *cameraPtr, Config *configPtr, QObject *pa
     m_cameraWidth = m_config->cameraWidth();
     m_cameraHeight = m_config->cameraHeight();
     m_willRecordWithRect = m_config->resultVideoWithObjectRectangles();
-    m_minPositiveRequired = m_config->minPositiveDetections();
     m_isMainThreadRunning = false;
     m_showCameraVideo = false;
     m_startedRecording = false;
@@ -49,6 +48,14 @@ ActualDetector::~ActualDetector()
 
 bool ActualDetector::initialize()
 {
+    if (!parseDetectionAreaFile(m_detectionAreaFile, m_region)){
+        return false;
+    }
+    state = new DetectorState(this,m_recorder);
+    state->MIN_POS_REQUIRED = m_config->minPositiveDetections();
+    connect(state, SIGNAL(sendOutputText(QString)), this->parent() , SLOT(update_output_text(QString)));
+    state->resetState();
+
     m_prevFrame = m_camPtr->getWebcamFrame();
     m_resultFrame = m_prevFrame;
     m_currentFrame = m_camPtr->getWebcamFrame();
@@ -61,10 +68,7 @@ bool ActualDetector::initialize()
     m_maxDeviation = 20;
     m_imageCount = 0;
     m_savedImageExtension =".jpg";
-    m_wasPlane = false;
-    m_numberOfPlanes = 0;
 
-    bool success = parseDetectionAreaFile(m_detectionAreaFile, m_region);
 
     m_willParseRectangle = false;
     if(m_willSaveImages)
@@ -94,17 +98,16 @@ bool ActualDetector::initialize()
     m_rect = Rect(Point(0,0),Point(m_cameraWidth,m_cameraHeight));
     m_treshImg = m_resultFrame.clone();
     m_treshImg.setTo(Scalar(0,0,0));
-    return success;
+
+    return true;
 }
 
 /*
  * The detection thread
  */
 void ActualDetector::detectingThread()
-{
+{    
     Mat tempImage;
-    int posCounter = 0;
-    int negAndNoMotionCounter = 0;
     int counterNoMotion = 0;
     int counterBlackDetecor = 0;
     int counterLight = 0;
@@ -112,7 +115,7 @@ void ActualDetector::detectingThread()
     int threadYieldPauseUsec = 1000;
     int numberOfChanges = 0;
 
-    CTracker tracker(0.2,0.5,60.0,15,15);
+
     CDetector* detector=new CDetector(m_currentFrame);
     vector<Point2d> centers;
     Scalar Colors[]={Scalar(255,0,0),Scalar(0,255,0),Scalar(0,0,255),Scalar(255,255,0),Scalar(0,255,255),Scalar(255,0,255),Scalar(255,127,255),Scalar(127,0,255),Scalar(127,0,127)};
@@ -145,7 +148,7 @@ void ActualDetector::detectingThread()
             counterNoMotion=0;
             if(centers.size()>0)
             {
-                tracker.Update(centers,m_detectorRectVec,CTracker::RectsDist);
+                state->tracker.Update(centers,m_detectorRectVec,CTracker::RectsDist);
             }
             //loop through detected objects
             if (m_detectorRectVec.size()<  MAX_OBJECTS_IN_FRAME)
@@ -162,8 +165,8 @@ void ActualDetector::detectingThread()
                         //object was bright
                         if (!m_isInNightMode && checkIfBird())
                         {
-                            tracker.tracks[i]->birdCounter++;
-                            tracker.tracks[i]->negCounter++;                           
+                            state->tracker.tracks[i]->birdCounter++;
+                            state->tracker.tracks[i]->negCounter++;
                         }
                         else
                         {//+++ not in night mode or was not a bird*/
@@ -187,9 +190,9 @@ void ActualDetector::detectingThread()
                                 {
                                     isPositiveRectangle=true;
                                 }
-                                negAndNoMotionCounter=0;
-                                posCounter++;
-                                tracker.tracks[i]->posCounter++;
+                                state->negAndNoMotionCounter=0;
+                                state->posCounter++;
+                                state->tracker.tracks[i]->posCounter++;
                                 emit positiveMessage();
 
                                 if(m_willSaveImages)
@@ -205,11 +208,11 @@ void ActualDetector::detectingThread()
                     else { //+++motion has black pixel
                         counterBlackDetecor++;
                         counterLight=0;
-                        tracker.tracks[i]->negCounter++;
+                        state->tracker.tracks[i]->negCounter++;
 
                         if (m_startedRecording)
                         {
-                            negAndNoMotionCounter++;
+                            state->negAndNoMotionCounter++;
                         }
                         emit negativeMessage();
                     }
@@ -228,65 +231,23 @@ void ActualDetector::detectingThread()
             counterNoMotion++;
             if (m_startedRecording)
             {
-                negAndNoMotionCounter++;
+                state->negAndNoMotionCounter++;
             }
-            tracker.updateEmpty();
+            state->tracker.updateEmpty();
             centers.clear();
             m_detectorRectVec.clear();
-            if ((m_startedRecording && counterNoMotion > 150) || (negAndNoMotionCounter > 700))
-            { //+++no motion for 150 checks after recording started
-                if(tracker.wasBird)
-                {
-                    auto output_text = tr("One object identified as a bird");
-                    emit broadcastOutputText(output_text);
-                }
-                if(!tracker.removedTrackWithPositive)
-                { //+++all detected objects had more negative than positive detections or was a bird
-                    m_recorder->stopRecording(false);
-                    auto output_text = tr("Finished recording - All found objects negative: removed video");
-                    emit broadcastOutputText(output_text);
-
-                }
-                else
-                {//+++one object had more positive than negative detections
-                    if(posCounter>=m_minPositiveRequired)
-                    {
-                        if (m_wasPlane)
-                        {
-                            m_recorder->stopRecording(true);
-                            auto output_text = tr("Finished recording - was plane +++++ saved video");
-                            emit broadcastOutputText(output_text);
-
-                        }
-                        else
-                        {
-                            m_recorder->stopRecording(true);
-                            auto output_text = tr("Finished recording - At least one object found positive: saved video");
-                            emit broadcastOutputText(output_text);
-                        }
-
-                    }
-                    else
-                    {
-                        m_recorder->stopRecording(false);
-                        auto output_text = tr("Finished recording - Minimum required positive detections not met: removed video");
-                        emit broadcastOutputText(output_text);
-                    }
-                }
-                tracker.removedTrackWithPositive=false;
-                tracker.wasBird=false;
-                negAndNoMotionCounter=0;
-                posCounter=0;
+            if ((m_startedRecording && counterNoMotion > 150) || (state->negAndNoMotionCounter > 700))
+            {
+                state->finishRecording();
+                state->resetState();
                 m_willParseRectangle=false;
                 m_startedRecording=false;
-                m_wasPlane= false;
-                m_numberOfPlanes = 0;
             }
         }
 
         // check if there was a plane
-        if (m_numberOfPlanes && m_numberOfPlanes>= centers.size()){
-            m_wasPlane = true;
+        if (state->numberOfPlanes && state->numberOfPlanes >= centers.size()){
+            state->wasPlane = true;
         }
 
         if (m_showCameraVideo && centers.size() < MAX_OBJECTS_IN_FRAME )
@@ -303,13 +264,13 @@ void ActualDetector::detectingThread()
             }
             if(centers.size()>0)
             {
-                for(unsigned int i=0;i<tracker.tracks.size();i++)
+                for(unsigned int i=0;i<state->tracker.tracks.size();i++)
                 {
-                    if(!tracker.tracks[i]->trace.empty())
+                    if(!state->tracker.tracks[i]->trace.empty())
                     {
-                        for(unsigned int j=0;j<tracker.tracks[i]->trace.size()-1;j++)
+                        for(unsigned int j=0;j<state->tracker.tracks[i]->trace.size()-1;j++)
                         {
-                            line(m_resultFrame,tracker.tracks[i]->trace[j],tracker.tracks[i]->trace[j+1],Colors[tracker.tracks[i]->track_id%9],2,CV_AA);
+                            line(m_resultFrame,state->tracker.tracks[i]->trace[j],state->tracker.tracks[i]->trace[j+1],Colors[state->tracker.tracks[i]->track_id%9],2,CV_AA);
                         }
                     }
                 }
@@ -323,8 +284,7 @@ void ActualDetector::detectingThread()
         std::this_thread::yield();
         std::this_thread::sleep_for(std::chrono::microseconds(threadYieldPauseUsec));
     }
-    qDebug() << "Total Positive: " << posCounter;
-    delete detector;
+    delete detector;    
 }
 
 
@@ -796,6 +756,7 @@ void ActualDetector::stopThread()
         m_mainThread.reset();
         this_thread::sleep_for(chrono::seconds(1));
         m_nightCheckerThread->join(); m_nightCheckerThread.reset();
+        delete state;
     }
 }
 
@@ -835,7 +796,7 @@ Rect ActualDetector::enlargeROI(Mat &frm, Rect &boundingBox, int padding)
 
 void ActualDetector::setAmountOfPlanes(int amount)
 {
-    m_numberOfPlanes = amount;
+    state->numberOfPlanes = amount;
 }
 
 
