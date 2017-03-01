@@ -18,6 +18,7 @@ void DetectorState::finishRecording()
     if(tracker.wasBird)
     {
         auto output_text = tr("One object identified as a bird");
+        emit sendOutputText(output_text);
 
     }
     if(!tracker.removedTrackWithPositive)
