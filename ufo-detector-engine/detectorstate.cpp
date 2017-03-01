@@ -6,7 +6,7 @@ DetectorState::DetectorState(QObject *parent, Recorder *rec) : QObject(parent), 
     resetState();
 
     map_result[UNKNOWN] = {"At least one object found positive: saved video",true};
-    map_result[AIRPLANE] = {"Object was airplane: removed video",true};
+    map_result[AIRPLANE] = {"Object was airplane: removed video",false};
     map_result[BIRD] = {"Object was bird: removed video",false};
     map_result[MIN_POSITIVE_NOT_REACHED] = {"Minimum required positive detections not met: removed video",false};
     map_result[ALL_NEGATIVE] = {"All found objects negative: removed video",false};
