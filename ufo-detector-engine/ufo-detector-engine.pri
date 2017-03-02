@@ -38,7 +38,6 @@ HEADERS  += recorder.h \
     Kalman.h \
     HungarianAlg.h \
     BackgroundSubtract.h \
-    VIBE.h \
     config.h \
     camerainfo.h \
     videocodecsupportinfo.h \

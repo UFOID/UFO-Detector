@@ -1,3 +1,4 @@
 src/Detector.pro.user
 ui-qt/Detector.pro.user
 build*/*
+ufo-detector-engine/test/testsuite.pro.user

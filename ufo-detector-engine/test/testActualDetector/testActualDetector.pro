@@ -12,9 +12,9 @@ CONFIG   -= app_bundle
 
 TEMPLATE = app
 
-QMAKE_CXXFLAGS += -std=c++11
+QMAKE_CXXFLAGS += -std=c++14
 
-CONFIG += c++11
+CONFIG += c++14
 
 DEFINES += SRCDIR=\\\"$$PWD/\\\" \
     _UNIT_TEST_
@@ -38,7 +38,9 @@ SOURCES += \
     ../../BackgroundSubtract.cpp \
     ../../VIBE.cpp \
     ../mock/mockVideoCodecSupportInfo.cpp \
-    testActualDetector.cpp
+    testActualDetector.cpp\
+    ../../planechecker.cpp \
+   ../../detectorstate.cpp
 
 HEADERS += ../../actualdetector.h \
     ../../config.h \
@@ -50,6 +52,8 @@ HEADERS += ../../actualdetector.h \
     ../../HungarianAlg.h \
     ../../BackgroundSubtract.h \
     ../../VIBE.h \
-    ../../videocodecsupportinfo.h
+    ../../videocodecsupportinfo.h \
+    ../../planechecker.h \
+    ../../detectorstate.h
 
 
