@@ -19,6 +19,7 @@
 #include "actualdetector.h"
 #include "config.h"
 #include "camera.h"
+#include "mainwindow.h"
 #include <QString>
 #include <QtTest>
 #include <QCoreApplication>
@@ -57,6 +58,7 @@ private:
     ActualDetector* m_actualDetector;
     Config* m_config;
     Camera* m_camera;
+    MainWindow* m_mainWindow;
 
     // test thread to consume camera frames
     std::thread* m_cameraFrameConsumerThread;
@@ -92,7 +94,8 @@ void TestActualDetector::initTestCase() {
     QVERIFY(NULL != m_config);
     m_camera = new Camera(m_config->cameraIndex(), m_config->cameraWidth(), m_config->cameraHeight());
     QVERIFY(NULL != m_camera);
-    m_actualDetector = new ActualDetector(m_camera, m_config, NULL);
+    m_mainWindow = new MainWindow(0,m_camera,m_config);
+    m_actualDetector = new ActualDetector(m_camera, m_config, m_mainWindow);
     QVERIFY(NULL != m_actualDetector);
     m_cameraFps = 25;
 }
@@ -101,6 +104,7 @@ void TestActualDetector::cleanupTestCase() {
     m_actualDetector->deleteLater();
     m_camera->deleteLater();
     m_config->deleteLater();
+    m_mainWindow->deleteLater();
 }
 
 void TestActualDetector::cameraFrameConsumerThreadFunc() {

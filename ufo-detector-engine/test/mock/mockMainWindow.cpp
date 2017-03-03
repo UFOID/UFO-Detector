@@ -31,24 +31,9 @@ void MainWindow::addOutputText(QString msg) {
     Q_UNUSED(msg);
 }
 
-bool MainWindow::getCheckboxDisplayWebcamState() {
-    return false;
-}
 
 void MainWindow::setSignalsAndSlots(ActualDetector *actualDetector) {
     Q_UNUSED(actualDetector);
-}
-
-cv::Size MainWindow::getCameraViewSize() {
-    return cv::Size(m_config->cameraWidth(), m_config->cameraHeight());
-}
-
-QMutex* MainWindow::cameraViewImageMutex() {
-    return &m_cameraViewImageMutex;
-}
-
-void MainWindow::setLatestStillFrame(cv::Mat& frame) {
-    Q_UNUSED(frame);
 }
 
 
@@ -89,6 +74,7 @@ void MainWindow::addVideoToVideoList(QString filename, QString datetime, QString
     Q_UNUSED(datetime);
     Q_UNUSED(videoLength);
 }
+void MainWindow::downloadClassifier(QNetworkReply* reply){ Q_UNUSED(reply); }
 void MainWindow::on_aboutButton_clicked() { }
 void MainWindow::checkForUpdate(QNetworkReply* reply) { Q_UNUSED(reply); }
 void MainWindow::on_buttonImageExpl_clicked() { }
