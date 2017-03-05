@@ -95,8 +95,16 @@ void SettingsDialog::saveSettings()
     m_config->setMinPositiveDetections(ui->lineMinPosRequired->text().toInt());
     m_config->setResultVideoCodec(ui->comboBoxCodec->currentData().toString());
     m_config->setUserTokenAtUfoId(ui->lineToken->text());
-    m_config->setCheckAirplanes(ui->checkBoxFilterAiplanes->isChecked());
-    m_config->setAirplanesCoordinates(ui->lineEditFilterAirplanes->text());
+    m_config->setCheckAirplanes(ui->checkBoxFilterAiplanes->isChecked());  
+
+    if (ui->checkBoxFilterAiplanes->isChecked()){
+        QString value = ui->lineEditFilterAirplanes->text();
+        if (value.isEmpty() || value.split("\n").size() != 3){
+            m_config->setCheckAirplanes(false);
+            QMessageBox::critical(this, tr("Error"), tr("Value entered for Airplane filter not correct. Click the \"?\" button next to the field for more information."));
+        }
+        else m_config->setAirplanesCoordinates(ui->lineEditFilterAirplanes->text());
+    }
 }
 
 //void Settings::checkAreaFile()
