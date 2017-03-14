@@ -85,8 +85,7 @@ bool ActualDetector::initialize()
     if (!m_birdsCascade.load(m_config->birdClassifierTrainingFile().toStdString()))
     {
         auto output_text = tr("WARNING: could not load bird detection data (cascade classifier file)");
-        qDebug() << output_text;
-        qDebug() << m_config->birdClassifierTrainingFile();
+        qWarning() << output_text;
         emit broadcastOutputText(output_text);
         m_isInNightMode = true;
         m_isCascadeFound = false;
