@@ -19,7 +19,6 @@ void DetectorState::finishRecording()
     {
         auto output_text = tr("One object identified as a bird");
         emit sendOutputText(output_text);
-
     }
     if(!tracker.removedTrackWithPositive)
     { //+++all detected objects had more negative than positive detections or was a bird

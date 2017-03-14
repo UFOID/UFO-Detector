@@ -18,6 +18,7 @@
 
 #include "camera.h"
 #include <condition_variable>
+#include <QFile>
 
 /*
  * == How to Use the Blocking Version of Camera::getWebcamFrame() ==
@@ -67,11 +68,33 @@ void mockCamera_setFrameBlockingEnabled(bool enabled) {
     }
 }
 
+std::atomic<bool> isReadingVideo;
+
 /**
  * @brief Release next camera frame from Camera::getWebcamFrame().
  */
 void mockCamera_releaseNextFrame() {
     mockCamera_blockerCond.notify_all();
+}
+
+bool startCameraFromVideo(QFile* videoFile){
+    cv::VideoCapture webcam(videoFile->fileName().toStdString());
+    if(!webcam.isOpened())
+        qWarning() << "Cannot find test video file " + videoFile->fileName();
+
+
+    isReadingVideo = true;
+    int frames = webcam.get(cv::CAP_PROP_FRAME_COUNT);
+    int fps = webcam.get(cv::CAP_PROP_FPS);
+    for (int i=0; i<frames; i++)
+    {
+        webcam.read(mockCameraNextFrame);
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000/fps));
+
+    }
+    isReadingVideo = false;
+
+
 }
 
 

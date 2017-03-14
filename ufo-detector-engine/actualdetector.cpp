@@ -85,6 +85,8 @@ bool ActualDetector::initialize()
     if (!m_birdsCascade.load(m_config->birdClassifierTrainingFile().toStdString()))
     {
         auto output_text = tr("WARNING: could not load bird detection data (cascade classifier file)");
+        qDebug() << output_text;
+        qDebug() << m_config->birdClassifierTrainingFile();
         emit broadcastOutputText(output_text);
         m_isInNightMode = true;
         m_isCascadeFound = false;
@@ -494,7 +496,6 @@ void ActualDetector::checkIfNight()
         }
 
         total = light/m_region.size();
-        qDebug() << "total light " << total;
 
         if (total<100)
         {
@@ -725,7 +726,6 @@ bool ActualDetector::parseDetectionAreaFile(string file_region, vector<Point> &r
                     emit progressValueChanged(percentage);
                 }
             }
-            qDebug() << region.size();
             return true;
         }
     }
