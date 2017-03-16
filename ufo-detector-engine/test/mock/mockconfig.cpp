@@ -54,11 +54,11 @@ int Config::cameraIndex() {
 }
 
 int Config::cameraWidth() {
-    return 640;
+    return 1280;
 }
 
 int Config::cameraHeight() {
-    return 480;
+    return 720;
 }
 
 bool Config::checkCameraAspectRatio() {
@@ -86,7 +86,7 @@ int Config::minPositiveDetections() {
 }
 
 QString Config::birdClassifierTrainingFile() {
-    return "birdclassifier.xml";
+    return "classifier.xml";
 }
 
 QString Config::resultDataFile() {

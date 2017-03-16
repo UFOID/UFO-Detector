@@ -156,12 +156,17 @@ void TestActualDetector::initialize() {
 }
 
 void TestActualDetector::testBird(){
-    qDebug() << "start test bird";
-    QFile file("F:\\Project CE\\test videos\\one bird.avi");
+   // int id = qRegisterMetaType<Dete>();
+
+    QFile file("F:\\Project CE\\test videos\\positive bird.avi");
     m_videoReaderThread.reset(new std::thread(startCameraFromVideo,&file));
 
     QVERIFY(m_actualDetector->start());
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    QVERIFY(NULL != m_actualDetector->state);
+    QSignalSpy spy(m_actualDetector->state, SIGNAL(foundDetectionResult(DetectorState::DetectionResult)));
+
+    qDebug() << "Waiting for bird test video to finish";
 
     m_videoReaderThread->join();
 

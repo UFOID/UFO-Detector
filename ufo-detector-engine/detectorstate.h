@@ -40,15 +40,19 @@ public:
 
 
 private:
-    void handleResult(DetectionResult result);
+
 
     Recorder *recorder;
     std::map<DetectionResult, Result> map_result;
 
 signals:
     void sendOutputText(QString output_text);
+    void foundDetectionResult(DetectorState::DetectionResult);
 
 public slots:
+
+private slots:
+    void handleResult(DetectorState::DetectionResult result);
 };
 
 #endif // DETECTORSTATE_H

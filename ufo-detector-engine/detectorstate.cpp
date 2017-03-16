@@ -18,11 +18,12 @@ void DetectorState::finishRecording()
     if(tracker.wasBird)
     {
         auto output_text = tr("One object identified as a bird");
+        qDebug() << output_text;
         emit sendOutputText(output_text);
     }
     if(!tracker.removedTrackWithPositive)
     { //+++all detected objects had more negative than positive detections or was a bird
-        handleResult(ALL_NEGATIVE);
+        emit foundDetectionResult(ALL_NEGATIVE);
     }
     else
     {//+++one object had more positive than negative detections
@@ -30,17 +31,17 @@ void DetectorState::finishRecording()
         {
             if (wasPlane)
             {
-                handleResult(AIRPLANE);
+                emit foundDetectionResult(AIRPLANE);
             }
             else
             {
-                handleResult(UNKNOWN);
+                emit foundDetectionResult(UNKNOWN);
             }
 
         }
         else
         {
-            handleResult(MIN_POSITIVE_NOT_REACHED);
+            emit foundDetectionResult(MIN_POSITIVE_NOT_REACHED);
         }
     }
 
@@ -56,7 +57,7 @@ void DetectorState::resetState()
     numberOfPlanes = 0;
 }
 
-void DetectorState::handleResult(DetectionResult result)
+void DetectorState::handleResult(DetectorState::DetectionResult result)
 {
     recorder->stopRecording(map_result[result].willSaveVideo);
     emit sendOutputText("Finished recording - " + map_result[result].message);
