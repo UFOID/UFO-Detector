@@ -1,5 +1,6 @@
 #include "detectorstate.h"
 
+
 DetectorState::DetectorState(QObject *parent, Recorder *rec) : QObject(parent), tracker(0.2,0.5,60.0,15,15)
 {
     recorder = rec;

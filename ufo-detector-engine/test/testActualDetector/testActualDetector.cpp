@@ -156,7 +156,7 @@ void TestActualDetector::initialize() {
 }
 
 void TestActualDetector::testBird(){
-   // int id = qRegisterMetaType<Dete>();
+    int id = qRegisterMetaType<DetectorState::DetectionResult>();
 
     QFile file("F:\\Project CE\\test videos\\positive bird.avi");
     m_videoReaderThread.reset(new std::thread(startCameraFromVideo,&file));
@@ -173,6 +173,7 @@ void TestActualDetector::testBird(){
     mockCamera_setFrameBlockingEnabled(false);
     mockCamera_releaseNextFrame();
     m_actualDetector->stopThread();
+
 
 
     qDebug () << "done";

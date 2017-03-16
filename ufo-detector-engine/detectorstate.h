@@ -6,6 +6,8 @@
 #include "Ctracker.h"
 #include "recorder.h"
 
+
+
 class DetectorState : public QObject
 {
     Q_OBJECT
@@ -39,6 +41,7 @@ public:
     };
 
 
+
 private:
 
 
@@ -54,5 +57,5 @@ public slots:
 private slots:
     void handleResult(DetectorState::DetectionResult result);
 };
-
+Q_DECLARE_METATYPE(DetectorState::DetectionResult)
 #endif // DETECTORSTATE_H
