@@ -156,8 +156,6 @@ void TestActualDetector::initialize() {
 }
 
 void TestActualDetector::testBird(){
-    int id = qRegisterMetaType<DetectorState::DetectionResult>();
-
     QFile file("F:\\Project CE\\test videos\\positive bird.avi");
     m_videoReaderThread.reset(new std::thread(startCameraFromVideo,&file));
 
@@ -173,6 +171,10 @@ void TestActualDetector::testBird(){
     mockCamera_setFrameBlockingEnabled(false);
     mockCamera_releaseNextFrame();
     m_actualDetector->stopThread();
+
+    QCOMPARE(spy.count(), 1);
+    QList<QVariant> arguments = spy.takeFirst();
+    QVERIFY(arguments.at(0) ==  DetectorState::DetectionResult::BIRD);
 
 
 
@@ -217,6 +219,7 @@ void TestActualDetector::detectBrightObjects() {
     cv::Scalar backgroundColor;
     QFile detectionAreaFile(m_config->detectionAreaFile());
 
+
     // case: 50% lightness in background, 100% brightness in one small object,
     // object moving left to right in the middle area of video
 
@@ -238,6 +241,7 @@ void TestActualDetector::detectBrightObjects() {
             SLOT(onActualDetectorStartProgressChanged(int)));
     QVERIFY(m_actualDetector->start());
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    QSignalSpy spy(m_actualDetector->state, SIGNAL(foundDetectionResult(DetectorState::DetectionResult)));
 
     for (objectX = 0; objectX < m_config->cameraWidth(); objectX += (m_config->cameraWidth() / numFrames)) {
         mockCameraNextFrame = cv::Mat(m_config->cameraHeight(), m_config->cameraWidth(), CV_8UC3, backgroundColor);
@@ -246,7 +250,12 @@ void TestActualDetector::detectBrightObjects() {
         std::this_thread::sleep_for(std::chrono::milliseconds(1000 / m_cameraFps));
     }
 
+   // mockCameraNextFrame
+    //Sleep for one second so the recording thread stops
     mockCamera_setFrameBlockingEnabled(false);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+
     mockCamera_releaseNextFrame();
     m_actualDetector->stopThread();
 
@@ -254,6 +263,10 @@ void TestActualDetector::detectBrightObjects() {
     // verify recorder started
     QVERIFY(mockRecorderStartCount > 0);
     QVERIFY(mockRecorderStopCount > 0);
+
+    QCOMPARE(spy.count(), 1);
+    QList<QVariant> arguments = spy.takeFirst();
+    QVERIFY(arguments.at(0) ==  DetectorState::DetectionResult::UNKNOWN);
 
     disconnect(m_actualDetector, SIGNAL(progressValueChanged(int)), this,
             SLOT(onActualDetectorStartProgressChanged(int)));

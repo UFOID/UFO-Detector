@@ -28,6 +28,7 @@ void DetectorState::finishRecording()
     }
     else
     {//+++one object had more positive than negative detections
+
         if(posCounter>=MIN_POS_REQUIRED)
         {
             if (wasPlane)
