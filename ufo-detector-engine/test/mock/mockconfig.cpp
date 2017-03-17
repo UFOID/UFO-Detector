@@ -86,7 +86,12 @@ int Config::minPositiveDetections() {
 }
 
 QString Config::birdClassifierTrainingFile() {
-    return "classifier.xml";
+    QDir resources(QApplication::applicationDirPath());
+    resources.cdUp();
+    resources.cdUp();
+    resources.cdUp();
+    resources.cd("test\\resources");
+    return resources.path()+"\\cascade.xml";
 }
 
 QString Config::resultDataFile() {
