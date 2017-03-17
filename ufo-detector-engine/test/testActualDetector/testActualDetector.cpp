@@ -104,6 +104,11 @@ void TestActualDetector::initTestCase() {
     m_actualDetector = new ActualDetector(m_camera, m_config, m_mainWindow);
     QVERIFY(NULL != m_actualDetector);
     m_cameraFps = 25;
+
+    QFile detectionAreaFile(m_config->detectionAreaFile());
+    if (!detectionAreaFile.exists()) {
+        makeDetectionAreaFile();
+    }
 }
 
 void TestActualDetector::cleanupTestCase() {

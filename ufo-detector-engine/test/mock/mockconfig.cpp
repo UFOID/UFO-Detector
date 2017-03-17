@@ -54,11 +54,11 @@ int Config::cameraIndex() {
 }
 
 int Config::cameraWidth() {
-    return 1280;
+    return 640;
 }
 
 int Config::cameraHeight() {
-    return 720;
+    return 480;
 }
 
 bool Config::checkCameraAspectRatio() {
