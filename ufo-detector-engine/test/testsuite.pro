@@ -1,5 +1,5 @@
-QMAKE_CXXFLAGS += -fprofile-arcs -ftest-coverage
-QMAKE_LFLAGS += -fprofile-arcs -ftest-coverage
+QMAKE_CXXFLAGS += --coverage
+QMAKE_LFLAGS += --coverage
 
 
 TEMPLATE = subdirs
@@ -13,5 +13,4 @@ SUBDIRS = \
 
 
 
-LIBS += \
--lgcov
+LIBS += -lgcov
