@@ -32,6 +32,7 @@ extern void mockCamera_releaseNextFrame();
 
 extern int mockRecorderStartCount;
 extern int mockRecorderStopCount;
+extern QString testResourceFolder();
 
 extern void startCameraFromVideo(QFile* videoFile);
 
@@ -161,7 +162,10 @@ void TestActualDetector::initialize() {
 }
 
 void TestActualDetector::testBird(){
-    QFile file("F:\\Project CE\\test videos\\positive bird.avi");
+    QFile file(testResourceFolder()+"\\positive bird.avi");
+    if (!file.exists())
+        QSKIP("this test need a positive bird video");
+
     m_videoReaderThread.reset(new std::thread(startCameraFromVideo,&file));
 
     QVERIFY(m_actualDetector->start());
@@ -177,9 +181,9 @@ void TestActualDetector::testBird(){
     mockCamera_releaseNextFrame();
     m_actualDetector->stopThread();
 
-    QCOMPARE(spy.count(), 0);
+    QCOMPARE(spy.count(), 1);
     QList<QVariant> arguments = spy.takeFirst();
-    //QVERIFY(arguments.at(0) ==  DetectorState::DetectionResult::BIRD);
+    QVERIFY(arguments.at(0) ==  DetectorState::DetectionResult::BIRD);
 
 
 
