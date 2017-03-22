@@ -179,6 +179,9 @@ void TestActualDetector::testBird(){
 
     mockCamera_setFrameBlockingEnabled(false);
     mockCamera_releaseNextFrame();
+
+    //Wait 1 sec to detector to recognize there is no movement and stop
+    std::this_thread::sleep_for(chrono::seconds(1));
     m_actualDetector->stopThread();
 
     QCOMPARE(spy.count(), 1);
@@ -262,7 +265,7 @@ void TestActualDetector::detectBrightObjects() {
    // mockCameraNextFrame
     //Sleep for one second so the recording thread stops
     mockCamera_setFrameBlockingEnabled(false);
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    std::this_thread::sleep_for(std::chrono::seconds(2));
 
 
     mockCamera_releaseNextFrame();
