@@ -118,7 +118,7 @@ private:
     int m_cameraWidth;
     int m_cameraHeight;
     DetectorState *state;
-    const unsigned int MAX_OBJECTS_IN_FRAME = 10;
+    unsigned int MAX_OBJECTS_IN_FRAME = 10;
     const int CLASSIFIER_DIMENSION_SIZE = 30;
     bool m_willRecordWithRect;
     cv::CascadeClassifier m_birdsCascade;
