@@ -368,7 +368,7 @@ void TestActualDetector::setShowCameraVideo() {
         mockCamera_releaseNextFrame();
         std::this_thread::sleep_for(std::chrono::milliseconds(1000 / m_cameraFps));
         //qDebug() << "round " << (i+1) << " counter =" << m_cameraFrameUpdatedCounter;
-        QVERIFY((i + 1) == m_cameraFrameUpdatedCounter);
+        QCOMPARE((i + 1) , m_cameraFrameUpdatedCounter);
         QVERIFY(m_actualDetector->m_showCameraVideo);
     }
     mockCamera_setFrameBlockingEnabled(false);
