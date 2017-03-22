@@ -338,7 +338,6 @@ void TestActualDetector::setShowCameraVideo() {
     QVERIFY(false == m_actualDetector->m_showCameraVideo);
     m_actualDetector->setShowCameraVideo(true);
     QVERIFY(m_actualDetector->m_showCameraVideo);
-    m_actualDetector->MAX_OBJECTS_IN_FRAME = 100;
 
     int numFrames = 24;
     cv::Scalar backgroundColor = cv::Scalar(127, 127, 127);
