@@ -6,6 +6,8 @@
 #include "Ctracker.h"
 #include "recorder.h"
 
+
+
 class DetectorState : public QObject
 {
     Q_OBJECT
@@ -39,16 +41,21 @@ public:
     };
 
 
+
 private:
-    void handleResult(DetectionResult result);
+
 
     Recorder *recorder;
     std::map<DetectionResult, Result> map_result;
 
 signals:
     void sendOutputText(QString output_text);
+    void foundDetectionResult(DetectorState::DetectionResult);
 
 public slots:
-};
 
+private slots:
+    void handleResult(DetectorState::DetectionResult result);
+};
+Q_DECLARE_METATYPE(DetectorState::DetectionResult)
 #endif // DETECTORSTATE_H

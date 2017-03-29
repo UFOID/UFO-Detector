@@ -22,6 +22,8 @@
 QString mockConfigResultDataDir;
 int mockConfigResultVideoCodec;
 QString mockConfigResultVideoCodecStr;
+QString testResourceFolder();
+
 
 Config::Config(QObject *parent) {
     Q_UNUSED(parent);
@@ -86,7 +88,17 @@ int Config::minPositiveDetections() {
 }
 
 QString Config::birdClassifierTrainingFile() {
-    return "birdclassifier.xml";
+
+    return testResourceFolder()+"\\cascade.xml";
+}
+
+QString testResourceFolder(){
+    QDir resources(QApplication::applicationDirPath());
+    resources.cdUp();
+    resources.cdUp();
+    resources.cdUp();
+    resources.cd("test\\resources");
+    return resources.path();
 }
 
 QString Config::resultDataFile() {

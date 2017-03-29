@@ -1,3 +1,6 @@
+QMAKE_CXXFLAGS += --coverage
+QMAKE_LFLAGS += --coverage
+
 
 TEMPLATE = subdirs
 
@@ -8,3 +11,6 @@ SUBDIRS = \
     testActualDetector \
     testVideoCodecSupportInfo
 
+
+
+LIBS += -lgcov

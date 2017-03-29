@@ -6,9 +6,6 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 win32:CONFIG += windows
 win64:CONFIG += windows
 
-QMAKE_CXXFLAGS += -std=c++11
-
-CONFIG += c++11
 
 include(opencv.pri)
 

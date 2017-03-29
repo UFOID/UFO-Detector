@@ -124,7 +124,8 @@ void Recorder::recordThread(){
         while (difference < frame_period{ 1 })
         {
             currentTime = std::chrono::high_resolution_clock::now();
-            difference = currentTime - prevTime;
+            difference = currentTime - prevTime;            
+            std::this_thread::yield();
         }
         m_currentFrameMutex.lock();
         if (m_currentFrame.data)
@@ -135,7 +136,6 @@ void Recorder::recordThread(){
 
         prevTime = std::chrono::time_point_cast<hr_duration>(prevTime + frame_period{ 1 });
         difference = currentTime - prevTime;
-        std::this_thread::yield();
     }
 
     m_videoWriter.release();
@@ -240,7 +240,6 @@ void Recorder::readFrameThread()
         m_currentFrameMutex.lock();
         temp.copyTo(m_currentFrame);
         m_currentFrameMutex.unlock();
-        std::this_thread::yield();
     }
 }
 
