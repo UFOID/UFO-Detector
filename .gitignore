@@ -3,3 +3,4 @@ ui-qt/Detector.pro.user
 build*/*
 ufo-detector-engine/test/testsuite.pro.user
 ufo-detector-engine/build*
+*.Debug
