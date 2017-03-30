@@ -19,8 +19,6 @@ SOURCES += $$PWD/recorder.cpp \
     Detector.cpp \
     Kalman.cpp \
     HungarianAlg.cpp \
-    BackgroundSubtract.cpp \
-    VIBE.cpp \
     config.cpp \
     camerainfo.cpp \
     videocodecsupportinfo.cpp \
@@ -34,7 +32,6 @@ HEADERS  += recorder.h \
     Detector.h \
     Kalman.h \
     HungarianAlg.h \
-    BackgroundSubtract.h \
     config.h \
     camerainfo.h \
     videocodecsupportinfo.h \
