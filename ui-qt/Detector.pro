@@ -14,7 +14,10 @@ TEMPLATE = app
 win32:CONFIG += windows
 win64:CONFIG += windows
 
-
+unix {
+    QMAKE_CXXFLAGS += -std=c++1y
+    CONFIG += c++1y
+}
 
 RC_ICONS = app.ico
 
