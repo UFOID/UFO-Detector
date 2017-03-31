@@ -27,7 +27,7 @@
 
 struct BufferedVideoFrame {
     cv::Mat* m_frame;       ///< pointer to video frame
-    int m_duplicateCount;    ///< how many frames were skipped before this frame
+    int m_duplicateCount;   ///< number of following frames that are duplicates of this frame
 };
 
 /**
@@ -80,9 +80,9 @@ public:
 private:
 #endif
     QQueue<BufferedVideoFrame*> m_buffer;
-    int m_capacity;
-    QSemaphore* m_freeSlots;
-    QSemaphore* m_reservedSlots;
+    int m_capacity;         ///< capacity of buffer
+    QSemaphore* m_freeSlots; ///< free slots in buffer
+    QSemaphore* m_reservedSlots; ///< reserved slots in buffer
     bool m_waitingEnabled;  ///< blocking enabled on full/empty buffer
     int m_waitTimeoutMs;    ///< interval at which waiting enabled flag is checked
 
