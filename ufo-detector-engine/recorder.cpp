@@ -223,10 +223,12 @@ void Recorder::readFrameThread()
     BufferedVideoFrame* frame = NULL;
 
     prevTime = chrono::high_resolution_clock::now();
-    nextTime = prevTime + frame_period{1};
+    nextTime = prevTime + frame_period{1}; /// @todo decrease time from start to here for more accuracy
 
     while(m_recording)
     {
+        this_thread::sleep_until(nextTime);
+
         temp = m_camera->getWebcamFrame();
 
         if (m_drawRectangles && (m_motionRectangle != oldRectangle))
@@ -245,7 +247,6 @@ void Recorder::readFrameThread()
         }
         m_videoBuffer->pushFrame(frame);
 
-        this_thread::sleep_until(nextTime);
         prevTime = nextTime;
         nextTime += frame_period{1};
     }
