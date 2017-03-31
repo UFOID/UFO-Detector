@@ -38,7 +38,7 @@ void TestVideoBuffer::getAndSetNoBlock() {
     for (int i = 0; i < TEST_VIDEO_BUFFER_CAPACITY; i++) {
         frame = new BufferedVideoFrame;
         frame->m_frame = NULL;
-        frame->m_skippedFrames = (i + 1);
+        frame->m_duplicateCount = (i + 1);
 
         QVERIFY(m_videoBuffer->count() == i);
         QVERIFY(m_videoBuffer->m_buffer.count() == m_videoBuffer->count());
@@ -67,7 +67,7 @@ void TestVideoBuffer::getAndSetNoBlock() {
         QVERIFY(m_videoBuffer->count() == (i - 1));
         QVERIFY(m_videoBuffer->m_buffer.count() == m_videoBuffer->count());
         QVERIFY(frame->m_frame == NULL);
-        QVERIFY(frame->m_skippedFrames == (TEST_VIDEO_BUFFER_CAPACITY - i + 1));
+        QVERIFY(frame->m_duplicateCount == (TEST_VIDEO_BUFFER_CAPACITY - i + 1));
         QVERIFY(m_videoBuffer->m_freeSlots->available() == (TEST_VIDEO_BUFFER_CAPACITY - i + 1));
         QVERIFY(m_videoBuffer->m_reservedSlots->available() == i - 1);
     }

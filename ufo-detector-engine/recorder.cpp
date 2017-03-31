@@ -122,7 +122,9 @@ void Recorder::recordThread(){
         BufferedVideoFrame* frame = m_videoBuffer->waitNextFrame();
         if (frame) {
             if (frame->m_frame && frame->m_frame->data) {
-                m_videoWriter.write(*(frame->m_frame));
+                for (int i=0; i <= frame->m_duplicateCount; i++) {
+                    m_videoWriter.write(*(frame->m_frame));
+                }
                 frame->m_frame->release();
             }
             delete frame;
@@ -221,8 +223,8 @@ void Recorder::readFrameThread()
 {
     Mat temp;
     Rect oldRectangle;
-    chrono::high_resolution_clock::time_point prevTime, nextTime;
-    //int skippedFrames = 0;    // how many frames were skipped (couldn't be read in time)
+    chrono::high_resolution_clock::time_point prevTime, nextTime, currentTime;
+    int skippedFrames = 0;    // how many frames were skipped (couldn't be read in time)
     BufferedVideoFrame* frame = NULL;
 
     prevTime = chrono::high_resolution_clock::now();
@@ -230,9 +232,19 @@ void Recorder::readFrameThread()
 
     while(m_recording)
     {
+        skippedFrames = 0;
         this_thread::sleep_until(nextTime);
 
         temp = m_camera->getWebcamFrame();
+        currentTime = chrono::high_resolution_clock::now();
+
+        nextTime += frame_period{1};
+
+        // if frame exposure took more than frame_period(1), next time has already gone
+        while (nextTime < currentTime) {
+            skippedFrames++;
+            nextTime += frame_period{1};
+        }
 
         if (m_drawRectangles && (m_motionRectangle != oldRectangle))
         {
@@ -243,15 +255,12 @@ void Recorder::readFrameThread()
         frame = new BufferedVideoFrame;
         frame->m_frame = new Mat();
         *(frame->m_frame) = temp.clone();
-        frame->m_skippedFrames = 0;
+        frame->m_duplicateCount = skippedFrames;
 
         if (m_videoBuffer->count() >= m_videoBuffer->capacity()) {
-            qDebug() << "Alert: video buffer is full. Diminish video frame rate.";
+            qDebug() << "Alert: video buffer is full. Decrease video frame rate.";
         }
         m_videoBuffer->pushFrame(frame);
-
-        prevTime = nextTime;
-        nextTime += frame_period{1};
     }
 }
 

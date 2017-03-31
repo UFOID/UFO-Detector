@@ -27,7 +27,7 @@
 
 struct BufferedVideoFrame {
     cv::Mat* m_frame;       ///< pointer to video frame
-    int m_skippedFrames;    ///< how many frames were skipped before this frame
+    int m_duplicateCount;    ///< how many frames were skipped before this frame
 };
 
 /**
