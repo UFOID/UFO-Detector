@@ -41,6 +41,7 @@ Recorder::Recorder(Camera *cameraPtr, Config *configPtr) :
     m_objectNegativeColor = Scalar(0, 0, 255);
     m_objectRectangleColor = m_objectPositiveColor;
     m_videoResolution = Size(width, height);
+    m_videoBuffer = NULL;
 
     double aspectRatio = (double)width / (double)height;
     m_defaultThumbnailSideLength = 80;
@@ -63,8 +64,9 @@ void Recorder::startRecording(Mat &firstFrame)
     if (!m_recording)
     {
         m_firstFrame = firstFrame;
+        m_videoBuffer = new VideoBuffer(VIDEO_BUFFER_CAPACITY);
         m_recording = true;
-        m_currentFrame = m_camera->getWebcamFrame();
+        //m_currentFrame = m_camera->getWebcamFrame();
         if (!m_frameUpdateThread)
         {
             m_frameUpdateThread.reset(new std::thread(&Recorder::readFrameThread, this));
@@ -107,10 +109,6 @@ void Recorder::recordThread(){
         qDebug() << "ERROR: Failed to write temporary video" << filenameTemp;
         return;
     }
-    std::chrono::high_resolution_clock::time_point prevTime, currentTime;
-    prevTime = std::chrono::high_resolution_clock::now();
-    currentTime = prevTime + std::chrono::high_resolution_clock::duration(40000000);
-    auto difference = currentTime - prevTime;
 
     QTime timer;
     timer.start();
@@ -121,21 +119,12 @@ void Recorder::recordThread(){
 
     while(m_recording)
     {
-        while (difference < frame_period{ 1 })
-        {
-            currentTime = std::chrono::high_resolution_clock::now();
-            difference = currentTime - prevTime;            
-            std::this_thread::yield();
+        BufferedVideoFrame* frame = m_videoBuffer->waitNextFrame();
+        if (frame && frame->m_frame && frame->m_frame->data) {
+            m_videoWriter.write(*(frame->m_frame));
+            frame->m_frame->release();
+            delete frame;
         }
-        m_currentFrameMutex.lock();
-        if (m_currentFrame.data)
-        {
-            m_videoWriter.write(m_currentFrame);
-        }
-        m_currentFrameMutex.unlock();
-
-        prevTime = std::chrono::time_point_cast<hr_duration>(prevTime + frame_period{ 1 });
-        difference = currentTime - prevTime;
     }
 
     m_videoWriter.release();
@@ -229,17 +218,36 @@ void Recorder::readFrameThread()
 {
     Mat temp;
     Rect oldRectangle;
+    chrono::high_resolution_clock::time_point prevTime, nextTime;
+    //int skippedFrames = 0;    // how many frames were skipped (couldn't be read in time)
+    BufferedVideoFrame* frame = NULL;
+
+    prevTime = chrono::high_resolution_clock::now();
+    nextTime = prevTime + frame_period{1};
+
     while(m_recording)
     {
         temp = m_camera->getWebcamFrame();
+
         if (m_drawRectangles && (m_motionRectangle != oldRectangle))
         {
             rectangle(temp, m_motionRectangle, m_objectRectangleColor);
             oldRectangle=m_motionRectangle;
         }
-        m_currentFrameMutex.lock();
-        temp.copyTo(m_currentFrame);
-        m_currentFrameMutex.unlock();
+
+        frame = new BufferedVideoFrame;
+        frame->m_frame = new Mat();
+        *(frame->m_frame) = temp.clone();
+        frame->m_skippedFrames = 0;
+
+        if (m_videoBuffer->count() >= m_videoBuffer->capacity()) {
+            qDebug() << "Alert: video buffer is full. Diminish video frame rate.";
+        }
+        m_videoBuffer->pushFrame(frame);
+
+        this_thread::sleep_until(nextTime);
+        prevTime = nextTime;
+        nextTime += frame_period{1};
     }
 }
 
@@ -309,9 +317,12 @@ void Recorder::stopRecording(bool willSaveVideo)
 
         m_willSaveVideo=willSaveVideo;
         m_recording = false;
+        m_videoBuffer->stopWait();
         m_recorderThread->join(); m_recorderThread.reset();
         m_frameUpdateThread->join(); m_frameUpdateThread.reset();
     }
+    delete m_videoBuffer;
+    m_videoBuffer = NULL;
 }
 
 /*
