@@ -120,10 +120,13 @@ void Recorder::recordThread(){
     while(m_recording)
     {
         BufferedVideoFrame* frame = m_videoBuffer->waitNextFrame();
-        if (frame && frame->m_frame && frame->m_frame->data) {
-            m_videoWriter.write(*(frame->m_frame));
-            frame->m_frame->release();
+        if (frame) {
+            if (frame->m_frame && frame->m_frame->data) {
+                m_videoWriter.write(*(frame->m_frame));
+                frame->m_frame->release();
+            }
             delete frame;
+            frame = NULL;
         }
     }
 
