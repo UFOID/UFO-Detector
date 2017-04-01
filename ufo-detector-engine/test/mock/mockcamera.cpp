@@ -77,7 +77,7 @@ void mockCamera_releaseNextFrame() {
     mockCamera_blockerCond.notify_all();
 }
 
-bool startCameraFromVideo(QFile* videoFile){
+void startCameraFromVideo(QFile* videoFile){
     cv::VideoCapture webcam(videoFile->fileName().toStdString());
     if(!webcam.isOpened())
         qWarning() << "Cannot find test video file " + videoFile->fileName();
