@@ -33,10 +33,10 @@ BufferedVideoFrame* VideoBuffer::waitNextFrame() {
     while (m_waitingEnabled && !slotAcquired) {
         slotAcquired = m_reservedSlots->tryAcquire(1, m_waitTimeoutMs);
     }
-    if (!m_buffer.isEmpty()) {
+    if (slotAcquired && !m_buffer.isEmpty()) {
         frame = m_buffer.dequeue();
+        m_freeSlots->release(1);
     }
-    m_freeSlots->release(1);
     return frame;
 }
 
@@ -49,13 +49,11 @@ bool VideoBuffer::pushFrame(BufferedVideoFrame* frame) {
     while (m_waitingEnabled && !slotAcquired) {
         slotAcquired = m_freeSlots->tryAcquire(1, m_waitTimeoutMs);
     }
-    if (m_buffer.count() < m_capacity) {
+    if (slotAcquired && (m_buffer.count() < m_capacity)) {
         m_buffer.enqueue(frame);
         ok = true;
-    } else {
-        ok = false;
+        m_reservedSlots->release(1);
     }
-    m_reservedSlots->release(1);
     return ok;
 }
 
