@@ -33,7 +33,7 @@ void DetectorState::finishRecording()
                 // All objects where aircraft
                 emit foundDetectionResult(AIRPLANE);
             }
-            if(tracker.wasBird)
+            else if(tracker.wasBird)
             {
                 // All objects where a bird
                 emit foundDetectionResult(BIRD);
