@@ -2,22 +2,13 @@
 
 CDetector::CDetector(cv::Mat& gray)
 {
-	m_fg = gray.clone();
-	m_bs = std::make_unique<BackgroundSubtract>(gray.channels());
-	m_bs->init(gray);
-
-	m_minObjectSize.width = std::max(5, gray.cols / 100);
-	m_minObjectSize.height = m_minObjectSize.width;
+    m_fg = gray.clone();
 }
 
 CDetector::~CDetector(void)
 {
 }
 
-void CDetector::SetMinObjectSize(cv::Size minObjectSize)
-{
-	m_minObjectSize = minObjectSize;
-}
 
 //----------------------------------------------------------------------
 // Detector
@@ -49,9 +40,8 @@ void CDetector::DetectContour(cv::Mat& img, std::vector<cv::Rect>& Rects,std::ve
 
 std::pair<std::vector<cv::Point2d>, std::vector<cv::Rect> > CDetector::Detect(cv::Mat& gray, cv::Rect &croppedRect)
 {
-    //m_bs->subtract(gray, m_fg);
     cv::dilate(gray, m_fg, getStructuringElement(cv::MORPH_RECT, cv::Size(15,15)));
-    //imshow("Foreground",fg);
+    //imshow("Foreground",m_fg);
     DetectContour(m_fg,m_rects,m_centers,croppedRect);
 
 
