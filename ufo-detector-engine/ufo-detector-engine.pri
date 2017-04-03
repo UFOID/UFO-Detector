@@ -13,7 +13,6 @@ include(opencv.pri)
 INCLUDEPATH += $$PWD
 
 SOURCES += $$PWD/recorder.cpp \
-
     $$PWD/actualdetector.cpp \
     $$PWD/camera.cpp \
     $$PWD/Ctracker.cpp \
@@ -27,8 +26,7 @@ SOURCES += $$PWD/recorder.cpp \
     $$PWD/planechecker.cpp \
     $$PWD/detectorstate.cpp
 
-HEADERS  += $$PWD/defines.h \
-    $$PWD/recorder.h \
+HEADERS  += $$PWD/recorder.h \
     $$PWD/actualdetector.h \
     $$PWD/camera.h \
     $$PWD/Ctracker.h \
@@ -39,6 +37,5 @@ HEADERS  += $$PWD/defines.h \
     $$PWD/camerainfo.h \
     $$PWD/videobuffer.h \
     $$PWD/videocodecsupportinfo.h \
-    $$PWD/OpencvInclude.h \
     $$PWD/planechecker.h \
     $$PWD/detectorstate.h
