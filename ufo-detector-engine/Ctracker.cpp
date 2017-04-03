@@ -114,8 +114,9 @@ void CTracker::Update(const std::vector<cv::Point2d>& detections, const std::vec
                 if(tracks[i]->posCounter>tracks[i]->negCounter){
                     if(tracks[i]->birdCounter<2){
                         removedTrackWithPositive=true;
+                        wasBird = false;
                     }
-                    else wasBird=true;
+                    else wasBird = true;
                 }
 				tracks.erase(tracks.begin() + i);
 				assignment.erase(assignment.begin() + i);

@@ -13,14 +13,13 @@ include(opencv.pri)
 INCLUDEPATH += $$PWD
 
 SOURCES += $$PWD/recorder.cpp \
+
     $$PWD/actualdetector.cpp \
     $$PWD/camera.cpp \
     $$PWD/Ctracker.cpp \
     $$PWD/Detector.cpp \
     $$PWD/Kalman.cpp \
     $$PWD/HungarianAlg.cpp \
-    $$PWD/BackgroundSubtract.cpp \
-    $$PWD/VIBE.cpp \
     $$PWD/config.cpp \
     $$PWD/camerainfo.cpp \
     $$PWD/videobuffer.cpp \
@@ -36,8 +35,6 @@ HEADERS  += $$PWD/defines.h \
     $$PWD/Detector.h \
     $$PWD/Kalman.h \
     $$PWD/HungarianAlg.h \
-    $$PWD/BackgroundSubtract.h \
-    $$PWD/vibe.hpp \
     $$PWD/config.h \
     $$PWD/camerainfo.h \
     $$PWD/videobuffer.h \

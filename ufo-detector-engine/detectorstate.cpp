@@ -18,33 +18,36 @@ DetectorState::DetectorState(QObject *parent, Recorder *rec) : QObject(parent), 
 
 void DetectorState::finishRecording()
 {
-    if(tracker.wasBird)
-    {
-        auto output_text = tr("One object identified as a bird");
-        qDebug() << output_text;
-        emit sendOutputText(output_text);
-    }
+
     if(!tracker.removedTrackWithPositive)
-    { //+++all detected objects had more negative than positive detections or was a bird
+    {
+        // All detected objects had more negative than positive detections
         emit foundDetectionResult(ALL_NEGATIVE);
     }
     else
-    {//+++one object had more positive than negative detections
-
+    {
         if(posCounter>=MIN_POS_REQUIRED)
         {
             if (wasPlane)
             {
+                // All objects where aircraft
                 emit foundDetectionResult(AIRPLANE);
+            }
+            else if(tracker.wasBird)
+            {
+                // All objects where a bird
+                emit foundDetectionResult(BIRD);
             }
             else
             {
+                // At least one object was unkown
                 emit foundDetectionResult(UNKNOWN);
             }
 
         }
         else
         {
+            // Minimum positive required not reached
             emit foundDetectionResult(MIN_POSITIVE_NOT_REACHED);
         }
     }

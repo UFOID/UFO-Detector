@@ -14,7 +14,6 @@ TEMPLATE = app
 
 QMAKE_CXXFLAGS += -std=c++14 --coverage
 QMAKE_LFLAGS += --coverage
-LIBS += -lgcov
 
 CONFIG += c++14
 
@@ -38,8 +37,6 @@ SOURCES += \
     ../../Detector.cpp \
     ../../Kalman.cpp \
     ../../HungarianAlg.cpp \
-    ../../BackgroundSubtract.cpp \
-    ../../VIBE.cpp \
     ../mock/mockVideoCodecSupportInfo.cpp \
     testActualDetector.cpp\
     ../../planechecker.cpp \
@@ -54,7 +51,6 @@ HEADERS += ../../actualdetector.h \
     ../../Detector.h \
     ../../Kalman.h \
     ../../HungarianAlg.h \
-    ../../BackgroundSubtract.h \
     ../../videocodecsupportinfo.h \
     ../../planechecker.h \
     ../../detectorstate.h \
