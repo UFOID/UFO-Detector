@@ -72,7 +72,6 @@ public:
      * @return
      */
     cv::Mat getWebcamFrame();
-    void stopReadingWebcam();
     bool isWebcamOpen();
 
     /**
@@ -105,13 +104,9 @@ private:
     int m_index;    ///< camera index as used by OpenCV
     int m_width;
     int m_height;
-    std::atomic<bool> isReadingWebcam;
     cv::VideoCapture* m_webcam;
     cv::Mat videoFrame;
-    cv::Mat frameToReturn;
     std::mutex mutex;
-    void readWebcamFrame();     ///< thread method for continuous reading of frames
-    std::unique_ptr<std::thread> threadReadFrame;
     CameraInfo* m_cameraInfo;
     bool m_initialized;     ///< whether camera is initialized or not
 

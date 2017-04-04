@@ -672,7 +672,6 @@ bool MainWindow::checkCamera(const int width, const int height)
         catch( cv::Exception& e )
         {
             qDebug() << "Exception caught: " << QString(e.what());
-            m_camera->stopReadingWebcam();
             ui->outputText->append(tr("ERROR: Found webcam but video frame could not be read. Reconnect and check resolution in settings."));
         }
     }
@@ -846,7 +845,6 @@ void MainWindow::closeEvent(QCloseEvent *event)
         threadWebcam->join();
         threadWebcam.reset();
     }
-    m_camera->stopReadingWebcam();
     m_camera->release();
     QApplication::quit();
 }
