@@ -38,12 +38,17 @@ ActualDetector::ActualDetector(Camera *cameraPtr, Config *configPtr, QObject *pa
 
     m_recorder = new Recorder(m_camPtr, m_config);
 
+    state = new DetectorState(this, m_recorder);
+    state->MIN_POS_REQUIRED = m_config->minPositiveDetections();
+    connect(state, SIGNAL(sendOutputText(QString)), this, SIGNAL(broadcastOutputText(QString)));
+
     qDebug() << "ActualDetector constructed";
 }
 
 ActualDetector::~ActualDetector()
 {
     m_recorder->deleteLater();
+    state->deleteLater();
 }
 
 bool ActualDetector::initialize()
@@ -51,9 +56,6 @@ bool ActualDetector::initialize()
     if (!parseDetectionAreaFile(m_detectionAreaFile, m_region)){
         return false;
     }
-    state = new DetectorState(this,m_recorder);
-    state->MIN_POS_REQUIRED = m_config->minPositiveDetections();
-    connect(state, SIGNAL(sendOutputText(QString)), this->parent() , SLOT(update_output_text(QString)));
     state->resetState();
 
     m_prevFrame = m_camPtr->getWebcamFrame();
@@ -755,7 +757,6 @@ void ActualDetector::stopThread()
         m_mainThread.reset();
         this_thread::sleep_for(chrono::seconds(1));
         m_nightCheckerThread->join(); m_nightCheckerThread.reset();
-        delete state;
     }
 }
 
