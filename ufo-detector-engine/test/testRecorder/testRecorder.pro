@@ -30,11 +30,13 @@ SOURCES += testrecorder.cpp \
     ../mock/mockconfig.cpp \
     ../../videocodecsupportinfo.cpp \
     ../../recorder.cpp \
-    ../../camerainfo.cpp
+    ../../camerainfo.cpp \
+    ../../videobuffer.cpp
 
 HEADERS += ../../recorder.h \
     ../../config.h \
     ../../videocodecsupportinfo.h \
     ../../camera.h \
-    ../../camerainfo.h
+    ../../camerainfo.h \
+    ../../videobuffer.h
 
