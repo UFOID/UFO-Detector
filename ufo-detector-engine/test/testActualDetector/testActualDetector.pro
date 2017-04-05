@@ -40,7 +40,8 @@ SOURCES += \
     ../mock/mockVideoCodecSupportInfo.cpp \
     testActualDetector.cpp\
     ../../planechecker.cpp \
-   ../../detectorstate.cpp
+   ../../detectorstate.cpp \
+   ../../videobuffer.cpp
 
 
 HEADERS += ../../actualdetector.h \
@@ -54,6 +55,8 @@ HEADERS += ../../actualdetector.h \
     ../../videocodecsupportinfo.h \
     ../../planechecker.h \
     ../../detectorstate.h \
-    ../../../ui-qt/mainwindow.h
+    ../../../ui-qt/mainwindow.h \
+    ../../videobuffer.h
+
 
 
