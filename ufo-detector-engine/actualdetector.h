@@ -45,6 +45,8 @@ class Recorder;
 
 /**
  * @brief Main class to detect moving objects in video stream.
+ *
+ * @todo use constant frame rate for detection (though exposure time changes)
  */
 class ActualDetector : public QObject
 {

@@ -9,7 +9,8 @@ SUBDIRS = \
     testCameraInfo \
     testRecorder \
     testActualDetector \
-    testVideoCodecSupportInfo
+    testVideoCodecSupportInfo \
+    testVideoBuffer
 
 
 

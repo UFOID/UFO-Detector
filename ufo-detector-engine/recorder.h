@@ -21,6 +21,7 @@
 
 #include "config.h"
 #include "camera.h"
+#include "videobuffer.h"
 #include <QDomDocument>
 #include <QFile>
 #include <QObject>
@@ -36,10 +37,12 @@
 #include <thread>
 #include <memory>
 #include <iostream>
+#include <chrono>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
 #define OUTPUT_FPS 25
+#define VIDEO_BUFFER_CAPACITY (OUTPUT_FPS * 5)
 
 using namespace cv;
 using namespace std;
@@ -68,9 +71,8 @@ private:
     Camera* m_camera;
     Config* m_config;
     cv::VideoWriter m_videoWriter;
-    cv::Mat m_currentFrame;
     cv::Mat m_firstFrame;
-    cv::Mat m_secondFrame;
+    VideoBuffer* m_videoBuffer;
     cv::Rect m_motionRectangle;
     cv::Scalar m_objectRectangleColor;  ///< color of object rectangle, changes each time
     cv::Scalar m_objectPositiveColor;   ///< color used to draw rectangle around a positive detection object
@@ -85,8 +87,7 @@ private:
 
     std::unique_ptr<std::thread> m_recorderThread;
     std::unique_ptr<std::thread> m_frameUpdateThread;
-    QMutex m_currentFrameMutex;     ///< mutex for synchronizing access to m_currentFrame
-    std::atomic<bool>  m_recording;
+    std::atomic<bool> m_recording;
     bool m_willSaveVideo;       ///< whether to save video or reject it
     bool m_drawRectangles;      ///< whether or not to draw rectangles around detected objects
 
@@ -97,9 +98,13 @@ private:
     QFile m_resultDataFile;
     QDomElement m_resultDataRootElement;
 
-
-
     void recordThread();
+
+    /**
+     * @brief camera frame reader thread
+     *
+     * @todo use a single source of frames
+     */
     void readFrameThread();
 
     /**

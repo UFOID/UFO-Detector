@@ -13,27 +13,29 @@ include(opencv.pri)
 INCLUDEPATH += $$PWD
 
 SOURCES += $$PWD/recorder.cpp \
-    actualdetector.cpp \
-    camera.cpp \
-    Ctracker.cpp \
-    Detector.cpp \
-    Kalman.cpp \
-    HungarianAlg.cpp \
-    config.cpp \
-    camerainfo.cpp \
-    videocodecsupportinfo.cpp \
+    $$PWD/actualdetector.cpp \
+    $$PWD/camera.cpp \
+    $$PWD/Ctracker.cpp \
+    $$PWD/Detector.cpp \
+    $$PWD/Kalman.cpp \
+    $$PWD/HungarianAlg.cpp \
+    $$PWD/config.cpp \
+    $$PWD/camerainfo.cpp \
+    $$PWD/videobuffer.cpp \
+    $$PWD/videocodecsupportinfo.cpp \
     $$PWD/planechecker.cpp \
     $$PWD/detectorstate.cpp
 
-HEADERS  += recorder.h \
-    actualdetector.h \
-    camera.h \
-    Ctracker.h \
-    Detector.h \
-    Kalman.h \
-    HungarianAlg.h \
-    config.h \
-    camerainfo.h \
-    videocodecsupportinfo.h \
+HEADERS  += $$PWD/recorder.h \
+    $$PWD/actualdetector.h \
+    $$PWD/camera.h \
+    $$PWD/Ctracker.h \
+    $$PWD/Detector.h \
+    $$PWD/Kalman.h \
+    $$PWD/HungarianAlg.h \
+    $$PWD/config.h \
+    $$PWD/camerainfo.h \
+    $$PWD/videobuffer.h \
+    $$PWD/videocodecsupportinfo.h \
     $$PWD/planechecker.h \
     $$PWD/detectorstate.h
