@@ -21,6 +21,9 @@
 Console::Console(Config* config, ActualDetector* detector, QObject* parent) : QObject(parent) {
     m_config = config;
     m_actualDetector = detector;
+
+    logMessage("Noise filter pixel size: " + m_config->noiseFilterPixelSize());
+    logMessage("Motion threshold size: " + m_config->motionThreshold());
 }
 
 void Console::setSignalsAndSlots() {

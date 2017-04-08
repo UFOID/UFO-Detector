@@ -18,10 +18,18 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <QMainWindow>
 #include "actualdetector.h"
 #include "config.h"
 #include "updateapplicationdialog.h"
+#include "clickablelabel.h"
+#include "videowidget.h"
+#include "camera.h"
+#include "settingsdialog.h"
+#include "imageexplorer.h"
+#include "videouploaderdialog.h"
+#include "planechecker.h"
+#include "datamanager.h"
+#include <QMainWindow>
 #include <QModelIndex>
 #include <QDomDocument>
 #include <QFile>
@@ -32,23 +40,16 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <QMessageBox>
 #include <QDebug>
-#include "clickablelabel.h"
-#include "videowidget.h"
-#include "camera.h"
-#include "settingsdialog.h"
-#include "imageexplorer.h"
 #include <QDesktopServices>
 #include <QDir>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkRequest>
 #include <QtNetwork/QNetworkReply>
 #include <QByteArray>
-#include "videouploaderdialog.h"
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMutex>
 #include <QScrollBar>
-#include "planechecker.h"
 
 using namespace cv;
 
@@ -66,7 +67,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0, Camera *cameraPtr = 0, Config *configPtr = 0);
+    explicit MainWindow(Camera* cameraPtr, Config* configPtr, DataManager* dataManager, QWidget* parent = 0);
     ~MainWindow();
     void addOutputText(QString msg);
 
@@ -76,6 +77,7 @@ private:
     Ui::MainWindow *ui;
     SettingsDialog *m_settingsDialog;
     ActualDetector* m_actualDetector;
+    DataManager* m_dataManager;
     UpdateApplicationDialog* m_updateApplicationDialog;
     std::atomic<bool> m_showCameraVideo;    ///< showing camera video
     std::atomic<bool> m_recordingVideo;     ///< recording video
@@ -95,8 +97,6 @@ private:
 
     Config* m_config;
 
-    QDomDocument m_resultDataDomDocument;
-    QFile m_resultDataFile;  ///< result (log) data file (XML)
     QString m_programVersion;
     QString m_classifierVersion;
     QNetworkAccessManager *m_networkAccessManager;
@@ -104,16 +104,6 @@ private:
     void updateWebcamFrame();
     bool checkAndSetResolution(const int width, const int height);
     void adjustCameraViewFrameSize();    ///< fit camera frame into camera view
-
-    /**
-     * @brief Read logfile containing existing video info
-     */
-    void readLogFileAndGetRootElement();
-
-    /**
-     * @brief Check detection area file and create if doesn't exist
-     */
-    void checkDetectionAreaFile();
 
     /**
      * @brief Verify camera is working normally.
@@ -124,10 +114,6 @@ private:
      */
     bool checkCamera(const int width, const int height);
 
-    /**
-     * @brief Check that the folder for the images and videos exist
-     */
-    void checkFolders();
     void on_stopButton_clicked();
 
     /**
@@ -153,6 +139,7 @@ public slots:
     void on_progressBar_valueChanged(int value);
     void update_output_text(QString msg);
     void displayPixmap(QImage img);
+    void addVideoToList(QString filename, QString dateTime, QString videoLength);
 
 private slots:
     void on_startButton_clicked();
@@ -177,15 +164,14 @@ private slots:
     void setPositiveMessage();
     void setNegativeMessage();
     void setErrorReadingDetectionAreaFile();
-    void addVideoToVideoList(QString filename, QString datetime, QString videoLength);
     void on_aboutButton_clicked();
-    void checkForUpdate(QNetworkReply* reply);
-    void downloadClassifier(QNetworkReply* reply);
 
     void on_buttonImageExpl_clicked();
     void on_sliderThresh_sliderMoved(int position);
     void on_toolButtonNoise_clicked();
     void on_toolButtonThresh_clicked();
+
+    void onNewApplicationVersionAvailable(QString newVersion, std::queue<QString> messageInXml);
 
 protected:
     void showEvent(QShowEvent *event);

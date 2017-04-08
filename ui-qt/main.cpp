@@ -41,10 +41,15 @@ int main(int argc, char *argv[])
         }
 
         Config myConfig;
+        DataManager dataManager(&myConfig);
+        dataManager.init();
+
         Camera myCam(myConfig.cameraIndex(), myConfig.cameraWidth(), myConfig.cameraHeight());
         myCam.init();
-        MainWindow mainWindow(0, &myCam, &myConfig);
+
+        MainWindow mainWindow(&myCam, &myConfig, &dataManager, NULL);
         ActualDetector detector(&myCam, &myConfig, &mainWindow);
+
         mainWindow.setSignalsAndSlots(&detector);
         mainWindow.show();
 

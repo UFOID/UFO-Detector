@@ -112,6 +112,8 @@ private:
      * Emits resultDataSaved() signal.
      * @param dateTime format: yyyy-MM-dd--hh-mm-ss
      * @param videoLength format: mm:ss
+     *
+     * @todo move saveResultData() into DataManager
      */
     void saveResultData(QString dateTime, QString videoLength);
 

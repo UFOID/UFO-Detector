@@ -124,6 +124,8 @@ void ActualDetector::detectingThread()
     Scalar Colors[]={Scalar(255,0,0),Scalar(0,255,0),Scalar(0,0,255),Scalar(255,255,0),Scalar(0,255,255),Scalar(255,0,255),Scalar(255,127,255),Scalar(127,0,255),Scalar(127,0,127)};
     pair < vector<Point2d>,vector<Rect> > centerAndRectPair;
 
+    qDebug() << "ActualDetector::detectingThread() started";
+
     while (m_isMainThreadRunning)
     {
         m_prevFrame = m_currentFrame;
