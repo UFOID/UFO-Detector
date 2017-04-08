@@ -19,6 +19,7 @@
 #include "config.h"
 #include "camera.h"
 #include "actualdetector.h"
+#include "datamanager.h"
 #include "console.h"
 #include <iostream>
 #include <QCoreApplication>
@@ -34,6 +35,11 @@ int main(int argc, char *argv[])
             std::cerr << "Couldn't initialize web camera, quitting" << std::endl;
             return -1;
         }
+        DataManager dataManager(&config);
+        if (!dataManager.init()) {
+            std::cerr << "Problems in data manager initialization" << std::endl;
+        }
+
         ActualDetector actualDetector(&camera, &config, NULL);
         Console console(&config, &actualDetector);
         console.setSignalsAndSlots();
@@ -46,6 +52,7 @@ int main(int argc, char *argv[])
         std::cout << "Running main loop" << std::endl;
         return a.exec();
 
+        std::cout << "Main loop exited" << std::endl;
         actualDetector.stopThread();
 
     } catch (std::exception &e) {

@@ -22,15 +22,15 @@ Console::Console(Config* config, ActualDetector* detector, QObject* parent) : QO
     m_config = config;
     m_actualDetector = detector;
 
-    logMessage("Noise filter pixel size: " + m_config->noiseFilterPixelSize());
-    logMessage("Motion threshold size: " + m_config->motionThreshold());
+    logMessage("Noise filter pixel size: " + QString::number(m_config->noiseFilterPixelSize()));
+    logMessage("Motion threshold size: " + QString::number(m_config->motionThreshold()));
 }
 
 void Console::setSignalsAndSlots() {
     connect(m_actualDetector, SIGNAL(positiveMessage()), this, SLOT(onPositiveMessage()));
     connect(m_actualDetector, SIGNAL(negativeMessage()), this, SLOT(onNegativeMessage()));
-    //connect(m_actualDetector, SIGNAL(errorReadingDetectionAreaFile()), this, SLOT(setErrorReadingDetectionAreaFile()));
-    //connect(m_actualDetector->getRecorder(), SIGNAL(resultDataSaved(QString,QString,QString)), this, SLOT(addVideoToVideoList(QString,QString,QString)));
+    connect(m_actualDetector, SIGNAL(errorReadingDetectionAreaFile()), this, SLOT(onDetectionAreaFileReadError()));
+    connect(m_actualDetector->getRecorder(), SIGNAL(resultDataSaved(QString,QString,QString)), this, SLOT(onVideoSaved(QString,QString,QString)));
     connect(m_actualDetector->getRecorder(), SIGNAL(recordingStarted()), this, SLOT(onRecordingStarted()));
     connect(m_actualDetector->getRecorder(), SIGNAL(recordingFinished()), this, SLOT(onRecordingFinished()));
     connect(m_actualDetector, SIGNAL(progressValueChanged(int)), this, SLOT(onDetectorStartProgressChanged(int)));
@@ -44,21 +44,21 @@ void Console::setSignalsAndSlots() {
 }
 
 void Console::onRecordingStarted() {
-    std::cout << "Video recording started" << std::endl;
+    logMessage("Video recording started");
 }
 
 void Console::onRecordingFinished() {
-    std::cout << "Video recording finished" << std::endl;
+    logMessage("Video recording finished");
 }
 
 void Console::onDetectorStartProgressChanged(int progress) {
     if (100 == progress) {
-        std::cout << "Detector started" << std::endl;
+        logMessage("Detector started");
     }
 }
 
 void Console::logMessage(QString message) {
-    std::cout << message.toLocal8Bit().data() << std::endl;
+    std::cout << message.toStdString() << std::endl;
 }
 
 void Console::onPositiveMessage() {
@@ -67,4 +67,15 @@ void Console::onPositiveMessage() {
 
 void Console::onNegativeMessage() {
     logMessage("Negative");
+}
+
+void Console::onDetectionAreaFileReadError() {
+    logMessage("Error reading detection area file " + m_config->detectionAreaFile());
+}
+
+void Console::onVideoSaved(QString filename, QString dateTime, QString length) {
+    Q_UNUSED(filename);
+    Q_UNUSED(dateTime);
+    Q_UNUSED(length);
+    logMessage("Video saved");
 }

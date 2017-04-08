@@ -289,6 +289,7 @@ void ActualDetector::detectingThread()
         std::this_thread::yield();
         std::this_thread::sleep_for(std::chrono::microseconds(threadYieldPauseUsec));
     }
+    qDebug() << "ActualDetector::detectingThread() finished";
     delete detector;    
 }
 

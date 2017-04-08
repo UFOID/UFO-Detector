@@ -49,9 +49,11 @@ public slots:
     void onRecordingStarted();
     void onRecordingFinished();
     void onDetectorStartProgressChanged(int progress);
-    void logMessage(QString message);
+    void logMessage(QString message);   /// @todo move into Logger class (screen, file, forward)
     void onPositiveMessage();
     void onNegativeMessage();
+    void onDetectionAreaFileReadError();
+    void onVideoSaved(QString filename, QString dateTime, QString length);
 };
 
 #endif // CONSOLE_H
