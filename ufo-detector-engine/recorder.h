@@ -58,7 +58,7 @@ class Recorder : public QObject {
 Q_OBJECT
 
 public:
-    explicit Recorder(Camera* cameraPtr = 0, Config* configPtr = 0);
+    explicit Recorder(Camera* cameraPtr, Config* configPtr);
     void startRecording(cv::Mat &firstFrame);
     void stopRecording(bool willSaveVideo);
     void setRectangle(cv::Rect &r, bool isRed);
