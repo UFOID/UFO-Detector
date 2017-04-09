@@ -43,7 +43,7 @@ bool Console::init() {
     connect(m_actualDetector, SIGNAL(positiveMessage()), this, SLOT(onPositiveMessage()));
     connect(m_actualDetector, SIGNAL(negativeMessage()), this, SLOT(onNegativeMessage()));
     connect(m_actualDetector, SIGNAL(errorReadingDetectionAreaFile()), this, SLOT(onDetectionAreaFileReadError()));
-    connect(m_actualDetector->getRecorder(), SIGNAL(resultDataSaved(QString,QString,QString)), this, SLOT(onVideoSaved(QString,QString,QString)));
+    connect(m_dataManager, SIGNAL(resultDataSaved(QString,QString,QString)), this, SLOT(onVideoSaved(QString,QString,QString)));
     connect(m_actualDetector->getRecorder(), SIGNAL(recordingStarted()), this, SLOT(onRecordingStarted()));
     connect(m_actualDetector->getRecorder(), SIGNAL(recordingFinished()), this, SLOT(onRecordingFinished()));
     connect(m_actualDetector, SIGNAL(progressValueChanged(int)), this, SLOT(onDetectorStartProgressChanged(int)));

@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
             std::cerr << "Problems in data manager initialization" << std::endl;
         }
 
-        ActualDetector actualDetector(&camera, &config, &a);
+        ActualDetector actualDetector(&camera, &config, &dataManager, &a);
 
         Console console(&config, &actualDetector, &camera, &dataManager, &a);
         console.init();
