@@ -23,6 +23,8 @@
 #include "actualdetector.h"
 #include "recorder.h"
 #include "planechecker.h"
+#include "datamanager.h"
+#include "camera.h"
 #include <QObject>
 
 /**
@@ -32,13 +34,22 @@ class Console : public QObject
 {
     Q_OBJECT
 public:
-    explicit Console(Config* config, ActualDetector* detector, QObject *parent = 0);
+    explicit Console(Config* config, ActualDetector* detector, Camera* camera,
+                     DataManager* dataManager, QObject *parent = 0);
+
+    ~Console();
 
     /**
-     * @brief Initialize object
+     * @brief Initialize object.
      * @return true on success
      */
     bool init();
+
+    /**
+     * @brief Start detection.
+     * @return
+     */
+    bool start();
 
 #ifndef _UNIT_TEST_
 private:
@@ -46,6 +57,9 @@ private:
     Config* m_config;
     ActualDetector* m_actualDetector;
     PlaneChecker* m_planeChecker;
+    Camera* m_camera;
+    DataManager* m_dataManager;
+    bool m_initialized;
 
 signals:
 

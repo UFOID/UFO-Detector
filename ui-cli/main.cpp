@@ -58,21 +58,16 @@ int main(int argc, char *argv[])
         }
 
         ActualDetector actualDetector(&camera, &config, &a);
-        Console console(&config, &actualDetector, &a);
+
+        Console console(&config, &actualDetector, &camera, &dataManager, &a);
         console.init();
         a.connect(&a, SIGNAL(aboutToQuit()), &console, SLOT(onApplicationAboutToQuit()));
 
-        if (!actualDetector.start()) {
-            std::cerr << "Error starting detector" << std::endl;
+        if (!console.start()) {
+            std::cerr << "Error starting Console" << std::endl;
             return -1;
         }
-
-        std::cout << "Running main loop" << std::endl;
         return a.exec();
-
-        std::cout << "Main loop exited" << std::endl;
-        actualDetector.stopThread();
-
     } catch (std::exception &e) {
         std::cout << e.what() << std::endl;
     }

@@ -18,15 +18,28 @@
 
 #include "console.h"
 
-Console::Console(Config* config, ActualDetector* detector, QObject* parent) : QObject(parent) {
+Console::Console(Config* config, ActualDetector* detector, Camera* camera,
+                 DataManager* dataManager, QObject* parent) : QObject(parent)
+{
     m_config = config;
     m_actualDetector = detector;
+    m_camera = camera;
+    m_dataManager = dataManager;
+    m_initialized = false;
+}
 
-    logMessage("Noise filter pixel size: " + QString::number(m_config->noiseFilterPixelSize()));
-    logMessage("Motion threshold size: " + QString::number(m_config->motionThreshold()));
+Console::~Console() {
+    logMessage("Console quitting");
+    m_dataManager->deleteLater();
+    m_actualDetector->deleteLater();
+    m_camera->deleteLater();
+    m_config->deleteLater();
 }
 
 bool Console::init() {
+    logMessage("Noise filter pixel size: " + QString::number(m_config->noiseFilterPixelSize()));
+    logMessage("Motion threshold size: " + QString::number(m_config->motionThreshold()));
+
     connect(m_actualDetector, SIGNAL(positiveMessage()), this, SLOT(onPositiveMessage()));
     connect(m_actualDetector, SIGNAL(negativeMessage()), this, SLOT(onNegativeMessage()));
     connect(m_actualDetector, SIGNAL(errorReadingDetectionAreaFile()), this, SLOT(onDetectionAreaFileReadError()));
@@ -41,15 +54,21 @@ bool Console::init() {
         connect(m_planeChecker, SIGNAL(foundNumberOfPlanes(int)), m_actualDetector, SLOT(setAmountOfPlanes(int)));
         connect(m_actualDetector, SIGNAL(checkPlane()), m_planeChecker, SLOT(callApi()));
     }
+    m_initialized = true;
     return true;
 }
 
+bool Console::start() {
+    if (!m_initialized) {
+        return false;
+    }
+    return m_actualDetector->start();
+}
+
 void Console::onRecordingStarted() {
-    logMessage("Video recording started");
 }
 
 void Console::onRecordingFinished() {
-    logMessage("Video recording finished");
 }
 
 void Console::onDetectorStartProgressChanged(int progress) {
@@ -63,11 +82,9 @@ void Console::logMessage(QString message) {
 }
 
 void Console::onPositiveMessage() {
-    //logMessage("Positive");
 }
 
 void Console::onNegativeMessage() {
-    //logMessage("Negative");
 }
 
 void Console::onDetectionAreaFileReadError() {
@@ -78,10 +95,8 @@ void Console::onVideoSaved(QString filename, QString dateTime, QString length) {
     Q_UNUSED(filename);
     Q_UNUSED(dateTime);
     Q_UNUSED(length);
-    logMessage("Video saved");
 }
 
 void Console::onApplicationAboutToQuit() {
-    logMessage("Console::onApplicationAboutToQuit()");
     m_actualDetector->stopThread();
 }
