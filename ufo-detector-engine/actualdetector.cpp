@@ -131,7 +131,6 @@ void ActualDetector::detectingThread()
 
     qDebug() << "ActualDetector::detectingThread() started";
 
-    qDebug() << "Measuring ActualDetector frame rate";
     fpsMeasurementTimer.start();
 
     while (m_isMainThreadRunning)
