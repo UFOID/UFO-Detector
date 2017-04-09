@@ -72,6 +72,8 @@ public:
      */
     void checkForUpdates();
 
+    void saveResultData(QString dateTime, QString videoLength);
+
 #ifndef _UNIT_TEST_
 private:
 #endif
@@ -123,6 +125,14 @@ signals:
      * @param messageInXml messages related to the update
      */
     void newApplicationVersionAvailable(QString newVersion, std::queue<QString> messageInXml);
+
+    /**
+     * @brief Emitted when a new video entry was added into result data file.
+     * @param videoFolder
+     * @param dateTime
+     * @param videoLength
+     */
+    void resultDataSaved(QString videoFolder, QString dateTime, QString videoLength);
 };
 
 #endif // DATAMANAGER_H

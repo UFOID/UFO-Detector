@@ -273,3 +273,33 @@ void DataManager::handleBirdClassifierReply(QNetworkReply* reply) {
     }
     reply->deleteLater();
 }
+
+void DataManager::saveResultData(QString dateTime, QString videoLength) {
+    /// @todo create root element here if it doesn't exist
+    QDomElement rootElement = m_resultDataDomDocument.firstChildElement();
+    QDomElement node = m_resultDataDomDocument.createElement("Video");
+    node.setAttribute("Pathname", m_config->resultVideoDir());
+    node.setAttribute("DateTime", dateTime);
+    node.setAttribute("Length", videoLength);
+    rootElement.appendChild(node);
+
+    if(!m_resultDataFile.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        qDebug() << "DataManager: failed to open result data file" << m_resultDataFile.fileName();
+        return;
+    }
+    else
+    {
+        QTextStream stream(&m_resultDataFile);
+        stream.setCodec("UTF-8");
+        /// @todo find way to append just the latest entry into the file, this is not scalable
+        stream << m_resultDataDomDocument.toString();
+        if (stream.status() != QTextStream::Ok)
+        {
+            qDebug() << "DataManager: problem writing to result data file" << m_resultDataFile.fileName();
+        }
+        m_resultDataFile.flush();
+        m_resultDataFile.close();
+    }
+    emit resultDataSaved(m_config->resultVideoDir(), dateTime, videoLength);
+}
