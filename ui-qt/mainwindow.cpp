@@ -424,10 +424,12 @@ void MainWindow::on_startButton_clicked()
         ui->progressBar->repaint();
 
         disconnect(this,SIGNAL(updatePixmap(QImage)),this,SLOT(displayPixmap(QImage)));
+
+        m_actualDetector->setNoiseLevel(ui->sliderNoise->value());
+        m_actualDetector->setThresholdLevel(ui->sliderThresh->value());
+
         if(m_actualDetector->start())
         {
-            m_actualDetector->setNoiseLevel(ui->sliderNoise->value());
-            m_actualDetector->setThresholdLevel(ui->sliderThresh->value());
             m_showCameraVideo = false;
             if (threadWebcam)
             {
