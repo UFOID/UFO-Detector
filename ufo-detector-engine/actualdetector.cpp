@@ -18,10 +18,11 @@
 
 #include "actualdetector.h"
 
-ActualDetector::ActualDetector(Camera *cameraPtr, Config *configPtr, QObject *parent) :
-    QObject(parent), m_camPtr(cameraPtr)
+ActualDetector::ActualDetector(Camera* camera, Config* config, DataManager* dataManager, QObject *parent) :
+    QObject(parent), m_camPtr(camera)
 {
-    m_config = configPtr;
+    m_config = config;
+    m_dataManager = dataManager;
     const QString DETECTION_AREA_FILE = m_config->detectionAreaFile();
     const QString IMAGEPATH = m_config->resultImageDir() + "/";
     m_willSaveImages = m_config->saveResultImages();
@@ -38,7 +39,7 @@ ActualDetector::ActualDetector(Camera *cameraPtr, Config *configPtr, QObject *pa
     setNoiseLevel(m_config->noiseFilterPixelSize());
     setThresholdLevel(m_config->motionThreshold());
 
-    m_recorder = new Recorder(m_camPtr, m_config);
+    m_recorder = new Recorder(m_camPtr, m_config, m_dataManager);
 
     state = new DetectorState(this, m_recorder);
     state->MIN_POS_REQUIRED = m_config->minPositiveDetections();

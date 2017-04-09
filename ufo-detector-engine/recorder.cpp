@@ -18,14 +18,13 @@
 
 #include "recorder.h"
 
-Recorder::Recorder(Camera *cameraPtr, Config *configPtr) :
-    m_camera(cameraPtr), m_config(configPtr)
+Recorder::Recorder(Camera* cameraPtr, Config* configPtr, DataManager* dataManager) :
+    m_camera(cameraPtr), m_config(configPtr), m_dataManager(dataManager)
 {
     qDebug() << "Creating recorder";
     const int width = m_config->cameraWidth();
     const int height  = m_config->cameraHeight();
     m_drawRectangles = m_config->resultVideoWithObjectRectangles();
-    m_resultDataFile.setFileName(m_config->resultDataFile());
     m_resultVideoDirName = m_config->resultVideoDir();
     m_thumbnailDirName = "thumbnails";
     m_thumbnailExtension = ".jpg";
@@ -50,7 +49,6 @@ Recorder::Recorder(Camera *cameraPtr, Config *configPtr) :
             (int)(thumbnailWidth / aspectRatio), m_defaultThumbnailSideLength);
     m_thumbnailResolution = Size(thumbnailWidth, thumbnailHeight);
 
-    reloadResultDataFile();
     m_recording = false;
     connect(this, SIGNAL(videoEncodingRequested(QString,QString)), this, SLOT(startEncodingVideo(QString,QString)));
     qDebug() << "Recorder created";
@@ -141,7 +139,7 @@ void Recorder::recordThread(){
     if(m_willSaveVideo)
     {
         saveVideoThumbnailImage(m_firstFrame, dateTime);
-        saveResultData(dateTime, videoLength);
+        m_dataManager->saveResultData(dateTime, videoLength);
         if(!recordCodecIsFinal)
         {
             // Convert raw video to final codec with external encoder
@@ -270,58 +268,6 @@ void Recorder::saveVideoThumbnailImage(Mat image, QString dateTime) {
     cv::resize(thumbnail, thumbnail, m_thumbnailResolution, 0, 0, INTER_CUBIC);
     QString thumbnailFileName = m_resultVideoDirName + "/" + m_thumbnailDirName + "/" + dateTime + m_thumbnailExtension;
     imwrite(thumbnailFileName.toStdString(), thumbnail);
-}
-
-void Recorder::saveResultData(QString dateTime, QString videoLength)
-{
-    /// @todo create root element here if it doesn't exist
-    QDomElement node = m_resultDataDomDocument.createElement("Video");
-    node.setAttribute("Pathname", m_resultVideoDirName);
-    node.setAttribute("DateTime", dateTime);
-    node.setAttribute("Length", videoLength);
-    m_resultDataRootElement.appendChild(node);
-
-    if(!m_resultDataFile.open(QIODevice::WriteOnly | QIODevice::Text))
-    {
-        qDebug() << "Recorder: failed to open result data file" << m_resultDataFile.fileName();
-        return;
-    }
-    else
-    {
-        QTextStream stream(&m_resultDataFile);
-        stream.setCodec("UTF-8");
-        stream << m_resultDataDomDocument.toString();
-        if (stream.status() != QTextStream::Ok)
-        {
-            qDebug() << "Problem writing to result data file" << m_resultDataFile.fileName();
-        }
-        m_resultDataFile.flush();
-        m_resultDataFile.close();
-    }
-    emit resultDataSaved(m_resultVideoDirName, dateTime, videoLength);
-}
-
-/*
- * Slot to reload the log file and get the root element. Called from MainWindow when a VideoWidget was removed
- */
-void Recorder::reloadResultDataFile()
-{
-    if(!m_resultDataFile.open(QIODevice::ReadOnly | QIODevice::Text))
-    {
-        qDebug() << "Recorder: failed to open result data file" << m_resultDataFile.fileName();
-    }
-    else
-    {
-        if(!m_resultDataDomDocument.setContent(&m_resultDataFile))
-        {
-            qDebug() << "Recorder: failed to reload result data file" << m_resultDataFile.fileName();
-        }
-        else
-        {
-            m_resultDataRootElement = m_resultDataDomDocument.firstChildElement();
-        }
-        m_resultDataFile.close();
-    }
 }
 
 /*

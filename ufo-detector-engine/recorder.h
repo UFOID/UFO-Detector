@@ -22,6 +22,7 @@
 #include "config.h"
 #include "camera.h"
 #include "videobuffer.h"
+#include "datamanager.h"
 #include <QDomDocument>
 #include <QFile>
 #include <QObject>
@@ -58,7 +59,7 @@ class Recorder : public QObject {
 Q_OBJECT
 
 public:
-    explicit Recorder(Camera* cameraPtr, Config* configPtr);
+    explicit Recorder(Camera* cameraPtr, Config* configPtr, DataManager* dataManager);
     void startRecording(cv::Mat &firstFrame);
     void stopRecording(bool willSaveVideo);
     void setRectangle(cv::Rect &r, bool isRed);
@@ -70,6 +71,7 @@ private:
 
     Camera* m_camera;
     Config* m_config;
+    DataManager* m_dataManager;
     cv::VideoWriter m_videoWriter;
     cv::Mat m_firstFrame;
     VideoBuffer* m_videoBuffer;
@@ -94,10 +96,6 @@ private:
     std::vector<QProcess*> m_encoderProcesses;
     std::vector<QString> m_tempVideoFiles;
 
-    QDomDocument m_resultDataDomDocument;
-    QFile m_resultDataFile;
-    QDomElement m_resultDataRootElement;
-
     void recordThread();
 
     /**
@@ -114,19 +112,6 @@ private:
      */
     void saveVideoThumbnailImage(Mat image, QString dateTime);
 
-    /**
-     * @brief Save information about the video to result data file.
-     * Emits resultDataSaved() signal.
-     * @param dateTime format: yyyy-MM-dd--hh-mm-ss
-     * @param videoLength format: mm:ss
-     *
-     * @todo move saveResultData() into DataManager
-     */
-    void saveResultData(QString dateTime, QString videoLength);
-
-public slots:
-    void reloadResultDataFile();
-
 #ifndef _UNIT_TEST_
 private slots:
 #endif
@@ -142,7 +127,6 @@ private slots:
     void onVideoEncodingFinished();
 
 signals:
-    void resultDataSaved(QString file, QString date, QString length);
     void recordingStarted();
     void recordingFinished();
     void videoEncodingRequested(QString tempVideoName, QString targetVideoName);

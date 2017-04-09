@@ -44,12 +44,6 @@ public:
     bool init();
 
     /**
-     * @brief Read result data from file into QDomDocument which can be got with resultDataDomDocument().
-     * @return true on success, false on failure
-     */
-    bool readResultDataFile();
-
-    /**
      * @brief Get pointer to DOM document representation of result data file.
      * @param readFile read the result data file, updating the DOM document
      *
@@ -99,6 +93,13 @@ private:
      * @brief Initiate download of bird classifier file.
      */
     void downloadBirdClassifierFile();
+
+public slots:
+    /**
+     * @brief Read result data from file into QDomDocument which can be got with resultDataDomDocument().
+     * @return true on success, false on failure
+     */
+    bool readResultDataFile();
 
 #ifndef _UNIT_TEST_
 private slots:

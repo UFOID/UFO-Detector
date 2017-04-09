@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
         myCam.init();
 
         MainWindow mainWindow(&myCam, &myConfig, &dataManager, NULL);
-        ActualDetector detector(&myCam, &myConfig, &mainWindow);
+        ActualDetector detector(&myCam, &myConfig, &dataManager, &mainWindow);
 
         mainWindow.setSignalsAndSlots(&detector);
         mainWindow.show();

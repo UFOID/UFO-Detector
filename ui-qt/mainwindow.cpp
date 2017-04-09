@@ -162,10 +162,10 @@ void MainWindow::setSignalsAndSlots(ActualDetector* actualDetector)
     connect(m_actualDetector, SIGNAL(positiveMessage()), this, SLOT(setPositiveMessage()));
     connect(m_actualDetector, SIGNAL(negativeMessage()), this, SLOT(setNegativeMessage()));
     connect(m_actualDetector, SIGNAL(errorReadingDetectionAreaFile()), this, SLOT(setErrorReadingDetectionAreaFile()));
-    connect(m_actualDetector->getRecorder(), SIGNAL(resultDataSaved(QString,QString,QString)), this, SLOT(addVideoToList(QString,QString,QString)));
+    connect(m_dataManager, SIGNAL(resultDataSaved(QString,QString,QString)), this, SLOT(addVideoToList(QString,QString,QString)));
     connect(m_actualDetector->getRecorder(), SIGNAL(recordingStarted()), this, SLOT(onRecordingStarted()));
     connect(m_actualDetector->getRecorder(), SIGNAL(recordingFinished()), this, SLOT(onRecordingFinished()));
-    connect(this, SIGNAL(elementWasRemoved()), m_actualDetector->getRecorder(), SLOT(reloadResultDataFile()));
+    connect(this, SIGNAL(elementWasRemoved()), m_dataManager, SLOT(readResultDataFile()));
     connect(m_actualDetector, SIGNAL(progressValueChanged(int)), this, SLOT(on_progressBar_valueChanged(int)));
     connect(m_actualDetector, SIGNAL(broadcastOutputText(QString)), this, SLOT(update_output_text(QString)));
     connect(this, SIGNAL(updatePixmap(QImage)), this, SLOT(displayPixmap(QImage)));
