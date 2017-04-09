@@ -22,9 +22,10 @@ int mockRecorderStartCount;
 int mockRecorderStopCount;
 
 
-Recorder::Recorder(Camera* cameraPtr, Config* configPtr) {
+Recorder::Recorder(Camera* cameraPtr, Config* configPtr, DataManager* dataManager) {
     Q_UNUSED(cameraPtr);
     Q_UNUSED(configPtr);
+    Q_UNUSED(dataManager);
 }
 
 void Recorder::startRecording(cv::Mat &firstFrame) {
@@ -42,9 +43,6 @@ void Recorder::stopRecording(bool willSaveVideo) {
 void Recorder::setRectangle(cv::Rect &r, bool isRed) {
     Q_UNUSED(r);
     Q_UNUSED(isRed);
-}
-
-void Recorder::reloadResultDataFile() {
 }
 
 void Recorder::startEncodingVideo(QString tempVideoFileName, QString targetVideoFileName) {

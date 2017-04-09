@@ -32,7 +32,6 @@ SOURCES += \
     ../mock/mockconfig.cpp \
     ../mock/mockcamera.cpp \
     ../mock/mockRecorder.cpp \
-    ../mock/mockMainWindow.cpp \
     ../../Ctracker.cpp \
     ../../Detector.cpp \
     ../../Kalman.cpp \
@@ -40,7 +39,8 @@ SOURCES += \
     ../mock/mockVideoCodecSupportInfo.cpp \
     testActualDetector.cpp\
     ../../planechecker.cpp \
-   ../../detectorstate.cpp
+   ../../detectorstate.cpp \
+    ../mock/mockdatamanager.cpp
 
 
 HEADERS += ../../actualdetector.h \
@@ -54,6 +54,6 @@ HEADERS += ../../actualdetector.h \
     ../../videocodecsupportinfo.h \
     ../../planechecker.h \
     ../../detectorstate.h \
-    ../../../ui-qt/mainwindow.h
+    ../../datamanager.h
 
 
