@@ -140,6 +140,7 @@ void Recorder::recordThread(){
 
     if(m_willSaveVideo)
     {
+        saveVideoThumbnailImage(m_firstFrame, dateTime);
         saveResultData(dateTime, videoLength);
         if(!recordCodecIsFinal)
         {
@@ -264,12 +265,15 @@ void Recorder::readFrameThread()
     }
 }
 
+void Recorder::saveVideoThumbnailImage(Mat image, QString dateTime) {
+    Mat thumbnail = image.clone();
+    cv::resize(thumbnail, thumbnail, m_thumbnailResolution, 0, 0, INTER_CUBIC);
+    QString thumbnailFileName = m_resultVideoDirName + "/" + m_thumbnailDirName + "/" + dateTime + m_thumbnailExtension;
+    imwrite(thumbnailFileName.toStdString(), thumbnail);
+}
+
 void Recorder::saveResultData(QString dateTime, QString videoLength)
 {
-    cv::resize(m_firstFrame, m_firstFrame, m_thumbnailResolution, 0, 0, INTER_CUBIC);
-    QString thumbnail = m_resultVideoDirName + "/" + m_thumbnailDirName + "/" + dateTime + m_thumbnailExtension;
-    imwrite(thumbnail.toStdString(), m_firstFrame);
-
     /// @todo create root element here if it doesn't exist
     QDomElement node = m_resultDataDomDocument.createElement("Video");
     node.setAttribute("Pathname", m_resultVideoDirName);

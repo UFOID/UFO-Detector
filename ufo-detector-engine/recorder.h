@@ -108,6 +108,13 @@ private:
     void readFrameThread();
 
     /**
+     * @brief Save video thumbnail image.
+     * @param image
+     * @param dateTime
+     */
+    void saveVideoThumbnailImage(Mat image, QString dateTime);
+
+    /**
      * @brief Save information about the video to result data file.
      * Emits resultDataSaved() signal.
      * @param dateTime format: yyyy-MM-dd--hh-mm-ss
