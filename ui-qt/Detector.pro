@@ -36,8 +36,7 @@ SOURCES += main.cpp\
     cameraresolutiondialog.cpp \
     videolist.cpp \
     videouploaderdialog.cpp \
-    updateapplicationdialog.cpp \
-    ../ufo-detector-engine/datamanager.cpp
+    updateapplicationdialog.cpp
 
 HEADERS  += \
     mainwindow.h \
@@ -50,8 +49,7 @@ HEADERS  += \
     cameraresolutiondialog.h \
     videolist.h \
     videouploaderdialog.h \
-    updateapplicationdialog.h \
-    ../ufo-detector-engine/datamanager.h
+    updateapplicationdialog.h
 
 FORMS    += \
     mainwindow.ui \
