@@ -80,3 +80,8 @@ void Console::onVideoSaved(QString filename, QString dateTime, QString length) {
     Q_UNUSED(length);
     logMessage("Video saved");
 }
+
+void Console::onApplicationAboutToQuit() {
+    logMessage("Console::onApplicationAboutToQuit()");
+    m_actualDetector->stopThread();
+}

@@ -23,10 +23,27 @@
 #include "console.h"
 #include <iostream>
 #include <QCoreApplication>
+#include <csignal>
+
+void handleTerminationSignals(int signal) {
+    Q_UNUSED(signal);
+    std::cout << "Got termination signal, quitting" << std::endl;
+    QCoreApplication::exit(0);
+}
 
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
+
+#ifdef Q_OS_UNIX
+    // killing with 2, 3, and 15 works, 9 doesn't properly
+    signal(SIGINT, &handleTerminationSignals);  // signal 2
+    signal(SIGQUIT, &handleTerminationSignals); // signal 3
+    signal(SIGKILL, &handleTerminationSignals); // signal 9
+    signal(SIGTERM, &handleTerminationSignals); // signal 15
+#else
+    std::cerr << "Warning: termination signals not yet handled in other than Unix" << std::endl;
+#endif
 
     try {
         Config config;
@@ -35,14 +52,15 @@ int main(int argc, char *argv[])
             std::cerr << "Couldn't initialize web camera, quitting" << std::endl;
             return -1;
         }
-        DataManager dataManager(&config);
+        DataManager dataManager(&config, &a);
         if (!dataManager.init()) {
             std::cerr << "Problems in data manager initialization" << std::endl;
         }
 
-        ActualDetector actualDetector(&camera, &config, NULL);
-        Console console(&config, &actualDetector);
+        ActualDetector actualDetector(&camera, &config, &a);
+        Console console(&config, &actualDetector, &a);
         console.init();
+        a.connect(&a, SIGNAL(aboutToQuit()), &console, SLOT(onApplicationAboutToQuit()));
 
         if (!actualDetector.start()) {
             std::cerr << "Error starting detector" << std::endl;

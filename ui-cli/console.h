@@ -58,6 +58,7 @@ public slots:
     void onNegativeMessage();
     void onDetectionAreaFileReadError();
     void onVideoSaved(QString filename, QString dateTime, QString length);
+    void onApplicationAboutToQuit();
 };
 
 #endif // CONSOLE_H
