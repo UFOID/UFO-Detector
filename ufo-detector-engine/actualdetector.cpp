@@ -117,7 +117,10 @@ void ActualDetector::detectingThread()
     bool isPositiveRectangle;
     int threadYieldPauseUsec = 1000;
     int numberOfChanges = 0;
-
+    int frameCount = 0;
+    int framesInFpsMeasurement = OUTPUT_FPS * 10;
+    bool fpsMeasurementDone = false;
+    QTime fpsMeasurementTimer;
 
     CDetector* detector=new CDetector(m_currentFrame);
     vector<Point2d> centers;
@@ -126,11 +129,21 @@ void ActualDetector::detectingThread()
 
     qDebug() << "ActualDetector::detectingThread() started";
 
+    qDebug() << "Measuring ActualDetector frame rate";
+    fpsMeasurementTimer.start();
+
     while (m_isMainThreadRunning)
     {
         m_prevFrame = m_currentFrame;
         m_currentFrame = m_nextFrame;
         tempImage = m_camPtr->getWebcamFrame();
+        frameCount++;
+        if (!fpsMeasurementDone && (frameCount >= framesInFpsMeasurement)) {
+            qDebug() << "ActualDetector reading" << ((float)frameCount /
+                         (float)fpsMeasurementTimer.elapsed()) * (float)1000
+                     << "FPS on average";
+            fpsMeasurementDone = true;
+        }
 
         m_nextFrame = tempImage.clone();
         m_resultFrame = m_nextFrame;
