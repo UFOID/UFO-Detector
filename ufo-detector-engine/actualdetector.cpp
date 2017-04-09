@@ -34,7 +34,9 @@ ActualDetector::ActualDetector(Camera *cameraPtr, Config *configPtr, QObject *pa
 
     m_detectionAreaFile = DETECTION_AREA_FILE.toStdString();
     m_resultImageDirNameBase = IMAGEPATH.toStdString();
-    m_noiseLevel = getStructuringElement(MORPH_RECT, Size(1,1));
+
+    setNoiseLevel(m_config->noiseFilterPixelSize());
+    setThresholdLevel(m_config->motionThreshold());
 
     m_recorder = new Recorder(m_camPtr, m_config);
 
