@@ -114,6 +114,8 @@ private:
 
 #ifndef _UNIT_TEST_
 private slots:
+#else
+public slots:
 #endif
     /**
      * @brief Creates a new QProcess that encodes the temporary raw video with ffmpeg/avconv.

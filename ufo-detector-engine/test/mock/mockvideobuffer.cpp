@@ -16,25 +16,33 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "datamanager.h"
+#include "videobuffer.h"
 
-DataManager::DataManager(Config* config, QObject* parent) : QObject(parent) {
-    m_config = config;
+VideoBuffer::VideoBuffer(int capacity, QObject *parent) : QObject(parent) {
+    m_capacity = capacity;
 }
 
-bool DataManager::readResultDataFile() {
+BufferedVideoFrame* VideoBuffer::waitNextFrame() {
+    if (!m_buffer.isEmpty()) {
+        return m_buffer.takeFirst();
+    }
+    return NULL;
+}
+
+int VideoBuffer::count() {
+    return 0;
+}
+
+int VideoBuffer::capacity() {
+    return m_capacity;
+}
+
+bool VideoBuffer::pushFrame(BufferedVideoFrame *frame) {
+    m_buffer.append(frame);
     return true;
 }
 
-void DataManager::saveResultData(QString dateTime, QString videoLength) {
-    Q_UNUSED(dateTime);
-    Q_UNUSED(videoLength);
+void VideoBuffer::stopWait() {
 }
 
-void DataManager::handleUpdateReply(QNetworkReply *reply) {
-    Q_UNUSED(reply);
-}
 
-void DataManager::handleBirdClassifierReply(QNetworkReply *reply) {
-    Q_UNUSED(reply);
-}

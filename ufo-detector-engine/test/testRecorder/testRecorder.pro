@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += testlib core xml widgets
+QT       += testlib core xml widgets network
 
 TARGET = testrecorder
 CONFIG   += console
@@ -28,6 +28,8 @@ INCLUDEPATH += . \
 SOURCES += testrecorder.cpp \
     ../mock/mockcamera.cpp \
     ../mock/mockconfig.cpp \
+    ../mock/mockdatamanager.cpp \
+    ../mock/mockvideobuffer.cpp \
     ../../videocodecsupportinfo.cpp \
     ../../recorder.cpp \
     ../../camerainfo.cpp
@@ -36,5 +38,7 @@ HEADERS += ../../recorder.h \
     ../../config.h \
     ../../videocodecsupportinfo.h \
     ../../camera.h \
-    ../../camerainfo.h
+    ../../camerainfo.h \
+    ../../datamanager.h \
+    ../../videobuffer.h
 
