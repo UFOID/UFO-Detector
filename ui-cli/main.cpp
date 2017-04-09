@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
 
         ActualDetector actualDetector(&camera, &config, NULL);
         Console console(&config, &actualDetector);
-        console.setSignalsAndSlots();
+        console.init();
 
         if (!actualDetector.start()) {
             std::cerr << "Error starting detector" << std::endl;

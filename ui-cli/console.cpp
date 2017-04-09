@@ -26,7 +26,7 @@ Console::Console(Config* config, ActualDetector* detector, QObject* parent) : QO
     logMessage("Motion threshold size: " + QString::number(m_config->motionThreshold()));
 }
 
-void Console::setSignalsAndSlots() {
+bool Console::init() {
     connect(m_actualDetector, SIGNAL(positiveMessage()), this, SLOT(onPositiveMessage()));
     connect(m_actualDetector, SIGNAL(negativeMessage()), this, SLOT(onNegativeMessage()));
     connect(m_actualDetector, SIGNAL(errorReadingDetectionAreaFile()), this, SLOT(onDetectionAreaFileReadError()));
@@ -41,6 +41,7 @@ void Console::setSignalsAndSlots() {
         connect(m_planeChecker, SIGNAL(foundNumberOfPlanes(int)), m_actualDetector, SLOT(setAmountOfPlanes(int)));
         connect(m_actualDetector, SIGNAL(checkPlane()), m_planeChecker, SLOT(callApi()));
     }
+    return true;
 }
 
 void Console::onRecordingStarted() {
@@ -62,11 +63,11 @@ void Console::logMessage(QString message) {
 }
 
 void Console::onPositiveMessage() {
-    logMessage("Positive");
+    //logMessage("Positive");
 }
 
 void Console::onNegativeMessage() {
-    logMessage("Negative");
+    //logMessage("Negative");
 }
 
 void Console::onDetectionAreaFileReadError() {

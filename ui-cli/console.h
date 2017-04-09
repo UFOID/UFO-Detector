@@ -34,7 +34,11 @@ class Console : public QObject
 public:
     explicit Console(Config* config, ActualDetector* detector, QObject *parent = 0);
 
-    void setSignalsAndSlots();
+    /**
+     * @brief Initialize object
+     * @return true on success
+     */
+    bool init();
 
 #ifndef _UNIT_TEST_
 private:
