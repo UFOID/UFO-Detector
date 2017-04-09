@@ -77,6 +77,7 @@ Config::Config(QObject *parent) : QObject(parent)
     m_defaultResultDataFileName = m_defaultDetectionDataDir + "/logs.xml";
     m_defaultResultDocumentDir = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)+"/UFO ID";
     m_defaultDetectionAreaFileName = m_defaultDetectionDataDir + "/detectionArea.xml";
+    m_defaultDetectionAreaSize = 0;
 
     m_defaultResultVideoDir = m_defaultResultDocumentDir + "/Videos";
     if ((QSysInfo::windowsVersion()==QSysInfo::WV_WINDOWS8) || (QSysInfo::windowsVersion()==QSysInfo::WV_WINDOWS8_1)) {
