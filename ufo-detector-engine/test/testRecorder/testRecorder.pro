@@ -7,8 +7,8 @@
 QT       += testlib core xml widgets network
 
 TARGET = testrecorder
-CONFIG   += console
-CONFIG   -= app_bundle
+CONFIG += console testcase
+CONFIG -= app_bundle
 
 TEMPLATE = app
 

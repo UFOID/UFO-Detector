@@ -7,8 +7,8 @@
 QT       += widgets testlib xml network
 
 TARGET = testActualDetector
-CONFIG   += console
-CONFIG   -= app_bundle
+CONFIG += console testcase
+CONFIG -= app_bundle
 
 TEMPLATE = app
 

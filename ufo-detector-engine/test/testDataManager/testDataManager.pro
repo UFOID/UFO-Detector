@@ -9,8 +9,8 @@ QT       += network testlib xml widgets
 QT       -= gui
 
 TARGET = testdatamanager
-CONFIG   += console
-CONFIG   -= app_bundle
+CONFIG += console testcase
+CONFIG -= app_bundle
 
 TEMPLATE = app
 
