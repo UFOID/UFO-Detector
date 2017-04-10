@@ -40,7 +40,7 @@ OpenCV versions between 2.4.9 through 3.0.0 have a [bug](https://github.com/open
 
 First, install Qt5, avconv/ffmpeg, and OpenCV development packages:
 
-```sudo apt-get install qtbase5-dev avconv libopencv-dev```
+```sudo apt-get install qtbase5-dev libav-tools libopencv-dev```
 
 If this is not enough, check if you need to install other development packages as well.
 
@@ -50,7 +50,7 @@ Open the project file .../UFO-Detector/ui-qt/Detector.pro in Qt Creator and buil
 
 In Ubuntu Linux >=15, first install Qt5 and avconv/ffmpeg, plus the necessary packages for compiling OpenCV. Installing libopencv-dev package is optional because it will not be used.
 
-```sudo apt-get install qtbase5-dev avconv build-essential cmake libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev```
+```sudo apt-get install qtbase5-dev libav-tools build-essential cmake libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev```
 
 Next, download [OpenCV 3.1.0 source package](http://opencv.org/downloads.html) for Linux and unzip it. It's assumed here the target folder is opencv-3.1.0. Then run the following commands in the same folder in which you unzipped the source package:
 

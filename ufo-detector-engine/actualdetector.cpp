@@ -186,7 +186,6 @@ void ActualDetector::detectingThread()
                         if (!m_isInNightMode && checkIfBird())
                         {
                             state->tracker.tracks[i]->birdCounter++;
-                            state->tracker.tracks[i]->negCounter++;
                         }
                         else
                         {//+++ not in night mode or was not a bird*/

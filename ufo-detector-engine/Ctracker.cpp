@@ -112,11 +112,13 @@ void CTracker::Update(const std::vector<cv::Point2d>& detections, const std::vec
 			if (tracks[i]->skipped_frames > maximum_allowed_skipped_frames)
 			{
                 if(tracks[i]->posCounter>tracks[i]->negCounter){
-                    if(tracks[i]->birdCounter<2){
-                        removedTrackWithPositive=true;
+                    if(!removedTrackWithPositive && tracks[i]->birdCounter>=2){
+                        wasBird = true;
+                    }
+                    else {
+                        removedTrackWithPositive = true;
                         wasBird = false;
                     }
-                    else wasBird = true;
                 }
 				tracks.erase(tracks.begin() + i);
 				assignment.erase(assignment.begin() + i);
@@ -166,13 +168,13 @@ void CTracker::updateEmpty(){
         {
 
             if(tracks[i]->posCounter>tracks[i]->negCounter){
-                if(tracks[i]->birdCounter<2){
-                    removedTrackWithPositive=true;
+                if(!removedTrackWithPositive && tracks[i]->birdCounter>=2){
+                    wasBird = true;
                 }
-                else wasBird=true;
-            }
-            else if (tracks[i]->birdCounter>1){
-                wasBird=true;
+                else {
+                    removedTrackWithPositive = true;
+                    wasBird = false;
+                }
             }
             //cout << "Pos: " << tracks[i]->posCounter << " Neg: " << tracks[i]->negCounter << endl;
             tracks.erase(tracks.begin()+i);
