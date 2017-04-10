@@ -15,6 +15,10 @@ CDetector::~CDetector(void)
 //----------------------------------------------------------------------
 void CDetector::DetectContour(cv::Mat& img, std::vector<cv::Rect>& Rects,std::vector<cv::Point2d>& centers, cv::Rect& croppedRect)
 {
+    // unused
+    (void)Rects;
+    (void)centers;
+
 	m_rects.clear();
 	m_centers.clear();
 	std::vector<std::vector<cv::Point> > contours;

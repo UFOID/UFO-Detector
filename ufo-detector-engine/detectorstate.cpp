@@ -11,7 +11,7 @@ DetectorState::DetectorState(QObject *parent, Recorder *rec) : QObject(parent), 
     map_result[BIRD] = {"Object was bird: removed video",false};
     map_result[MIN_POSITIVE_NOT_REACHED] = {"Minimum required positive detections not met: removed video",false};
     map_result[ALL_NEGATIVE] = {"All found objects negative: removed video",false};
-    int id = qRegisterMetaType<DetectorState::DetectionResult>();
+    qRegisterMetaType<DetectorState::DetectionResult>();
     connect(this,SIGNAL(foundDetectionResult(DetectorState::DetectionResult)),this,SLOT(handleResult(DetectorState::DetectionResult)));
 
 }
