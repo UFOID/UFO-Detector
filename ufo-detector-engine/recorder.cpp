@@ -263,7 +263,7 @@ void Recorder::readFrameThread()
     }
 }
 
-void Recorder::saveVideoThumbnailImage(Mat image, QString dateTime) {
+void Recorder::saveVideoThumbnailImage(Mat& image, QString dateTime) {
     Mat thumbnail = image.clone();
     cv::resize(thumbnail, thumbnail, m_thumbnailResolution, 0, 0, INTER_CUBIC);
     QString thumbnailFileName = m_resultVideoDirName + "/" + m_thumbnailDirName + "/" + dateTime + m_thumbnailExtension;

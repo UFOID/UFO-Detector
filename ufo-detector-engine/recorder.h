@@ -110,7 +110,7 @@ private:
      * @param image
      * @param dateTime
      */
-    void saveVideoThumbnailImage(Mat image, QString dateTime);
+    void saveVideoThumbnailImage(Mat& image, QString dateTime);
 
 #ifndef _UNIT_TEST_
 private slots:

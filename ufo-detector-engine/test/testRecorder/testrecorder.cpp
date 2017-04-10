@@ -56,6 +56,8 @@ private Q_SLOTS:
      */
     void mockCamera();
 
+    void saveVideoThumbnailImage();
+
 private:
     Recorder* m_recorder;
     Config* m_config;
@@ -275,6 +277,19 @@ void TestRecorder::videoCodecs()
     }
     // Recorder has modified the next frame of mock Camera so clean it
     mockCameraNextFrame = cv::Mat();
+}
+
+void TestRecorder::saveVideoThumbnailImage() {
+    QString dateTime = "2017-04-10--12-00-00";
+    QString thumbnailFileName = m_config->resultVideoDir() + "/thumbnails/" + dateTime + ".jpg";
+    QFile thumbnailFile(thumbnailFileName);
+    Mat thumbnailImage(100, 200, CV_8UC3);
+
+    m_recorder->saveVideoThumbnailImage(thumbnailImage, dateTime);
+
+    QVERIFY(thumbnailFile.exists());
+    QVERIFY(thumbnailFile.remove());
+    QVERIFY(!thumbnailFile.exists());
 }
 
 void TestRecorder::fourccToStr(int fourcc, char str[5]) {
