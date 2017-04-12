@@ -82,7 +82,10 @@ std::vector<Point2f> GraphicsScene::getCoor()
          cout << "empty vector" << endl;
          return vecPoint;
     }
+}
 
+QPolygon* GraphicsScene::detectionAreaPolygon() {
+    return &pol;
 }
 
 void GraphicsScene::connectDots()

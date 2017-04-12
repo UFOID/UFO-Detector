@@ -56,9 +56,14 @@ ActualDetector::~ActualDetector()
 
 bool ActualDetector::initialize()
 {
+    chrono::high_resolution_clock::time_point startTime, endTime;
+    startTime = chrono::high_resolution_clock::now();
     if (!parseDetectionAreaFile(m_detectionAreaFile, m_region)){
         return false;
     }
+    endTime = chrono::high_resolution_clock::now();
+    chrono::duration<double, std::milli> msec = endTime - startTime;
+    qDebug() << "Parsing detection area file took" << msec.count() << "ms";
     state->resetState();
 
     m_prevFrame = m_camPtr->getWebcamFrame();

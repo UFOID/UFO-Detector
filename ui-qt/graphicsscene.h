@@ -22,6 +22,7 @@
 #include <QGraphicsScene>
 #include <QPoint>
 #include <QMouseEvent>
+#include <QList>
 #include <opencv2/imgproc/imgproc.hpp>
 
 class Camera;
@@ -36,6 +37,15 @@ public:
     explicit GraphicsScene(QObject *parent = 0, Camera* camPtr =0);
     ~GraphicsScene();
     std::vector<cv::Point2f> getCoor();
+
+    /**
+     * @brief Get detection area polygon.
+     * @return
+     *
+     * @todo enable using multiple polygons
+     */
+    QPolygon* detectionAreaPolygon();
+
     void connectDots();
     void clearPoly();
 

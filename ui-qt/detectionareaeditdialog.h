@@ -23,6 +23,8 @@
 #include <QDialog>
 #include <opencv2/opencv.hpp>
 #include "graphicsscene.h"
+#include <chrono>
+#include <QApplication>
 
 class Camera;
 
@@ -46,6 +48,7 @@ public:
 private slots:
     void on_buttonTakePicture_clicked();
     void on_buttonSave_clicked();
+    void on_savePolygonFilePushButton_clicked();
     void on_buttonConnect_clicked();
     void on_buttonClear_clicked();
 
@@ -64,13 +67,15 @@ private:
      * @brief Save the points to area xml
      */
     void savePointsAsXML(std::vector<cv::Point2f> & contour);
+
+    bool savePolygonsAsXml();
+
     int WIDTH;
     int HEIGHT;
     std::string areaFilePath;
     bool isPictureTaken;
     bool wasSaved;
     void closeEvent(QCloseEvent *);
-
 
 signals:
     //void savedFile();
