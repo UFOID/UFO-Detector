@@ -821,9 +821,11 @@ bool ActualDetector::loadDetectionArea(int cameraId) {
                 QPolygon polygon;
                 for (int p = 0; p < pointList.count(); p++) {
                     QDomElement pointElement = pointList.at(p).toElement();
-                    x = pointElement.attribute("x").toInt();
-                    y = pointElement.attribute("y").toInt();
-                    polygon << QPoint(x, y);
+                    if (pointElement.nodeName() == "point") {
+                        x = pointElement.attribute("x").toInt();
+                        y = pointElement.attribute("y").toInt();
+                        polygon << QPoint(x, y);
+                    }
                 }
                 qDebug() << polygon;
                 QRect boundingRect = polygon.boundingRect();
