@@ -146,6 +146,14 @@ private:
                      std::vector<cv::Point> &m_region,
                      int m_maxDeviation);
     bool parseDetectionAreaFile(std::string file_region, std::vector<cv::Point> &m_region);
+
+    /**
+     * @brief Load detection area from file.
+     * @param cameraId camera ID for which to load the detection area
+     * @return true on success, false on failure
+     */
+    bool loadDetectionArea(int cameraId);
+
     bool lightDetection(cv::Rect &rectangle, cv::Mat &croppedImage);
     void detectingThread();
     void detectingThreadHigh();
