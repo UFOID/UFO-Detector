@@ -48,7 +48,6 @@ public:
 private slots:
     void on_buttonTakePicture_clicked();
     void on_buttonSave_clicked();
-    void on_savePolygonFilePushButton_clicked();
     void on_buttonConnect_clicked();
     void on_buttonClear_clicked();
 
@@ -59,15 +58,9 @@ private:
     GraphicsScene *scene;
 
     /**
-     * @brief Get all points inside the selected area and pass vector with points to savePointsAsXML()
+     * @brief Save detection area polygons into XML file.
+     * @return true on success, false on failure
      */
-    void getPointsInContour(std::vector<cv::Point2f> & contour);
-
-    /**
-     * @brief Save the points to area xml
-     */
-    void savePointsAsXML(std::vector<cv::Point2f> & contour);
-
     bool savePolygonsAsXml();
 
     int WIDTH;

@@ -47,92 +47,27 @@ DetectionAreaEditDialog::DetectionAreaEditDialog(QWidget *parent, Camera *camPtr
     }
 
     isPictureTaken=false;
-    cout << "dialog constructed" << endl;
     ui->buttonClear->setEnabled(false);
     ui->buttonConnect->setEnabled(false);
     ui->progressBar->hide();
 }
 
-void DetectionAreaEditDialog::getPointsInContour(vector<Point2f> & contour)
-{
-    vector<Point2f> insideContour;
-    for(int j = 0; j < HEIGHT; j++)
-	{
-        for(int i = 0; i < WIDTH; i++)
-		{
-            Point2f p(i,j);
-            if(pointPolygonTest(contour,p,false) >= 0)
-			{ // yes inside
-				insideContour.push_back(p);
-			}                
-        }
-        float temp = (float)HEIGHT/(float)(j+1);
-        int division = 40/temp;
-        ui->progressBar->setValue(division);
-    }
-    cout << "# points inside contour: " << insideContour.size() << endl;
-    if(insideContour.size()!=0)
-    {
-        m_config->setDetectionAreaSize((int)insideContour.size());
-        savePointsAsXML(insideContour);
-    }
-    else ui->labelInfo->setText(tr("ERROR saving detection area file: no points inside area"));
-}
-
-void DetectionAreaEditDialog::savePointsAsXML(vector<Point2f> & contour)
-{
-    QFile file(QApplication::applicationDirPath() + "/detectionarea-point.xml");
-    if(file.open(QIODevice::WriteOnly | QIODevice::Text))
-    {
-       QXmlStreamWriter stream(&file);
-       stream.setAutoFormatting(true);
-       stream.writeStartDocument();
-       stream.writeStartElement("UFOID");
-
-       int count=0;
-       for(int i = 0; i < (int)contour.size(); i++)
-       {
-           count++;
-
-           stream.writeStartElement("point");
-           stream.writeAttribute("x",QString::number(contour[i].x));
-           stream.writeAttribute("y",QString::number(contour[i].y));
-           stream.writeEndElement();
-           if(count==1000)
-           {
-               count=0;
-               float temp = (float) contour.size()/ (float) i;
-               int division = 50/temp;
-               ui->progressBar->setValue(division+40);
-           }
-       }
-       stream.writeEndElement();
-       ui->progressBar->setValue(100);
-
-
-       file.close();
-       ui->labelInfo->setText(tr("Detection area file saved successfully"));
-
-    }
-    else
-    {
-        ui->labelInfo->setText(tr("ERROR saving the detection area file. Check \"Detection area file\" path in settings."));
-    }
-}
-
 bool DetectionAreaEditDialog::savePolygonsAsXml() {
-    QFile file(QApplication::applicationDirPath() + "/detectionarea-polygon.xml");
+    QFile file(m_config->detectionAreaFile());
     QPolygon* polygon = scene->detectionAreaPolygon();
 
     if(!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         ui->labelInfo->setText("ERROR saving " + file.fileName());
         return false;
     }
+
     QXmlStreamWriter stream(&file);
     stream.setAutoFormatting(true);
+
     stream.writeStartDocument();
-    stream.writeStartElement("detectionareas");
+    stream.writeStartElement("detectionarealist");
     stream.writeStartElement("detectionarea");
+
     stream.writeStartElement("camera");
     stream.writeAttribute("id", QString::number(m_config->cameraIndex()));
     stream.writeAttribute("width", QString::number(m_config->cameraWidth()));
@@ -147,9 +82,11 @@ bool DetectionAreaEditDialog::savePolygonsAsXml() {
         stream.writeEndElement();
     }
     stream.writeEndElement(); // polygon
+
     stream.writeEndElement(); // detectionarea
-    stream.writeEndElement(); // detectionareas
+    stream.writeEndElement(); // detectionarealist
     stream.writeEndDocument();
+
     ui->progressBar->setValue(100);
 
     file.close();
@@ -183,43 +120,18 @@ void DetectionAreaEditDialog::on_buttonTakePicture_clicked()
     ui->buttonConnect->setEnabled(true);
 }
 
-void DetectionAreaEditDialog::on_buttonSave_clicked()
-{
-    chrono::high_resolution_clock::time_point startTime, endTime;
-    startTime = chrono::high_resolution_clock::now();
-    if (isPictureTaken)
-    {
-        ui->progressBar->show();
-        ui->progressBar->repaint();
-        wasSaved=true;
-        std::vector<Point2f> vecFinal = scene->getCoor();
-        if (vecFinal.size()>2)
-        {
-            getPointsInContour(vecFinal);
-        }
-        else ui->labelInfo->setText(tr("ERROR not enough points. Draw at least three points around your area of detection."));
-    }
-    endTime = chrono::high_resolution_clock::now();
-    chrono::duration<double, std::milli> msec = endTime - startTime;
-    qDebug() << "Saving detection area point file took" << msec.count() << "ms";
-}
-
-void DetectionAreaEditDialog::on_savePolygonFilePushButton_clicked() {
-    chrono::high_resolution_clock::time_point startTime, endTime;
-    startTime = chrono::high_resolution_clock::now();
+void DetectionAreaEditDialog::on_buttonSave_clicked() {
     if (isPictureTaken)
     {
         ui->progressBar->show();
         ui->progressBar->repaint();
         if (scene->detectionAreaPolygon()->size() > 2) {
+            /// @todo check area of polygon >= 1
             savePolygonsAsXml();
-            wasSaved=true;
+            wasSaved = true;
         }
         else ui->labelInfo->setText(tr("ERROR not enough points. Draw at least three points around your area of detection."));
     }
-    endTime = chrono::high_resolution_clock::now();
-    chrono::duration<double, std::milli> msec = endTime - startTime;
-    qDebug() << "Saving detection area polygon file took" << msec.count() << "ms";
 }
 
 void DetectionAreaEditDialog::closeEvent(QCloseEvent *)
