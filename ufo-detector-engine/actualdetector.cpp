@@ -45,8 +45,6 @@ ActualDetector::ActualDetector(Camera* camera, Config* config, DataManager* data
     state->MIN_POS_REQUIRED = m_config->minPositiveDetections();
     connect(state, SIGNAL(sendOutputText(QString)), this, SIGNAL(broadcastOutputText(QString)));
 
-    loadDetectionArea(m_config->cameraIndex());
-
     qDebug() << "ActualDetector constructed";
 }
 
@@ -58,14 +56,9 @@ ActualDetector::~ActualDetector()
 
 bool ActualDetector::initialize()
 {
-    chrono::high_resolution_clock::time_point startTime, endTime;
-    startTime = chrono::high_resolution_clock::now();
-    if (!parseDetectionAreaFile(m_detectionAreaFile, m_region)){
+    if (!loadDetectionArea()){
         return false;
     }
-    endTime = chrono::high_resolution_clock::now();
-    chrono::duration<double, std::milli> msec = endTime - startTime;
-    qDebug() << "Parsing detection area file took" << msec.count() << "ms";
     state->resetState();
 
     m_prevFrame = m_camPtr->getWebcamFrame();
@@ -314,8 +307,6 @@ void ActualDetector::detectingThread()
     qDebug() << "ActualDetector::detectingThread() finished";
     delete detector;    
 }
-
-
 
 /*
  * Check if there was motion between frames. Return the AmountOfMotion detected
@@ -691,85 +682,15 @@ std::vector<Rect> ActualDetector::getConstantRecs(int totalLight)
 
 }
 
-/*
- * Read the detection area file
- */
-bool ActualDetector::parseDetectionAreaFile(string file_region, vector<Point> &region)
-{
-    region.clear();
-
-    QFile fileXML(file_region.c_str());
-    QDomDocument doc;
-    QDomElement root;
-    int size = m_config->detectionAreaSize();
-
-    if(!fileXML.open(QIODevice::ReadOnly | QIODevice::Text))
-    {
-        qDebug() << "Failed to open the detection area file" << QString(file_region.data());
-        emit errorReadingDetectionAreaFile();
-        return false;
-    }
-    else
-    {
-        if(!doc.setContent(&fileXML))
-        {
-            qDebug() << "Error reading the detection area file" << QString(file_region.data());
-            emit errorReadingDetectionAreaFile();
-            return false;
-        }
-        else
-        {
-            root = doc.firstChildElement();
-            QDomNode node = root.firstChild();
-            int x, y;
-            int count = 0;
-            while( !node.isNull())
-            {
-                if( node.isElement())
-                {
-                    QDomElement element = node.toElement();
-                    x = element.attribute("x").toInt();
-                    y = element.attribute("y").toInt();
-                    if(y>m_cameraHeight || x>m_cameraWidth)
-                    {
-                        qDebug() << y;
-                        qDebug() << x;
-                        /// @todo auto-scale area of detection
-                        auto output_text = tr("ERROR: Selected area of detection does not match camera resolution. Re-select area of detection.");
-                        emit broadcastOutputText(output_text);
-                        return false;
-                    }
-                    Point2f p(x,y);
-                    region.push_back(p);
-                    count++;
-                }
-                node = node.nextSibling();
-
-                if (count%1000 == 0)
-                {
-                    float division = (float)size / (float)count;
-                    int percentage =  85/division;
-                    emit progressValueChanged(percentage);
-                }
-            }
-            return true;
-        }
-    }
-
-}
-
-bool ActualDetector::loadDetectionArea(int cameraId) {
-    QFileInfo origFile(QFile(m_detectionAreaFile.c_str()));
-    QFile areaFile(origFile.absolutePath() + "/detectionArea-poly.xml");
+bool ActualDetector::loadDetectionArea() {
+    QFile areaFile(m_config->detectionAreaFile());
     QDomDocument doc;
     QDomElement root;
     QList<QPolygon> polygons;
     int size = 0;
     int x = 0;
     int y = 0;
-    chrono::high_resolution_clock::time_point startTime, endTime;
 
-    startTime = chrono::high_resolution_clock::now();
     if(!areaFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qDebug() << "Failed to open the detection area file" << areaFile.fileName();
         emit errorReadingDetectionAreaFile();
@@ -803,12 +724,15 @@ bool ActualDetector::loadDetectionArea(int cameraId) {
     for (int i = 0; i < areaList.count(); i++) {
         QDomNode area = areaList.at(i);
         QDomNodeList areaNodes = area.childNodes();
+
         if (area.nodeName() != "detectionarea") {
             QString errorMsg = tr("Expected <detectionarea> tag in detection area file but not found.");
             emit broadcastOutputText(errorMsg);
             return false;
         }
+
         QDomNodeList cameraList = area.toElement().elementsByTagName("camera");
+
         if (cameraList.count() != 1) {
             QString errorMsg = tr("Expected single <camera> tag in detection area. Assuming camera index 0.");
             emit broadcastOutputText(errorMsg);
@@ -816,9 +740,11 @@ bool ActualDetector::loadDetectionArea(int cameraId) {
 
         for (int a = 0; a < areaNodes.count(); a++) {
             QDomNode areaSubNode = areaNodes.at(a);
+
             if (areaSubNode.nodeName() == "polygon") {
                 QDomNodeList pointList = areaSubNode.childNodes();
                 QPolygon polygon;
+
                 for (int p = 0; p < pointList.count(); p++) {
                     QDomElement pointElement = pointList.at(p).toElement();
                     if (pointElement.nodeName() == "point") {
@@ -827,13 +753,14 @@ bool ActualDetector::loadDetectionArea(int cameraId) {
                         polygon << QPoint(x, y);
                     }
                 }
-                qDebug() << polygon;
                 QRect boundingRect = polygon.boundingRect();
+
                 if (!cameraRect.contains(boundingRect)) {
                     QString errorMsg = tr("ERROR: Selected area of detection does not match camera resolution. Re-select area of detection.");
                     emit broadcastOutputText(errorMsg);
                     return false;
                 }
+
                 for (int bx = boundingRect.x(); bx < boundingRect.width(); bx++) {
                     for (int by = boundingRect.y(); by < boundingRect.height(); by++) {
                         if (polygon.containsPoint(QPoint(bx, by), Qt::OddEvenFill)) {
@@ -845,10 +772,6 @@ bool ActualDetector::loadDetectionArea(int cameraId) {
             }
         }
     }
-    endTime = chrono::high_resolution_clock::now();
-    chrono::duration<double, std::milli> timeMsec = endTime - startTime;
-    qDebug() << "Got" << size << "points in detection area";
-    qDebug() << "Parsing detection area polygon file took" << QString::number(timeMsec.count()) << "ms";
     return true;
 }
 
