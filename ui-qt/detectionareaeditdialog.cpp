@@ -128,18 +128,9 @@ void DetectionAreaEditDialog::on_buttonSave_clicked() {
         if (scene->detectionAreaPolygon()->size() > 2) {
             /// @todo check area of polygon >= 1
             savePolygonsAsXml();
-            wasSaved = true;
         }
         else ui->labelInfo->setText(tr("ERROR not enough points. Draw at least three points around your area of detection."));
     }
-}
-
-void DetectionAreaEditDialog::closeEvent(QCloseEvent *)
-{
-//    if(wasSaved)
-//	  {
-//        emit savedFile();
-//    }
 }
 
 DetectionAreaEditDialog::~DetectionAreaEditDialog()

@@ -20,9 +20,9 @@
 #define DIALOG_H
 
 #include "config.h"
+#include "graphicsscene.h"
 #include <QDialog>
 #include <opencv2/opencv.hpp>
-#include "graphicsscene.h"
 #include <chrono>
 #include <QApplication>
 
@@ -67,12 +67,6 @@ private:
     int HEIGHT;
     std::string areaFilePath;
     bool isPictureTaken;
-    bool wasSaved;
-    void closeEvent(QCloseEvent *);
-
-signals:
-    //void savedFile();
-
 };
 
 #endif // DIALOG_H
