@@ -23,7 +23,6 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <iostream>
 #include <QPainter>
-#include "camera.h"
 
 using namespace cv;
 using namespace std;
@@ -31,14 +30,11 @@ using namespace std;
 /*
  * Graphics scene for drawing points to the detection area dialog
  */
-GraphicsScene::GraphicsScene(QObject *parent, Camera *camPtr) :
+GraphicsScene::GraphicsScene(QObject *parent, Camera *camera) :
     QGraphicsScene(parent)
 {
-    Mat src;    
-    src = camPtr->getWebcamFrame();
-    cv::cvtColor(src, src, CV_BGR2RGB);
-    QImage imgToDisplay = QImage((uchar*)src.data, src.cols, src.rows, src.step, QImage::Format_RGB888);
-    addPixmap(QPixmap::fromImage(imgToDisplay));
+    m_camera = camera;
+    m_picture = NULL;
 }
 
 void GraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
@@ -96,9 +92,22 @@ void GraphicsScene::connectDots()
     }
 
 }
+
 void GraphicsScene::clearPoly()
 {
     pol.clear();
+}
+
+bool GraphicsScene::takePicture() {
+    Mat src;
+    src = m_camera->getWebcamFrame();
+    cv::cvtColor(src, src, CV_BGR2RGB);
+    QImage imgToDisplay = QImage((uchar*)src.data, src.cols, src.rows, src.step, QImage::Format_RGB888);
+    if (items().contains((QGraphicsItem*)m_picture)) {
+        removeItem((QGraphicsItem*)m_picture);
+    }
+    m_picture = addPixmap(QPixmap::fromImage(imgToDisplay));
+    return true;
 }
 
 GraphicsScene::~GraphicsScene()

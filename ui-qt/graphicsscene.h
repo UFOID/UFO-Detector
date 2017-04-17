@@ -19,13 +19,12 @@
 #ifndef GRAPHICSSCENE_H
 #define GRAPHICSSCENE_H
 
+#include "camera.h"
 #include <QGraphicsScene>
 #include <QPoint>
 #include <QMouseEvent>
 #include <QList>
 #include <opencv2/imgproc/imgproc.hpp>
-
-class Camera;
 
 /**
  * @brief Graphics scene for DetectionAreaEditDialog
@@ -34,7 +33,7 @@ class GraphicsScene : public QGraphicsScene
 {
     Q_OBJECT
 public:
-    explicit GraphicsScene(QObject *parent = 0, Camera* camPtr =0);
+    explicit GraphicsScene(QObject *parent = 0, Camera* camera =0);
     ~GraphicsScene();
     std::vector<cv::Point2f> getCoor();
 
@@ -49,8 +48,18 @@ public:
     void connectDots();
     void clearPoly();
 
+    /**
+     * @brief Take picture with web camera and show it.
+     * @return true on success, false on failure (webcam error)
+     */
+    bool takePicture();
+
+#ifndef _UNIT_TEST_
 private:
+#endif
     QPolygon pol;
+    Camera* m_camera;
+    QGraphicsPixmapItem* m_picture;
 
 signals:
 
