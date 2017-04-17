@@ -35,7 +35,6 @@ class GraphicsScene : public QGraphicsScene
 public:
     explicit GraphicsScene(QObject *parent = 0, Camera* camera =0);
     ~GraphicsScene();
-    std::vector<cv::Point2f> getCoor();
 
     /**
      * @brief Get detection area polygon.

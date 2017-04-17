@@ -54,32 +54,6 @@ void GraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
     }
 }
 
-std::vector<Point2f> GraphicsScene::getCoor()
-{
-    std::vector<Point2f> vecPoint;
-
-    if (pol.size()>2)
-	{
-        connectDots();
-        std::vector<QPoint> myVec = pol.toStdVector();
-
-        for(int i=0; i < (int)myVec.size(); i++)
-		{
-            QPoint point = myVec[i];
-            Point2f p(point.x(), point.y());
-           vecPoint.push_back(p);
-        }
-
-        pol.clear();
-        return vecPoint;
-    }
-    else
-	{
-         cout << "empty vector" << endl;
-         return vecPoint;
-    }
-}
-
 QPolygon* GraphicsScene::detectionAreaPolygon() {
     return &pol;
 }
