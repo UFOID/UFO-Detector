@@ -35,12 +35,16 @@ GraphicsScene::GraphicsScene(QObject *parent, Camera *camera) :
 {
     m_camera = camera;
     m_picture = NULL;
+    m_polygonClosed = false;
 }
 
 void GraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
     if (mouseEvent->button() == Qt::LeftButton)
 	{
+        if (m_polygonClosed) {
+            return;
+        }
         QPoint pos = mouseEvent->scenePos().toPoint();
         pol.append(pos);
         double rad  = 2;
@@ -62,8 +66,9 @@ bool GraphicsScene::connectDots()
 {
     if (pol.size()>2)
 	{
-       addLine(QLine(pol.first(),pol.last()),QPen(Qt::red,1));
-       return true;
+        addLine(QLine(pol.first(),pol.last()),QPen(Qt::red,1));
+        m_polygonClosed = true;
+        return true;
     }
     return false;
 }
@@ -71,6 +76,7 @@ bool GraphicsScene::connectDots()
 void GraphicsScene::clearPoly()
 {
     pol.clear();
+    m_polygonClosed = false;
 }
 
 bool GraphicsScene::takePicture() {

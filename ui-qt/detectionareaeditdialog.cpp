@@ -130,6 +130,8 @@ void DetectionAreaEditDialog::on_buttonClear_clicked()
 
 void DetectionAreaEditDialog::on_buttonTakePicture_clicked()
 {
+    m_scene->clearPoly();
+    m_scene->clear();
     m_scene->takePicture();
     m_pictureTaken = true;
     ui->labelInfo->setText(tr("2. Click to create points around the area of the detection. Connect the first and last points using the \"Connect\" button."));

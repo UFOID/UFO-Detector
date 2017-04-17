@@ -64,6 +64,7 @@ private:
     QPolygon pol;
     Camera* m_camera;
     QGraphicsPixmapItem* m_picture;
+    bool m_polygonClosed;
 
 signals:
 
