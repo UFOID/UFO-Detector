@@ -131,7 +131,7 @@ void DetectionAreaEditDialog::on_buttonTakePicture_clicked()
     ui->image->setScene(scene);
     ui->image->show();
     isPictureTaken=true;
-    ui->labelInfo->setText(tr("2. Click to create points around the area of the dection. Connect the first and last points using the \"Connect\" button."));
+    ui->labelInfo->setText(tr("2. Click to create points around the area of the detection. Connect the first and last points using the \"Connect\" button."));
     ui->buttonClear->setEnabled(true);
     ui->buttonConnect->setEnabled(true);
 }
