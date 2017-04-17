@@ -53,9 +53,10 @@ private slots:
 
 private:
     Ui::DetectionAreaEditDialog *ui;
-    Camera *cameraPtr;
+    Camera *m_camera;
     Config *m_config;
-    GraphicsScene *scene;
+    GraphicsScene *m_scene;
+    bool m_pictureTaken;
 
     /**
      * @brief Save detection area polygons into XML file.
@@ -69,11 +70,6 @@ private:
      * @return true if polygon is valid, false if not
      */
     bool checkPolygon(QPolygon* polygon);
-
-    int WIDTH;
-    int HEIGHT;
-    std::string areaFilePath;
-    bool isPictureTaken;
 };
 
 #endif // DIALOG_H

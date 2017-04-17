@@ -29,31 +29,27 @@ using namespace cv;
 using namespace std;
 
 DetectionAreaEditDialog::DetectionAreaEditDialog(QWidget *parent, Camera *camPtr, Config *configPtr) :
-    QDialog(parent),  ui(new Ui::DetectionAreaEditDialog), cameraPtr(camPtr), m_config(configPtr)
+    QDialog(parent),  ui(new Ui::DetectionAreaEditDialog), m_camera(camPtr), m_config(configPtr)
 {
     ui->setupUi(this);
 
-    WIDTH = m_config->cameraWidth();
-    HEIGHT = m_config->cameraHeight();
-    areaFilePath = m_config->detectionAreaFile().toStdString(); /// @todo no need to use stdstrings
-
-    QFile area(areaFilePath.c_str());
+    QFile area(m_config->detectionAreaFile());
     if(!area.exists())
-	{
-         ui->labelInfo->setText(tr("Could not find area file: %1 - Check area file path in settings").arg(areaFilePath.c_str()));
+    {
+         ui->labelInfo->setText(tr("Could not find area file: %1 - Check area file path in settings").arg(m_config->detectionAreaFile()));
          ui->buttonTakePicture->setEnabled(false);
          ui->buttonConnect->setEnabled(false);
          ui->buttonSave->setEnabled(false);
     }
 
-    isPictureTaken=false;
+    m_pictureTaken=false;
     ui->buttonClear->setEnabled(false);
     ui->buttonConnect->setEnabled(false);
 }
 
 bool DetectionAreaEditDialog::savePolygonsAsXml() {
     QFile file(m_config->detectionAreaFile());
-    QPolygon* polygon = scene->detectionAreaPolygon();
+    QPolygon* polygon = m_scene->detectionAreaPolygon();
 
     if(!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         ui->labelInfo->setText("ERROR saving " + file.fileName());
@@ -114,32 +110,32 @@ bool DetectionAreaEditDialog::checkPolygon(QPolygon* polygon) {
 
 void DetectionAreaEditDialog::on_buttonConnect_clicked()
 {
-    scene->connectDots();
+    m_scene->connectDots();
     ui->labelInfo->setText(tr("3. Press the \"Save\" button to save your detection area file"));
 }
 
 void DetectionAreaEditDialog::on_buttonClear_clicked()
 {
-    scene->clearPoly();
-    scene->clear();
+    m_scene->clearPoly();
+    m_scene->clear();
     ui->labelInfo->setText(tr("1. Take a picture with the webcam"));
 }
 
 void DetectionAreaEditDialog::on_buttonTakePicture_clicked()
 {
-    scene = new GraphicsScene(this,cameraPtr);
-    ui->image->setScene(scene);
+    m_scene = new GraphicsScene(this,m_camera);
+    ui->image->setScene(m_scene);
     ui->image->show();
-    isPictureTaken=true;
+    m_pictureTaken=true;
     ui->labelInfo->setText(tr("2. Click to create points around the area of the detection. Connect the first and last points using the \"Connect\" button."));
     ui->buttonClear->setEnabled(true);
     ui->buttonConnect->setEnabled(true);
 }
 
 void DetectionAreaEditDialog::on_buttonSave_clicked() {
-    if (isPictureTaken)
+    if (m_pictureTaken)
     {
-        QPolygon* polygon = scene->detectionAreaPolygon();
+        QPolygon* polygon = m_scene->detectionAreaPolygon();
         if (checkPolygon(polygon)) {
             savePolygonsAsXml();
         } else {
