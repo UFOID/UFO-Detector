@@ -63,6 +63,13 @@ private:
      */
     bool savePolygonsAsXml();
 
+    /**
+     * @brief Check that polygon is acceptable as detection area polygon: area is larger than 1.
+     * @param polygon
+     * @return true if polygon is valid, false if not
+     */
+    bool checkPolygon(QPolygon* polygon);
+
     int WIDTH;
     int HEIGHT;
     std::string areaFilePath;

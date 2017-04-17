@@ -94,6 +94,27 @@ bool DetectionAreaEditDialog::savePolygonsAsXml() {
     return true;
 }
 
+bool DetectionAreaEditDialog::checkPolygon(QPolygon* polygon) {
+    if (!polygon) {
+        return false;
+    }
+
+    if (polygon->size() <= 2) {
+        return false;
+    }
+
+    QRect boundingRect = polygon->boundingRect();
+
+    for (int bx = boundingRect.x(); bx < boundingRect.width(); bx++) {
+        for (int by = boundingRect.y(); by < boundingRect.height(); by++) {
+            if (polygon->containsPoint(QPoint(bx, by), Qt::OddEvenFill)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 void DetectionAreaEditDialog::on_buttonConnect_clicked()
 {
     scene->connectDots();
@@ -125,11 +146,12 @@ void DetectionAreaEditDialog::on_buttonSave_clicked() {
     {
         ui->progressBar->show();
         ui->progressBar->repaint();
-        if (scene->detectionAreaPolygon()->size() > 2) {
-            /// @todo check area of polygon >= 1
+        QPolygon* polygon = scene->detectionAreaPolygon();
+        if (checkPolygon(polygon)) {
             savePolygonsAsXml();
+        } else {
+            ui->labelInfo->setText(tr("ERROR not enough points. Draw at least three points around your area of detection."));
         }
-        else ui->labelInfo->setText(tr("ERROR not enough points. Draw at least three points around your area of detection."));
     }
 }
 
