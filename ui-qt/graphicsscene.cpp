@@ -41,7 +41,7 @@ GraphicsScene::GraphicsScene(QObject *parent, Camera *camera) :
 void GraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
     if (mouseEvent->button() == Qt::LeftButton)
-	{
+    {
         if (m_polygonClosed) {
             return;
         }
@@ -50,7 +50,7 @@ void GraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
         double rad  = 2;
         this->addEllipse(pos.x()-rad, pos.y()-rad, rad*2.0, rad*2.0, QPen(Qt::red), QBrush(Qt::SolidPattern));
         if(pol.size() > 1)
-		{
+        {
             QPainterPath myPath;
             myPath.addPolygon(pol);
             addPath(myPath,QPen(Qt::red,1));
@@ -65,7 +65,7 @@ QPolygon* GraphicsScene::detectionAreaPolygon() {
 bool GraphicsScene::connectDots()
 {
     if (pol.size()>2)
-	{
+    {
         addLine(QLine(pol.first(),pol.last()),QPen(Qt::red,1));
         m_polygonClosed = true;
         return true;
