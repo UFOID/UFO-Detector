@@ -52,7 +52,7 @@ bool DetectionAreaEditDialog::savePolygonsAsXml() {
     QPolygon* polygon = m_scene->detectionAreaPolygon();
 
     if(!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        ui->labelInfo->setText("ERROR saving " + file.fileName());
+        ui->labelInfo->setText(tr("ERROR saving %1").arg(file.fileName()));
         return false;
     }
 
@@ -83,7 +83,7 @@ bool DetectionAreaEditDialog::savePolygonsAsXml() {
     stream.writeEndDocument();
 
     file.close();
-    ui->labelInfo->setText("Saved " + file.fileName());
+    ui->labelInfo->setText(tr("Saved %1").arg(file.fileName()));
     return true;
 }
 
