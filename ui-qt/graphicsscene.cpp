@@ -58,13 +58,14 @@ QPolygon* GraphicsScene::detectionAreaPolygon() {
     return &pol;
 }
 
-void GraphicsScene::connectDots()
+bool GraphicsScene::connectDots()
 {
     if (pol.size()>2)
 	{
        addLine(QLine(pol.first(),pol.last()),QPen(Qt::red,1));
+       return true;
     }
-
+    return false;
 }
 
 void GraphicsScene::clearPoly()

@@ -44,7 +44,12 @@ public:
      */
     QPolygon* detectionAreaPolygon();
 
-    void connectDots();
+    /**
+     * @brief Close polygon by connecting start and end vertices.
+     * @return true if connecting was successful, false if not
+     */
+    bool connectDots();
+
     void clearPoly();
 
     /**

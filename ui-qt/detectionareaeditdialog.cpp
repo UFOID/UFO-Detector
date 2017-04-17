@@ -112,14 +112,19 @@ bool DetectionAreaEditDialog::checkPolygon(QPolygon* polygon) {
 
 void DetectionAreaEditDialog::on_buttonConnect_clicked()
 {
-    m_scene->connectDots();
-    ui->labelInfo->setText(tr("3. Press the \"Save\" button to save your detection area file"));
+    if (m_scene->connectDots()) {
+        ui->buttonSave->setEnabled(true);
+        ui->labelInfo->setText(tr("3. Press the \"Save\" button to save your detection area file"));
+    } else {
+        ui->labelInfo->setText(tr("ERROR not enough points. Draw at least three points around your area of detection."));
+    }
 }
 
 void DetectionAreaEditDialog::on_buttonClear_clicked()
 {
     m_scene->clearPoly();
     m_scene->clear();
+    ui->buttonSave->setEnabled(false);
     ui->labelInfo->setText(tr("1. Take a picture with the webcam"));
 }
 
@@ -138,8 +143,6 @@ void DetectionAreaEditDialog::on_buttonSave_clicked() {
         QPolygon* polygon = m_scene->detectionAreaPolygon();
         if (checkPolygon(polygon)) {
             savePolygonsAsXml();
-        } else {
-            ui->labelInfo->setText(tr("ERROR not enough points. Draw at least three points around your area of detection."));
         }
     }
 }
