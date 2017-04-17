@@ -49,7 +49,6 @@ DetectionAreaEditDialog::DetectionAreaEditDialog(QWidget *parent, Camera *camPtr
     isPictureTaken=false;
     ui->buttonClear->setEnabled(false);
     ui->buttonConnect->setEnabled(false);
-    ui->progressBar->hide();
 }
 
 bool DetectionAreaEditDialog::savePolygonsAsXml() {
@@ -86,8 +85,6 @@ bool DetectionAreaEditDialog::savePolygonsAsXml() {
     stream.writeEndElement(); // detectionarea
     stream.writeEndElement(); // detectionarealist
     stream.writeEndDocument();
-
-    ui->progressBar->setValue(100);
 
     file.close();
     ui->labelInfo->setText("Saved " + file.fileName());
@@ -130,8 +127,6 @@ void DetectionAreaEditDialog::on_buttonClear_clicked()
 
 void DetectionAreaEditDialog::on_buttonTakePicture_clicked()
 {
-    ui->progressBar->setValue(0);
-    ui->progressBar->hide();
     scene = new GraphicsScene(this,cameraPtr);
     ui->image->setScene(scene);
     ui->image->show();
@@ -144,8 +139,6 @@ void DetectionAreaEditDialog::on_buttonTakePicture_clicked()
 void DetectionAreaEditDialog::on_buttonSave_clicked() {
     if (isPictureTaken)
     {
-        ui->progressBar->show();
-        ui->progressBar->repaint();
         QPolygon* polygon = scene->detectionAreaPolygon();
         if (checkPolygon(polygon)) {
             savePolygonsAsXml();
