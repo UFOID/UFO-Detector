@@ -17,12 +17,6 @@
  */
 
 #include "graphicsscene.h"
-#include <QDebug>
-#include <QGraphicsSceneMouseEvent>
-#include <QPainter>
-#include <opencv2/highgui/highgui.hpp>
-#include <iostream>
-#include <QPainter>
 
 using namespace cv;
 using namespace std;
@@ -36,25 +30,100 @@ GraphicsScene::GraphicsScene(QObject *parent, Camera *camera) :
     m_camera = camera;
     m_picture = NULL;
     m_polygonClosed = false;
+    m_tmpLine = NULL;
 }
 
 void GraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
-    if (mouseEvent->button() == Qt::LeftButton)
-    {
-        if (m_polygonClosed) {
-            return;
+    if (mouseEvent->button() != Qt::LeftButton) {
+        return;
+    }
+    mouseEvent->accept();
+    QPoint pos = mouseEvent->scenePos().toPoint();
+
+    // moving existing node
+    QGraphicsItem* clickedItem = itemAt(pos, QTransform());
+    if (clickedItem && (clickedItem->type() == 4)) {    // 4 = ellipse
+        clickedItem->setSelected(true);
+        m_addingNode = false;
+        return;
+    }
+
+    if (m_polygonClosed) {
+        return;
+    }
+
+    // creating a new node
+    double rad  = 4;
+    QGraphicsEllipseItem* ellipse = this->addEllipse(pos.x()-rad, pos.y()-rad,
+        rad*2.0, rad*2.0, QPen(Qt::red), QBrush(Qt::SolidPattern));
+    ellipse->setFlag(QGraphicsItem::ItemIsSelectable, true);
+    ellipse->setFlag(QGraphicsItem::ItemIsMovable, true);
+    ellipse->setSelected(true);
+    m_addingNode = true;
+
+    if (!pol.isEmpty()) {
+        QPointF prevNode(pol.last());
+        QLineF line(prevNode, pos);
+        if (m_tmpLine) {
+            delete m_tmpLine;
         }
-        QPoint pos = mouseEvent->scenePos().toPoint();
+        m_tmpLine = addLine(line, QPen(Qt::red));
+    }
+}
+
+void GraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
+    QPointF scenePos = event->scenePos();
+    QList<QGraphicsItem*> items = selectedItems();
+
+    if (!items.isEmpty()) {
+        event->accept();
+        QPointF delta = scenePos - event->lastScenePos();
+        QListIterator<QGraphicsItem*> itemIt(items);
+
+        while (itemIt.hasNext()) {
+            QGraphicsItem* item = itemIt.next();
+            item->moveBy(delta.x(), delta.y());
+        }
+    }
+
+    if (m_addingNode && !pol.isEmpty()) {
+        QPointF prevNode(pol.last());
+        QLineF line(prevNode, scenePos);
+        if (!m_tmpLine) {
+            m_tmpLine = addLine(line, QPen(Qt::red));
+        } else {
+            m_tmpLine->setLine(line);
+        }
+    }
+}
+
+void GraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
+    event->accept();
+    QPoint pos = event->scenePos().toPoint();
+
+    QList<QGraphicsItem*> items = selectedItems();
+    if (!items.isEmpty()) {
+        QListIterator<QGraphicsItem*> itemIt(items);
+        while (itemIt.hasNext()) {
+            QGraphicsItem* item = itemIt.next();
+            item->setSelected(false);
+        }
+    }
+
+    if (m_tmpLine) {
+        delete m_tmpLine;
+        m_tmpLine = NULL;
+    }
+
+    if (m_addingNode) {
         pol.append(pos);
-        double rad  = 2;
-        this->addEllipse(pos.x()-rad, pos.y()-rad, rad*2.0, rad*2.0, QPen(Qt::red), QBrush(Qt::SolidPattern));
-        if(pol.size() > 1)
-        {
+        if (pol.size() > 1) {
             QPainterPath myPath;
             myPath.addPolygon(pol);
             addPath(myPath,QPen(Qt::red,1));
         }
+        m_addingNode = false;
     }
 }
 

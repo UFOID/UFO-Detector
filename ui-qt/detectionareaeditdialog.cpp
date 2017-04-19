@@ -43,6 +43,7 @@ DetectionAreaEditDialog::DetectionAreaEditDialog(QWidget *parent, Camera *camPtr
     m_scene = new GraphicsScene(this, m_camera);
     ui->image->setScene(m_scene);
     ui->image->show();
+    //ui->image->setMouseTracking(true);
     m_pictureTaken = false;
     ui->buttonClear->setEnabled(false);
     ui->buttonConnect->setEnabled(false);

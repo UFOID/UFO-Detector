@@ -25,6 +25,13 @@
 #include <QMouseEvent>
 #include <QList>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <QDebug>
+#include <QGraphicsSceneMouseEvent>
+#include <QPainter>
+#include <opencv2/highgui/highgui.hpp>
+#include <iostream>
+#include <QPainter>
+#include <QGraphicsItem>
 
 /**
  * @brief Graphics scene for DetectionAreaEditDialog
@@ -64,12 +71,17 @@ private:
     QPolygon pol;
     Camera* m_camera;
     QGraphicsPixmapItem* m_picture;
+    QGraphicsPathItem* m_path;
+    QGraphicsLineItem* m_tmpLine;   ///< line drawn when moving a newly added node
     bool m_polygonClosed;
+    bool m_addingNode;  ///< node is being added to polygon
 
 signals:
 
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
+    void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
 
 public slots:
     private:
