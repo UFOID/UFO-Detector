@@ -285,7 +285,8 @@ void DataManager::saveResultData(QString dateTime, QString videoLength) {
 
     if(!m_resultDataFile.open(QIODevice::WriteOnly | QIODevice::Text))
     {
-        qDebug() << "DataManager: failed to open result data file" << m_resultDataFile.fileName();
+        QString errorMsg = tr("DataManager: failed to open result data file %1").arg(m_resultDataFile.fileName());
+        emit messageBroadcasted(errorMsg);
         return;
     }
     else
@@ -296,10 +297,88 @@ void DataManager::saveResultData(QString dateTime, QString videoLength) {
         stream << m_resultDataDomDocument.toString();
         if (stream.status() != QTextStream::Ok)
         {
-            qDebug() << "DataManager: problem writing to result data file" << m_resultDataFile.fileName();
+            QString errorMsg = tr("DataManager: problem writing to result data file %1").arg(m_resultDataFile.fileName());
+            emit messageBroadcasted(errorMsg);
         }
         m_resultDataFile.flush();
         m_resultDataFile.close();
     }
     emit resultDataSaved(m_config->resultVideoDir(), dateTime, videoLength);
+}
+
+bool DataManager::readDetectionAreaFile() {
+    QFile areaFile(m_config->detectionAreaFile());
+    QDomDocument doc;
+    QDomElement root;
+    int x = 0;
+    int y = 0;
+
+    if(!areaFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QString errorMsg = tr("Failed to open the detection area file %1").arg(areaFile.fileName());
+        emit messageBroadcasted(errorMsg);
+        return false;
+    }
+
+    if(!doc.setContent(&areaFile)) {
+        QString errorMsg = tr("Error reading the detection area file %1").arg(areaFile.fileName());
+        areaFile.close();
+        emit messageBroadcasted(errorMsg);
+        return false;
+    }
+
+    areaFile.close();
+    root = doc.documentElement();
+    if (root.nodeName() != "detectionarealist") {
+        QString errorMsg = tr("Expected <detectionarealist> tag in detection area file but not found");
+        emit messageBroadcasted(errorMsg);
+        return false;
+    }
+    QDomNodeList areaList = root.childNodes();
+
+    if (areaList.count() > 1) {
+        QString errorMsg = tr("More than one detection areas defined, combining all together");
+        emit messageBroadcasted(errorMsg);
+    }
+
+    for (int i = 0; i < areaList.count(); i++) {
+        QDomNode area = areaList.at(i);
+        QDomNodeList areaNodes = area.childNodes();
+
+        if (area.nodeName() != "detectionarea") {
+            QString errorMsg = tr("Expected <detectionarea> tag in detection area file but not found.");
+            emit messageBroadcasted(errorMsg);
+            return false;
+        }
+
+        QDomNodeList cameraList = area.toElement().elementsByTagName("camera");
+
+        if (cameraList.count() != 1) {
+            QString errorMsg = tr("Expected single <camera> tag in detection area. Assuming camera index 0.");
+            emit messageBroadcasted(errorMsg);
+        }
+
+        for (int a = 0; a < areaNodes.count(); a++) {
+            QDomNode areaSubNode = areaNodes.at(a);
+
+            if (areaSubNode.nodeName() == "polygon") {
+                QDomNodeList pointList = areaSubNode.childNodes();
+                QPolygon* polygon = new QPolygon();
+
+                for (int p = 0; p < pointList.count(); p++) {
+                    QDomElement pointElement = pointList.at(p).toElement();
+                    if (pointElement.nodeName() == "point") {
+                        x = pointElement.attribute("x").toInt();
+                        y = pointElement.attribute("y").toInt();
+                        polygon->append(QPoint(x, y));
+                    }
+                }
+                m_detectionAreaPolygons.append(polygon);
+            }
+        }
+    }
+    return true;
+}
+
+QList<QPolygon*>& DataManager::detectionArea() {
+    return m_detectionAreaPolygons;
 }

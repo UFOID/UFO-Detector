@@ -24,6 +24,7 @@
 #include <QDomDocument>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include <QPolygon>
 #include <queue>
 
 /**
@@ -68,6 +69,14 @@ public:
 
     void saveResultData(QString dateTime, QString videoLength);
 
+    /**
+     * @brief Read detection area file.
+     * @return true on success, false on failure
+     */
+    bool readDetectionAreaFile();
+
+    QList<QPolygon*>& detectionArea();
+
 #ifndef _UNIT_TEST_
 private:
 #endif
@@ -78,6 +87,7 @@ private:
     QFile m_resultDataFile;  ///< result data file (XML)
     QDomDocument m_resultDataDomDocument;   ///< DOM representation of result data file
     QNetworkAccessManager* m_networkAccessManager;
+    QList<QPolygon*> m_detectionAreaPolygons; ///< detection area polygons (cameras not separated)
 
     /**
      * @brief Check that the folders for images, videos, and other files exist
@@ -134,6 +144,12 @@ signals:
      * @param videoLength
      */
     void resultDataSaved(QString videoFolder, QString dateTime, QString videoLength);
+
+    /**
+     * @brief Emitted on message broadcast.
+     * @param message
+     */
+    void messageBroadcasted(QString message);
 };
 
 #endif // DATAMANAGER_H

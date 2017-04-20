@@ -147,11 +147,11 @@ private:
                      int m_maxDeviation);
 
     /**
-     * @brief Load detection area from file.
+     * @brief Initialize detection area.
      * Currently combining all defined detection areas into a single one.
      * @return true on success, false on failure
      */
-    bool loadDetectionArea();
+    bool initDetectionArea();
 
     bool lightDetection(cv::Rect &rectangle, cv::Mat &croppedImage);
     void detectingThread();
