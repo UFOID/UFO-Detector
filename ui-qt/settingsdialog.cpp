@@ -25,11 +25,6 @@
 #include <QDebug>
 #include <QDomDocument>
 
-
-/* Note:
- * Checking the status of the area file is broken. Commented out
- */
-
 SettingsDialog::SettingsDialog(QWidget* parent, Camera* camera, Config* config,
     DataManager* dataManager) :
     QDialog(parent), ui(new Ui::SettingsDialog), m_camera(camera), m_config(config),
@@ -78,10 +73,7 @@ SettingsDialog::SettingsDialog(QWidget* parent, Camera* camera, Config* config,
     setWindowFlags(Qt::FramelessWindowHint);
     setWindowFlags(Qt::WindowTitleHint);
     m_detectionAreaDialogIsOpen=false;
-    wasSaved=false;
-
-//    connect(this,SIGNAL(finishedCheckingXML()),this,SLOT(cleanupThreadCheckXML()));
-//    threadXMLfile.reset(new std::thread(&Settings::checkAreaFile, this));
+    m_wasSaved=false;
 }
 
 void SettingsDialog::saveSettings()
@@ -102,27 +94,6 @@ void SettingsDialog::saveSettings()
 
 }
 
-//void Settings::checkAreaFile()
-//{
-//    QFile fileXML(xmlFile);
-//    QDomDocument doc;
-
-//    if(!fileXML.open(QIODevice::ReadOnly | QIODevice::Text))
-//	{
-//        qDebug() << "fail reading the area file";
-//    }
-//    else
-//	{
-//        if(!doc.setContent(&fileXML))
-//		{
-//            ui->lineStatus->setText(tr("File found but is empty. Select area of detection."));
-//        }
-//        else ui->lineStatus->setText(tr("File found and loaded correctly"));
-//    }
-	
-//    emit finishedCheckingXML();
-//}
-
 void SettingsDialog::on_toolButtonVideoPath_clicked()
 {
     QString videoFilePath=QFileDialog::getExistingDirectory(this,tr("Select Directory"),QDir::currentPath(),QFileDialog::ShowDirsOnly);
@@ -134,8 +105,6 @@ void SettingsDialog::on_toolButtonVideoPath_clicked()
 
 SettingsDialog::~SettingsDialog()
 {
-    qDebug() << "destructor settings";
-    //disconnect(this,SIGNAL(finishedCheckingXML()),this,SLOT(cleanupThreadCheckXML()));
     delete ui;
 }
 
@@ -159,7 +128,7 @@ void SettingsDialog::on_buttonSave_clicked()
         }
     }
     saveSettings();
-    wasSaved=true;
+    m_wasSaved = true;
     /// @todo apply settings on-the-fly
     QMessageBox::information(this, tr("Information"), tr("Settings saved successfully. Restart the application to apply the changes."));
 }
@@ -172,17 +141,6 @@ void SettingsDialog::on_buttonCancel_clicked()
         delete m_detectionAreaDialog;
     }
     this->close();
-//    if(!threadXMLfile)
-//	{
-//        if(dialogIsOpened)
-//		{
-//            disconnect(myDialog,SIGNAL(savedFile()),this,SLOT(startThreadCheckXML()));
-//            myDialog->close();
-//            delete myDialog;
-//        }
-//        this->close();
-//    }
-//    else QMessageBox::information(this, tr("Information"), tr("Please wait until checking of the area file has finished"));
 }
 
 void SettingsDialog::on_checkBoxsaveImages_stateChanged(int arg1)
@@ -224,7 +182,7 @@ void SettingsDialog::on_toolButtonImagePath_clicked()
 
 void SettingsDialog::on_buttonSelectDetectionArea_clicked()
 {
-    if (wasSaved)
+    if (m_wasSaved)
 	{
         QMessageBox::warning(this, tr("Warning"), tr("Restart the application before creating detection area file"));
     }
@@ -234,7 +192,6 @@ void SettingsDialog::on_buttonSelectDetectionArea_clicked()
         m_detectionAreaDialog = new DetectionAreaEditDialog(0, m_camera, m_config, m_dataManager);
         m_detectionAreaDialog->setModal(true);
         m_detectionAreaDialog->show();
-        //connect(myDialog,SIGNAL(savedFile()),this,SLOT(startThreadCheckXML()));
     }
 }
 
@@ -250,22 +207,6 @@ void SettingsDialog::onResolutionAcceptedInDialog(QSize resolution)
     ui->lineEditCameraWidth->setText(QString::number(resolution.width()));
     ui->lineEditCameraHeight->setText(QString::number(resolution.height()));
 }
-
-//void Settings::startThreadCheckXML()
-//{
-//    ui->lineStatus->setText(tr("Checking..."));
-//    threadXMLfile.reset(new std::thread(&Settings::checkAreaFile, this));
-//}
-
-//void Settings::cleanupThreadCheckXML()
-//{
-//    if(threadXMLfile)
-//	{
-//        threadXMLfile->join();
-//        threadXMLfile.reset();
-//        qDebug() << "cleanup done";
-//    }
-//}
 
 void SettingsDialog::on_toolButtonCodecHelp_clicked()
 {
