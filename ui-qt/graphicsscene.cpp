@@ -50,6 +50,7 @@ void GraphicsScene::addDetectionAreaPolygon(QPolygon* polygon) {
             m_polygonEdges.append(edge);
         } else {
             this->addItem(newNode);
+            newNode->setZValue(100);
             m_polygonNodes.append(newNode);
         }
     }
@@ -194,6 +195,5 @@ bool GraphicsScene::takePicture() {
 GraphicsScene::~GraphicsScene()
 {
     clearPolygon();
-    qDebug() << "deleted scene";
 }
 
