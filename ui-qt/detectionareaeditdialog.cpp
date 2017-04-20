@@ -18,15 +18,6 @@
 
 #include "detectionareaeditdialog.h"
 #include "ui_detectionareaeditdialog.h"
-#include <opencv2/highgui/highgui.hpp>
-#include <QGraphicsSceneMouseEvent>
-#include <QPainter>
-#include <iostream>
-#include <QDir>
-#include <QtXml>
-
-using namespace cv;
-using namespace std;
 
 DetectionAreaEditDialog::DetectionAreaEditDialog(QWidget *parent, Camera *camPtr, Config *configPtr) :
     QDialog(parent),  ui(new Ui::DetectionAreaEditDialog), m_camera(camPtr), m_config(configPtr)
@@ -86,7 +77,9 @@ bool DetectionAreaEditDialog::savePolygonsAsXml() {
     stream.writeEndDocument();
 
     file.close();
+    delete polygon;
     ui->labelInfo->setText(tr("Saved %1").arg(file.fileName()));
+
     return true;
 }
 

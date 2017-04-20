@@ -22,9 +22,18 @@
 #include "config.h"
 #include "graphicsscene.h"
 #include <QDialog>
-#include <opencv2/opencv.hpp>
-#include <chrono>
 #include <QApplication>
+#include <QGraphicsSceneMouseEvent>
+#include <QPainter>
+#include <QDir>
+#include <QtXml>
+#include <opencv2/opencv.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <chrono>
+#include <iostream>
+
+using namespace cv;
+using namespace std;
 
 class Camera;
 

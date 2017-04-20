@@ -20,6 +20,8 @@
 #define GRAPHICSSCENE_H
 
 #include "camera.h"
+#include "polygonnode.h"
+#include "polygonedge.h"
 #include <QGraphicsScene>
 #include <QPoint>
 #include <QMouseEvent>
@@ -32,6 +34,7 @@
 #include <iostream>
 #include <QPainter>
 #include <QGraphicsItem>
+#include <QVector>
 
 /**
  * @brief Graphics scene for DetectionAreaEditDialog
@@ -68,25 +71,19 @@ public:
 #ifndef _UNIT_TEST_
 private:
 #endif
-    QPolygon pol;
+    QVector<PolygonNode*> m_polygonNodes;
+    QVector<PolygonEdge*> m_polygonEdges;
+    PolygonNode* m_tmpNode;     ///< new node, not yet added to polygon
     Camera* m_camera;
-    QGraphicsPixmapItem* m_picture;
-    QGraphicsPathItem* m_path;
+    QGraphicsPixmapItem* m_picture; ///< picture taken with webcam
     QGraphicsLineItem* m_tmpLine;   ///< line drawn when moving a newly added node
     bool m_polygonClosed;
-    bool m_addingNode;  ///< node is being added to polygon
-
-signals:
+    bool m_addingNode;  ///< whether dragged node is being added to polygon
 
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
-
-public slots:
-    private:
-
-
 };
 
 #endif // GRAPHICSSCENE_H

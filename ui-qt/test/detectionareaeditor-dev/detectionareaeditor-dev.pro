@@ -23,7 +23,9 @@ SOURCES += ./main.cpp\
     ../../detectionareaeditdialog.cpp \
     ../../../ufo-detector-engine/camera.cpp \
     ../../../ufo-detector-engine/camerainfo.cpp \
-    ../../../ufo-detector-engine/videocodecsupportinfo.cpp
+    ../../../ufo-detector-engine/videocodecsupportinfo.cpp \
+    ../../polygonnode.cpp \
+    ../../polygonedge.cpp
 
 HEADERS  += ./mainwindow.h \
     ../../../ufo-detector-engine/config.h \
@@ -31,7 +33,9 @@ HEADERS  += ./mainwindow.h \
     ../../detectionareaeditdialog.h \
     ../../../ufo-detector-engine/camera.h \
     ../../../ufo-detector-engine/camerainfo.h \
-    ../../../ufo-detector-engine/videocodecsupportinfo.h
+    ../../../ufo-detector-engine/videocodecsupportinfo.h \
+    ../../polygonnode.h \
+    ../../polygonedge.h
 
 FORMS    += mainwindow.ui \
     ../../detectionareaeditdialog.ui
