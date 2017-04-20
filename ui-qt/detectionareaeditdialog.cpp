@@ -77,7 +77,6 @@ bool DetectionAreaEditDialog::savePolygonsAsXml() {
     stream.writeEndDocument();
 
     file.close();
-    delete polygon;
     ui->labelInfo->setText(tr("Saved %1").arg(file.fileName()));
 
     return true;

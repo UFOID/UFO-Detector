@@ -71,6 +71,7 @@ public:
 #ifndef _UNIT_TEST_
 private:
 #endif
+    QPolygon m_polygon; ///< detection area polygon, updated in detectionAreaPolygon()
     QVector<PolygonNode*> m_polygonNodes;
     QVector<PolygonEdge*> m_polygonEdges;
     PolygonNode* m_tmpNode;     ///< new node, not yet added to polygon

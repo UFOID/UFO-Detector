@@ -121,11 +121,11 @@ void GraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
 }
 
 QPolygon* GraphicsScene::detectionAreaPolygon() {
-    QPolygon* ret = new QPolygon();
+    m_polygon.clear();
     for (int i = 0; i < m_polygonNodes.count(); i++) {
-        ret->append(m_polygonNodes.at(i)->pos().toPoint());
+        m_polygon << m_polygonNodes.at(i)->pos().toPoint();
     }
-    return ret;
+    return &m_polygon;
 }
 
 bool GraphicsScene::connectDots()
