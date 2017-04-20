@@ -187,7 +187,7 @@ void SettingsDialog::on_buttonSelectDetectionArea_clicked()
         QMessageBox::warning(this, tr("Warning"), tr("Restart the application before creating detection area file"));
     }
     else
-	{
+    {
         m_detectionAreaDialogIsOpen=true;
         m_detectionAreaDialog = new DetectionAreaEditDialog(0, m_camera, m_config, m_dataManager);
         m_detectionAreaDialog->setModal(true);

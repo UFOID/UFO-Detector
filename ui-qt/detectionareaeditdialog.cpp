@@ -36,7 +36,6 @@ DetectionAreaEditDialog::DetectionAreaEditDialog(QWidget* parent, Camera* camera
     m_scene = new GraphicsScene(this, m_camera);
     ui->image->setScene(m_scene);
     ui->image->show();
-    //ui->image->setMouseTracking(true);
     m_pictureTaken = false;
     m_isFirstPicture = true;
     ui->buttonClear->setEnabled(false);

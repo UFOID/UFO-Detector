@@ -357,6 +357,11 @@ bool DataManager::readDetectionAreaFile() {
             emit messageBroadcasted(errorMsg);
         }
 
+        while (!m_detectionAreaPolygons.isEmpty()) {
+            QPolygon* polygon = m_detectionAreaPolygons.takeLast();
+            delete polygon;
+        }
+
         for (int a = 0; a < areaNodes.count(); a++) {
             QDomNode areaSubNode = areaNodes.at(a);
 

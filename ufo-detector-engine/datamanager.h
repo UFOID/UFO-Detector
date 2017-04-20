@@ -25,6 +25,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QPolygon>
+#include <QList>
 #include <queue>
 
 /**
