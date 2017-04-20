@@ -142,8 +142,9 @@ bool GraphicsScene::connectDots()
     return false;
 }
 
-void GraphicsScene::clearPoly()
+void GraphicsScene::clearPolygon()
 {
+    m_polygon.clear();
     m_polygonClosed = false;
 
     while (!m_polygonNodes.isEmpty()) {
@@ -170,7 +171,7 @@ bool GraphicsScene::takePicture() {
 
 GraphicsScene::~GraphicsScene()
 {
-    clearPoly();
+    clearPolygon();
     qDebug() << "deleted scene";
 }
 

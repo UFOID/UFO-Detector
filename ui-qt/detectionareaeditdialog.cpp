@@ -115,7 +115,7 @@ void DetectionAreaEditDialog::on_buttonConnect_clicked()
 
 void DetectionAreaEditDialog::on_buttonClear_clicked()
 {
-    m_scene->clearPoly();
+    m_scene->clearPolygon();
     m_scene->clear();
     ui->buttonSave->setEnabled(false);
     ui->labelInfo->setText(tr("1. Take a picture with the webcam"));
@@ -123,7 +123,7 @@ void DetectionAreaEditDialog::on_buttonClear_clicked()
 
 void DetectionAreaEditDialog::on_buttonTakePicture_clicked()
 {
-    m_scene->clearPoly();
+    m_scene->clearPolygon();
     m_scene->clear();
     m_scene->takePicture();
     m_pictureTaken = true;

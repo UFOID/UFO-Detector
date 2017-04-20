@@ -60,7 +60,7 @@ public:
      */
     bool connectDots();
 
-    void clearPoly();
+    void clearPolygon();
 
     /**
      * @brief Take picture with web camera and show it.
