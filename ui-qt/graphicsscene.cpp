@@ -43,16 +43,12 @@ void GraphicsScene::addDetectionAreaPolygon(QPolygon* polygon) {
         if (i > 0) {
             PolygonNode* prevNode = m_polygonNodes.last();
             PolygonEdge* edge = new PolygonEdge(prevNode, newNode);
-            this->addItem(newNode);
-            newNode->setZValue(100);
-            m_polygonNodes.append(newNode);
             this->addItem(edge);
             m_polygonEdges.append(edge);
-        } else {
-            this->addItem(newNode);
-            newNode->setZValue(100);
-            m_polygonNodes.append(newNode);
         }
+        this->addItem(newNode);
+        newNode->setZValue(100);
+        m_polygonNodes.append(newNode);
     }
 }
 
