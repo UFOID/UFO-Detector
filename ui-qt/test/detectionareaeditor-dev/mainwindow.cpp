@@ -27,7 +27,9 @@ MainWindow::MainWindow(QWidget *parent) :
     m_config = new Config();
     m_camera = new Camera(m_config->cameraIndex(), m_config->cameraWidth(), m_config->cameraHeight());
     m_camera->init();
-    m_editor = new DetectionAreaEditDialog(this, m_camera, m_config);
+    m_dataManager = new DataManager(m_config);
+    m_dataManager->init();
+    m_editor = new DetectionAreaEditDialog(this, m_camera, m_config, m_dataManager);
     qDebug() << "Application dir path:" << QApplication::applicationDirPath();
     on_openDetectionAreaEditorButton_clicked();
 }

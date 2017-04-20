@@ -21,6 +21,7 @@
 
 #include "config.h"
 #include "graphicsscene.h"
+#include "datamanager.h"
 #include <QDialog>
 #include <QApplication>
 #include <QGraphicsSceneMouseEvent>
@@ -51,7 +52,8 @@ class DetectionAreaEditDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit DetectionAreaEditDialog(QWidget *parent = 0, Camera *camPtr = 0, Config *configPtr = 0);
+    explicit DetectionAreaEditDialog(QWidget *parent = 0, Camera* camera = 0,
+        Config* config = 0, DataManager* dataManager = 0);
     ~DetectionAreaEditDialog();
 
 private slots:
@@ -64,8 +66,10 @@ private:
     Ui::DetectionAreaEditDialog *ui;
     Camera *m_camera;
     Config *m_config;
+    DataManager* m_dataManager;
     GraphicsScene *m_scene;
     bool m_pictureTaken;
+    bool m_isFirstPicture;
 
     /**
      * @brief Save detection area polygons into XML file.
@@ -79,6 +83,12 @@ private:
      * @return true if polygon is valid, false if not
      */
     bool checkPolygon(QPolygon* polygon);
+
+    /**
+     * @brief Read existing detection area polygons from file.
+     * @return true on success, false on failure
+     */
+    bool readPolygonsFromFile();
 };
 
 #endif // DIALOG_H

@@ -21,6 +21,7 @@
 
 #include "camera.h"
 #include "config.h"
+#include "datamanager.h"
 #include "detectionareaeditdialog.h"
 #include <QMainWindow>
 #include <QApplication>
@@ -41,6 +42,7 @@ private:
     Ui::MainWindow *ui;
     Config* m_config;
     Camera* m_camera;
+    DataManager* m_dataManager;
     DetectionAreaEditDialog* m_editor;
 
 private slots:

@@ -19,8 +19,10 @@
 #include "detectionareaeditdialog.h"
 #include "ui_detectionareaeditdialog.h"
 
-DetectionAreaEditDialog::DetectionAreaEditDialog(QWidget *parent, Camera *camPtr, Config *configPtr) :
-    QDialog(parent),  ui(new Ui::DetectionAreaEditDialog), m_camera(camPtr), m_config(configPtr)
+DetectionAreaEditDialog::DetectionAreaEditDialog(QWidget* parent, Camera* camera,
+    Config* config, DataManager* dataManager) :
+    QDialog(parent),  ui(new Ui::DetectionAreaEditDialog), m_camera(camera),
+    m_config(config), m_dataManager(dataManager)
 {
     ui->setupUi(this);
 
@@ -36,6 +38,7 @@ DetectionAreaEditDialog::DetectionAreaEditDialog(QWidget *parent, Camera *camPtr
     ui->image->show();
     //ui->image->setMouseTracking(true);
     m_pictureTaken = false;
+    m_isFirstPicture = true;
     ui->buttonClear->setEnabled(false);
     ui->buttonConnect->setEnabled(false);
     ui->buttonSave->setEnabled(false);
@@ -103,6 +106,24 @@ bool DetectionAreaEditDialog::checkPolygon(QPolygon* polygon) {
     return false;
 }
 
+bool DetectionAreaEditDialog::readPolygonsFromFile() {
+    bool ok = false;
+    QList<QPolygon*> polygons;
+    if (!m_dataManager) {
+        return false;
+    }
+    ok = m_dataManager->readDetectionAreaFile();
+    if (!ok) {
+        return false;
+    }
+    polygons = m_dataManager->detectionArea();
+    foreach(QPolygon* polygon, polygons) {
+        m_scene->addDetectionAreaPolygon(polygon);
+        m_scene->connectDots();
+    }
+    return true;
+}
+
 void DetectionAreaEditDialog::on_buttonConnect_clicked()
 {
     if (m_scene->connectDots()) {
@@ -127,9 +148,18 @@ void DetectionAreaEditDialog::on_buttonTakePicture_clicked()
     m_scene->clear();
     m_scene->takePicture();
     m_pictureTaken = true;
-    ui->labelInfo->setText(tr("2. Click to create points around the area of the detection. Connect the first and last points using the \"Connect\" button."));
-    ui->buttonClear->setEnabled(true);
-    ui->buttonConnect->setEnabled(true);
+    if (m_isFirstPicture) {
+        readPolygonsFromFile();
+        m_isFirstPicture = false;
+        ui->labelInfo->setText(tr("2. Edit current detection area or take a new picture to create a new area."));
+        ui->buttonClear->setEnabled(true);
+        ui->buttonConnect->setEnabled(false);
+        ui->buttonSave->setEnabled(true);
+    } else {
+        ui->labelInfo->setText(tr("2. Click to create points around the area of the detection. Connect the first and last points using the \"Connect\" button."));
+        ui->buttonClear->setEnabled(true);
+        ui->buttonConnect->setEnabled(true);
+    }
 }
 
 void DetectionAreaEditDialog::on_buttonSave_clicked() {

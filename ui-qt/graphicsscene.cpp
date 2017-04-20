@@ -33,6 +33,28 @@ GraphicsScene::GraphicsScene(QObject *parent, Camera *camera) :
     m_tmpLine = NULL;
 }
 
+void GraphicsScene::addDetectionAreaPolygon(QPolygon* polygon) {
+    if (!polygon) {
+        return;
+    }
+    for (int i = 0; i < polygon->size(); i++) {
+        PolygonNode* newNode = new PolygonNode();
+        newNode->setPos(polygon->at(i));
+        if (i > 0) {
+            PolygonNode* prevNode = m_polygonNodes.last();
+            PolygonEdge* edge = new PolygonEdge(prevNode, newNode);
+            this->addItem(newNode);
+            newNode->setZValue(100);
+            m_polygonNodes.append(newNode);
+            this->addItem(edge);
+            m_polygonEdges.append(edge);
+        } else {
+            this->addItem(newNode);
+            m_polygonNodes.append(newNode);
+        }
+    }
+}
+
 void GraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
     if (mouseEvent->button() != Qt::LeftButton) {
@@ -57,7 +79,7 @@ void GraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
     m_tmpNode = new PolygonNode();
     this->addItem(m_tmpNode);
     m_tmpNode->setPos(pos);
-    m_tmpNode->setZValue(10);
+    m_tmpNode->setZValue(100);
     m_tmpNode->grabMouse();
     m_addingNode = true;
 
@@ -130,7 +152,7 @@ QPolygon* GraphicsScene::detectionAreaPolygon() {
 
 bool GraphicsScene::connectDots()
 {
-    if (m_polygonNodes.size() > 2) {
+    if ((m_polygonNodes.size() > 2) && !m_polygonClosed) {
         PolygonNode* firstNode = m_polygonNodes.first();
         PolygonNode* lastNode = m_polygonNodes.last();
         PolygonEdge* edge = new PolygonEdge(lastNode, firstNode);

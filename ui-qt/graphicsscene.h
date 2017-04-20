@@ -47,6 +47,12 @@ public:
     ~GraphicsScene();
 
     /**
+     * @brief Add a detection area polygon into scene.
+     * @param polygon
+     */
+    void addDetectionAreaPolygon(QPolygon* polygon);
+
+    /**
      * @brief Get detection area polygon.
      * @return
      *

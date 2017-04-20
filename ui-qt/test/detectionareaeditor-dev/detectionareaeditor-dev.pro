@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui xml
+QT       += core gui xml network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -19,6 +19,7 @@ include(../../../ufo-detector-engine/opencv.pri)
 SOURCES += ./main.cpp\
     ./mainwindow.cpp \
     ../../../ufo-detector-engine/config.cpp \
+    ../../../ufo-detector-engine/datamanager.cpp \
     ../../graphicsscene.cpp \
     ../../detectionareaeditdialog.cpp \
     ../../../ufo-detector-engine/camera.cpp \
@@ -29,6 +30,7 @@ SOURCES += ./main.cpp\
 
 HEADERS  += ./mainwindow.h \
     ../../../ufo-detector-engine/config.h \
+    ../../../ufo-detector-engine/datamanager.h \
     ../../graphicsscene.h \
     ../../detectionareaeditdialog.h \
     ../../../ufo-detector-engine/camera.h \

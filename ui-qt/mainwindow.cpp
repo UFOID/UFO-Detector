@@ -406,7 +406,7 @@ void MainWindow::on_settingsButton_clicked()
 {
     if (!m_detecting)
     {
-        m_settingsDialog = new SettingsDialog(0, m_camera, m_config);
+        m_settingsDialog = new SettingsDialog(0, m_camera, m_config, m_dataManager);
         m_settingsDialog->setModal(true);
         m_settingsDialog->show();
         m_settingsDialog->setAttribute(Qt::WA_DeleteOnClose);

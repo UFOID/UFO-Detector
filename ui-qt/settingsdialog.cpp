@@ -30,8 +30,10 @@
  * Checking the status of the area file is broken. Commented out
  */
 
-SettingsDialog::SettingsDialog(QWidget *parent, Camera *camPtr, Config *configPtr) :
-    QDialog(parent), ui(new Ui::SettingsDialog), cameraPtr(camPtr), m_config(configPtr)
+SettingsDialog::SettingsDialog(QWidget* parent, Camera* camera, Config* config,
+    DataManager* dataManager) :
+    QDialog(parent), ui(new Ui::SettingsDialog), m_camera(camera), m_config(config),
+    m_dataManager(dataManager)
 {
     ui->setupUi(this);
 
@@ -144,7 +146,7 @@ void SettingsDialog::on_buttonSave_clicked()
     int cameraWidth = ui->lineEditCameraWidth->text().toInt();
     int cameraHeight = ui->lineEditCameraHeight->text().toInt();
     int cameraAspectRatio =  (double)cameraWidth / (double)cameraHeight * 10000;
-    if (!cameraPtr->knownAspectRatios().contains(cameraAspectRatio))
+    if (!m_camera->knownAspectRatios().contains(cameraAspectRatio))
     {
         QMessageBox::warning(this, tr("Error"), tr("Unknown camera aspect ratio. Please change camera width and/or height. Settings are not saved."));
         return;
@@ -229,7 +231,7 @@ void SettingsDialog::on_buttonSelectDetectionArea_clicked()
     else
 	{
         m_detectionAreaDialogIsOpen=true;
-        m_detectionAreaDialog = new DetectionAreaEditDialog(0, cameraPtr, m_config);
+        m_detectionAreaDialog = new DetectionAreaEditDialog(0, m_camera, m_config, m_dataManager);
         m_detectionAreaDialog->setModal(true);
         m_detectionAreaDialog->show();
         //connect(myDialog,SIGNAL(savedFile()),this,SLOT(startThreadCheckXML()));
@@ -238,7 +240,7 @@ void SettingsDialog::on_buttonSelectDetectionArea_clicked()
 
 void SettingsDialog::on_toolButtonResolutionDialog_clicked()
 {
-    m_resolutionDialog = new CameraResolutionDialog(cameraPtr, m_config, this);
+    m_resolutionDialog = new CameraResolutionDialog(m_camera, m_config, this);
     connect(m_resolutionDialog, SIGNAL(resolutionAccepted(QSize)), this, SLOT(onResolutionAcceptedInDialog(QSize)));
     m_resolutionDialog->show();
 }
