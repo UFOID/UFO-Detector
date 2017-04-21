@@ -38,3 +38,12 @@ void DataManager::handleUpdateReply(QNetworkReply *reply) {
 void DataManager::handleBirdClassifierReply(QNetworkReply *reply) {
     Q_UNUSED(reply);
 }
+
+bool DataManager::readDetectionAreaFile(bool clipToCamera) {
+    Q_UNUSED(clipToCamera);
+    return true;
+}
+
+QList<QPolygon*>& DataManager::detectionArea() {
+    return m_detectionAreaPolygons;
+}

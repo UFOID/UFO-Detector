@@ -45,6 +45,8 @@ private Q_SLOTS:
     void checkFolders();
     void checkDetectionAreaFile();
     void readResultDataFile();
+    void readDetectionAreaFile();
+    void detectionArea();
 
 public slots:
     void onResultDataSaved(QString dirName, QString dateTime, QString videoLength);
@@ -173,6 +175,14 @@ void TestDataManager::checkDetectionAreaFile() {
 
 void TestDataManager::readResultDataFile() {
     QSKIP("TODO");
+}
+
+void TestDataManager::readDetectionAreaFile() {
+    QSKIP("TODO");
+}
+
+void TestDataManager::detectionArea() {
+    QVERIFY(m_dataManager->detectionArea() == m_dataManager->m_detectionAreaPolygons);
 }
 
 QTEST_APPLESS_MAIN(TestDataManager)
