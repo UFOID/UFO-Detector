@@ -20,4 +20,3 @@ SOURCES += main.cpp \
 HEADERS += \
     console.h
 
-

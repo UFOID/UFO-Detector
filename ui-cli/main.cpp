@@ -34,6 +34,8 @@ void handleTerminationSignals(int signal) {
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
+    QCoreApplication::setApplicationName("ufo-detector-cli");
+    QCoreApplication::setApplicationVersion(APPLICATION_VERSION);
 
 #ifdef Q_OS_UNIX
     // killing with 2, 3, and 15 works, 9 doesn't properly
@@ -45,16 +47,42 @@ int main(int argc, char *argv[])
     std::cerr << "Warning: termination signals not yet handled in other than Unix" << std::endl;
 #endif
 
+    QCommandLineParser parser;
+    parser.addHelpOption();
+    parser.addVersionOption();
+
+    parser.setApplicationDescription(QCoreApplication::translate("ufo-detector-cli",
+        "UFO Detector command line application"));
+
+    QCommandLineOption resetDetectionAreaFileOption("reset-detfile",
+        QCoreApplication::translate("ufo-detector-cli", "Reset detection area file."));
+    parser.addOption(resetDetectionAreaFileOption);
+
+    parser.process(a);
+
+    bool m_resetDetectionAreaFile = parser.isSet(resetDetectionAreaFileOption);
+
     try {
         Config config;
+
+        DataManager dataManager(&config, &a);
+        if (m_resetDetectionAreaFile) {
+            if (dataManager.resetDetectionAreaFile(true)) {
+                std::cout << "Created " << config.detectionAreaFile().toStdString() << endl;
+                return 0;
+            } else {
+                std::cerr << "Failed to create " << config.detectionAreaFile().toStdString() << endl;
+                return -1;
+            }
+        }
+        if (!dataManager.init()) {
+            std::cerr << "Problems in data manager initialization, continuing" << std::endl;
+        }
+
         Camera camera(config.cameraIndex(), config.cameraWidth(), config.cameraHeight());
         if (!camera.init()) {
             std::cerr << "Couldn't initialize web camera, quitting" << std::endl;
             return -1;
-        }
-        DataManager dataManager(&config, &a);
-        if (!dataManager.init()) {
-            std::cerr << "Problems in data manager initialization" << std::endl;
         }
 
         ActualDetector actualDetector(&camera, &config, &dataManager, &a);

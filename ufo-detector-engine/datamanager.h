@@ -79,6 +79,13 @@ public:
 
     QList<QPolygon*>& detectionArea();
 
+    /**
+     * @brief Reset detection area file.
+     * @param overwrite force file overwrite
+     * @return true on success, false on failure
+     */
+    bool resetDetectionAreaFile(bool overwrite);
+
 #ifndef _UNIT_TEST_
 private:
 #endif

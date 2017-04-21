@@ -425,3 +425,33 @@ bool DataManager::readDetectionAreaFile(bool clipToCamera) {
 QList<QPolygon*>& DataManager::detectionArea() {
     return m_detectionAreaPolygons;
 }
+
+bool DataManager::resetDetectionAreaFile(bool overwrite) {
+    QFile detectionAreaFile(m_config->detectionAreaFile());
+    if (detectionAreaFile.exists() && !overwrite) {
+        return false;
+    }
+    if (!detectionAreaFile.open(QFile::ReadWrite)) {
+        return false;
+    }
+    int id = m_config->cameraIndex();
+    int width = m_config->cameraWidth();
+    int height = m_config->cameraHeight();
+    QTextStream out(&detectionAreaFile);
+
+    out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl;
+    out << "<detectionarealist>" << endl;
+    out << "  <detectionarea>" << endl;
+    out << "    <camera id=\"" << id << "\" width=\"" << width
+        << "\" height=\"" << height << "\"/>" << endl;
+    out << "    <polygon>" << endl;
+    out << "      <point x=\"0\" y=\"0\"/>" << endl;
+    out << "      <point x=\"0\" y=\"" << (height - 1) << "\"/>" << endl;
+    out << "      <point x=\"" << (width - 1) << "\" y=\"" << (height - 1) << "\"/>" << endl;
+    out << "      <point x=\"" << (width - 1) << "\" y=\"0\"/>" << endl;
+    out << "    </polygon>" << endl;
+    out << "  </detectionarea>" << endl;
+    out << "</detectionarealist>" << endl;
+    detectionAreaFile.close();
+    return true;
+}
