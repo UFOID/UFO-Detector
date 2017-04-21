@@ -306,12 +306,18 @@ void DataManager::saveResultData(QString dateTime, QString videoLength) {
     emit resultDataSaved(m_config->resultVideoDir(), dateTime, videoLength);
 }
 
-bool DataManager::readDetectionAreaFile() {
+bool DataManager::readDetectionAreaFile(bool clipToCamera) {
     QFile areaFile(m_config->detectionAreaFile());
     QDomDocument doc;
     QDomElement root;
     int x = 0;
     int y = 0;
+    int cameraId = m_config->cameraIndex();
+    int cameraWidth = m_config->cameraWidth();
+    int cameraHeight = m_config->cameraHeight();
+    QPolygon cameraRectangle;
+    bool polygonsClipped = false;
+    bool polygonWasClosed = false;
 
     if(!areaFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QString errorMsg = tr("Failed to open the detection area file %1").arg(areaFile.fileName());
@@ -356,6 +362,18 @@ bool DataManager::readDetectionAreaFile() {
             QString errorMsg = tr("Expected single <camera> tag in detection area. Assuming camera index 0.");
             emit messageBroadcasted(errorMsg);
         }
+        for (int c = 0; c < cameraList.count(); c++) {
+            QDomElement cameraElement = cameraList.at(c).toElement();
+            cameraId = cameraElement.attribute("id").toInt();
+            cameraWidth = cameraElement.attribute("width").toInt();
+            cameraHeight = cameraElement.attribute("height").toInt();
+            if (cameraId == m_config->cameraIndex()) {
+                break;
+            }
+        }
+
+        cameraRectangle << QPoint(0, 0) << QPoint(0, cameraHeight)
+                        << QPoint(cameraWidth, cameraHeight) << QPoint(cameraWidth, 0);
 
         while (!m_detectionAreaPolygons.isEmpty()) {
             QPolygon* polygon = m_detectionAreaPolygons.takeLast();
@@ -377,9 +395,29 @@ bool DataManager::readDetectionAreaFile() {
                         polygon->append(QPoint(x, y));
                     }
                 }
+                if (clipToCamera && polygon->size() &&
+                    !cameraRectangle.boundingRect().contains(polygon->boundingRect()))
+                {
+                    if (polygon->first() == polygon->last()) {
+                        polygonWasClosed = true;
+                    }
+                    *polygon = polygon->intersected(cameraRectangle);
+                    polygonsClipped = true;
+                    if (!polygonWasClosed) {
+                        // intersected() treats polygon as implicitly closed
+                        // so extra node is added: remove it
+                        if (polygon->first() == polygon->last()) {
+                            polygon->removeLast();
+                        }
+                    }
+                }
                 m_detectionAreaPolygons.append(polygon);
             }
         }
+    }
+    if (polygonsClipped) {
+        QString warningMsg = tr("Detection area was clipped in order to fit the camera size.");
+        emit messageBroadcasted(warningMsg);
     }
     return true;
 }

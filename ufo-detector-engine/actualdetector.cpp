@@ -368,7 +368,7 @@ inline int ActualDetector::detectMotion(const Mat & motion, Mat & result, Mat & 
 
 bool ActualDetector::initDetectionArea() {
 
-    bool readOk = m_dataManager->readDetectionAreaFile();
+    bool readOk = m_dataManager->readDetectionAreaFile(true);
     if (!readOk) {
         return false;
     }

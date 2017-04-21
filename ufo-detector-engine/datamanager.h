@@ -72,9 +72,10 @@ public:
 
     /**
      * @brief Read detection area file.
+     * @param clipToCamera crop polygons which don't fit into camera image size
      * @return true on success, false on failure
      */
-    bool readDetectionAreaFile();
+    bool readDetectionAreaFile(bool clipToCamera);
 
     QList<QPolygon*>& detectionArea();
 

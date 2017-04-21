@@ -111,7 +111,7 @@ bool DetectionAreaEditDialog::readPolygonsFromFile() {
     if (!m_dataManager) {
         return false;
     }
-    ok = m_dataManager->readDetectionAreaFile();
+    ok = m_dataManager->readDetectionAreaFile(false);
     if (!ok) {
         return false;
     }
