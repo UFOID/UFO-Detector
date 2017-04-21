@@ -320,7 +320,7 @@ bool DataManager::readDetectionAreaFile(bool clipToCamera) {
     bool polygonWasClosed = false;
 
     if(!areaFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QString errorMsg = tr("Failed to open the detection area file %1").arg(areaFile.fileName());
+        QString errorMsg = tr("Failed to open the detection area file %1. Please create it in Settings dialog or manually.").arg(areaFile.fileName());
         emit messageBroadcasted(errorMsg);
         return false;
     }
