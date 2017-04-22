@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
     parser.setApplicationDescription(QCoreApplication::translate("ufo-detector-cli",
         "UFO Detector command line application"));
 
-    QCommandLineOption resetDetectionAreaFileOption("reset-detfile",
+    QCommandLineOption resetDetectionAreaFileOption("reset-area-file",
         QCoreApplication::translate("ufo-detector-cli", "Reset detection area file."));
     parser.addOption(resetDetectionAreaFileOption);
 
