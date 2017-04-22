@@ -27,7 +27,7 @@
 #include <QStandardPaths>
 #include <QDebug>
 
-#define APPLICATION_VERSION "0.7.0"
+#define APPLICATION_VERSION "0.7.6"
 
 /**
  * @brief Global configuration variables for UFO-Detector
