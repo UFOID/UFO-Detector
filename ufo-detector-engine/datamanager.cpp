@@ -372,8 +372,8 @@ bool DataManager::readDetectionAreaFile(bool clipToCamera) {
             }
         }
 
-        cameraRectangle << QPoint(0, 0) << QPoint(0, cameraHeight)
-                        << QPoint(cameraWidth, cameraHeight) << QPoint(cameraWidth, 0);
+        cameraRectangle << QPoint(0, 0) << QPoint(0, cameraHeight - 1)
+                        << QPoint(cameraWidth - 1, cameraHeight - 1) << QPoint(cameraWidth - 1, 0);
 
         while (!m_detectionAreaPolygons.isEmpty()) {
             QPolygon* polygon = m_detectionAreaPolygons.takeLast();
