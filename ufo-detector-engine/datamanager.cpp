@@ -431,7 +431,7 @@ bool DataManager::resetDetectionAreaFile(bool overwrite) {
     if (detectionAreaFile.exists() && !overwrite) {
         return false;
     }
-    if (!detectionAreaFile.open(QFile::ReadWrite)) {
+    if (!detectionAreaFile.open(QFile::WriteOnly | QFile::Truncate)) {
         return false;
     }
     int id = m_config->cameraIndex();
