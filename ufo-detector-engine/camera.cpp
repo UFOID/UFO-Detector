@@ -48,9 +48,7 @@ bool Camera::init()
 
     if(m_webcam->isOpened())
     {
-        m_webcam->read(frameToReturn);
-        isReadingWebcam=true;
-        threadReadFrame.reset(new std::thread(&Camera::readWebcamFrame, this));
+        m_webcam->read(videoFrame);
     } else {
         return false;
     }
@@ -69,7 +67,6 @@ void Camera::release()
     {
         return;
     }
-    stopReadingWebcam();
     m_webcam->release();
     m_initialized = false;
 }
@@ -79,47 +76,12 @@ void Camera::release()
  */
 cv::Mat Camera::getWebcamFrame()
 {
-    if (m_webcam && videoFrame.data && videoFrame.isContinuous())
-	{
-        mutex.lock();
-        frameToReturn = videoFrame.clone();
-        mutex.unlock();
-        return frameToReturn;
-    }
-    else return frameToReturn;
-
-}
-
-/*
- * Stop the thread that continuously reads frame from webcam
- */
-void Camera::stopReadingWebcam()
-{
-    if (threadReadFrame)
-    {
-        isReadingWebcam = false;
-        mutex.lock();
-        mutex.unlock();
-        threadReadFrame->join();
-        threadReadFrame.reset();
-    }
-}
-
-/*
- * Continuously read frame in to videoFrame
- */
-void Camera::readWebcamFrame()
-{
-    int yieldPauseUsec = 1000;    // e.g. at 25 FPS time between frames is 40,000 us
-    while(m_webcam && isReadingWebcam && isWebcamOpen())
-    {
+    if (m_webcam) {
         mutex.lock();
         m_webcam->read(videoFrame);
         mutex.unlock();
-        // give other threads better possibility to run
-        std::this_thread::yield();
-        std::this_thread::sleep_for(std::chrono::microseconds(yieldPauseUsec));
     }
+    return videoFrame;
 }
 
 /*
@@ -143,11 +105,11 @@ bool Camera::queryAvailableResolutions()
 {
     if (!m_cameraInfo->isInitialized())
     {
-        // first release current cv::VideoCapture & stop frame grab thread
+        // first release current cv::VideoCapture
         this->release();
         // CameraInfo::init() will reserve cv::VideoCapture and do the query
         m_cameraInfo->init();
-        // now can continue using own cv::VideoCapture and restart frame grab thread
+        // now can continue using own cv::VideoCapture
         this->init();
     }
     return true;

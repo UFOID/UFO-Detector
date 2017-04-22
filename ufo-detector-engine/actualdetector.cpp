@@ -18,10 +18,11 @@
 
 #include "actualdetector.h"
 
-ActualDetector::ActualDetector(Camera *cameraPtr, Config *configPtr, QObject *parent) :
-    QObject(parent), m_camPtr(cameraPtr)
+ActualDetector::ActualDetector(Camera* camera, Config* config, DataManager* dataManager, QObject *parent) :
+    QObject(parent), m_camPtr(camera)
 {
-    m_config = configPtr;
+    m_config = config;
+    m_dataManager = dataManager;
     const QString DETECTION_AREA_FILE = m_config->detectionAreaFile();
     const QString IMAGEPATH = m_config->resultImageDir() + "/";
     m_willSaveImages = m_config->saveResultImages();
@@ -34,9 +35,15 @@ ActualDetector::ActualDetector(Camera *cameraPtr, Config *configPtr, QObject *pa
 
     m_detectionAreaFile = DETECTION_AREA_FILE.toStdString();
     m_resultImageDirNameBase = IMAGEPATH.toStdString();
-    m_noiseLevel = getStructuringElement(MORPH_RECT, Size(1,1));
 
-    m_recorder = new Recorder(m_camPtr, m_config);
+    setNoiseLevel(m_config->noiseFilterPixelSize());
+    setThresholdLevel(m_config->motionThreshold());
+
+    m_recorder = new Recorder(m_camPtr, m_config, m_dataManager);
+
+    state = new DetectorState(this, m_recorder);
+    state->MIN_POS_REQUIRED = m_config->minPositiveDetections();
+    connect(state, SIGNAL(sendOutputText(QString)), this, SIGNAL(broadcastOutputText(QString)));
 
     qDebug() << "ActualDetector constructed";
 }
@@ -44,6 +51,7 @@ ActualDetector::ActualDetector(Camera *cameraPtr, Config *configPtr, QObject *pa
 ActualDetector::~ActualDetector()
 {
     m_recorder->deleteLater();
+    state->deleteLater();
 }
 
 bool ActualDetector::initialize()
@@ -51,9 +59,6 @@ bool ActualDetector::initialize()
     if (!parseDetectionAreaFile(m_detectionAreaFile, m_region)){
         return false;
     }
-    state = new DetectorState(this,m_recorder);
-    state->MIN_POS_REQUIRED = m_config->minPositiveDetections();
-    connect(state, SIGNAL(sendOutputText(QString)), this->parent() , SLOT(update_output_text(QString)));
     state->resetState();
 
     m_prevFrame = m_camPtr->getWebcamFrame();
@@ -115,18 +120,32 @@ void ActualDetector::detectingThread()
     bool isPositiveRectangle;
     int threadYieldPauseUsec = 1000;
     int numberOfChanges = 0;
-
+    int frameCount = 0;
+    int framesInFpsMeasurement = OUTPUT_FPS * 10;
+    bool fpsMeasurementDone = false;
+    QTime fpsMeasurementTimer;
 
     CDetector* detector=new CDetector(m_currentFrame);
     vector<Point2d> centers;
     Scalar Colors[]={Scalar(255,0,0),Scalar(0,255,0),Scalar(0,0,255),Scalar(255,255,0),Scalar(0,255,255),Scalar(255,0,255),Scalar(255,127,255),Scalar(127,0,255),Scalar(127,0,127)};
     pair < vector<Point2d>,vector<Rect> > centerAndRectPair;
 
+    qDebug() << "ActualDetector::detectingThread() started";
+
+    fpsMeasurementTimer.start();
+
     while (m_isMainThreadRunning)
     {
         m_prevFrame = m_currentFrame;
         m_currentFrame = m_nextFrame;
         tempImage = m_camPtr->getWebcamFrame();
+        frameCount++;
+        if (!fpsMeasurementDone && (frameCount >= framesInFpsMeasurement)) {
+            qDebug() << "ActualDetector reading" << ((float)frameCount /
+                         (float)fpsMeasurementTimer.elapsed()) * (float)1000
+                     << "FPS on average";
+            fpsMeasurementDone = true;
+        }
 
         m_nextFrame = tempImage.clone();
         m_resultFrame = m_nextFrame;
@@ -284,6 +303,7 @@ void ActualDetector::detectingThread()
         std::this_thread::yield();
         std::this_thread::sleep_for(std::chrono::microseconds(threadYieldPauseUsec));
     }
+    qDebug() << "ActualDetector::detectingThread() finished";
     delete detector;    
 }
 
@@ -754,7 +774,6 @@ void ActualDetector::stopThread()
         m_mainThread.reset();
         this_thread::sleep_for(chrono::seconds(1));
         m_nightCheckerThread->join(); m_nightCheckerThread.reset();
-        delete state;
     }
 }
 

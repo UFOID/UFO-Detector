@@ -9,8 +9,8 @@ QT       += testlib core widgets
 QT       -= gui
 
 TARGET = testVideoCodecSupportInfo
-CONFIG   += console
-CONFIG   -= app_bundle
+CONFIG += console testcase
+CONFIG -= app_bundle
 
 TEMPLATE = app
 

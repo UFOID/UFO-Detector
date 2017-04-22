@@ -22,6 +22,7 @@
 #include <vector>
 #include "recorder.h"
 #include "config.h"
+#include "datamanager.h"
 #include <time.h>
 #include <QObject>
 #include "opencv2/objdetect/objdetect.hpp"
@@ -53,7 +54,7 @@ class ActualDetector : public QObject
  Q_OBJECT
 
 public:
-    ActualDetector(Camera *cameraPtr = 0, Config *configPtr = 0, QObject *parent = 0);
+    ActualDetector(Camera* camera, Config* config, DataManager* dataManager, QObject *parent = 0);
     ~ActualDetector();
 
     /**
@@ -95,6 +96,7 @@ private:
     Recorder* m_recorder;
     Camera* m_camPtr;
     Config* m_config;
+    DataManager* m_dataManager;
     cv::Mat m_resultFrame;
     cv::Mat m_resultFrameCropped;
     cv::Mat m_prevFrame;

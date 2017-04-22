@@ -101,6 +101,10 @@ QString testResourceFolder(){
     return resources.path();
 }
 
+int Config::classifierVersion() {
+    return 1;
+}
+
 QString Config::resultDataFile() {
     return "./resultdata.xml";
 }
@@ -202,5 +206,9 @@ void Config::setSaveResultImages(bool save) {
 
 void Config::setUserTokenAtUfoId(QString token) {
     Q_UNUSED(token);
+}
+
+void Config::setClassifierVersion(int version) {
+    Q_UNUSED(version);
 }
 

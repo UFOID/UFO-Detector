@@ -93,8 +93,6 @@ void startCameraFromVideo(QFile* videoFile){
 
     }
     isReadingVideo = false;
-
-
 }
 
 
@@ -125,10 +123,6 @@ cv::Mat Camera::getWebcamFrame() {
         mockCamera_blockerMutex.unlock();
     }
     return mockCameraNextFrame;
-}
-
-void Camera::stopReadingWebcam() {
-
 }
 
 bool Camera::isWebcamOpen() {

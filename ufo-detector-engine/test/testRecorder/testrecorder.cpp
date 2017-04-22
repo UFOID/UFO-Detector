@@ -17,9 +17,9 @@
  */
 
 #include "recorder.h"
-//#include "actualdetector.h"
 #include "camera.h"
 #include "config.h"
+#include "datamanager.h"
 #include <QtTest>
 #include <QString>
 #include <QFile>
@@ -45,7 +45,6 @@ private Q_SLOTS:
     void initTestCase();
     void cleanupTestCase();
     void constructor();
-    void saveResultData();
 
     /*
      * Go through supported codecs and check Recorder will encode video with correct codec.
@@ -57,12 +56,13 @@ private Q_SLOTS:
      */
     void mockCamera();
 
+    void saveVideoThumbnailImage();
+
 private:
     Recorder* m_recorder;
     Config* m_config;
     Camera* m_camera;
-    QFile m_resultDataFile;
-    int m_resultDataSavedCounter;
+    DataManager* m_dataManager;
     int m_requestEncodingCounter;
     QString m_requestEncodingTempFileName;
     QString m_requestEncodingTargetFileName;
@@ -70,60 +70,27 @@ private:
     void fourccToStr(int fourcc, char str[5]);
 
 private slots:
-    void onResultDataSaved(QString fileName, QString dateTime, QString videoLength);
     void onVideoEncodingRequested(QString tempFileName, QString targetFileName);
 };
 
 TestRecorder::TestRecorder() {
-    m_resultDataSavedCounter = 0;
     m_requestEncodingCounter = 0;
 }
 
 TestRecorder::~TestRecorder() {
 }
 
-void TestRecorder::onResultDataSaved(QString fileName, QString dateTime, QString videoLength) {
-    Q_UNUSED(fileName);
-    Q_UNUSED(dateTime);
-    Q_UNUSED(videoLength);
-    m_resultDataSavedCounter++;
-}
-
-void TestRecorder::onVideoEncodingRequested(QString tempFileName, QString targetFileName) {
-    m_requestEncodingTempFileName = tempFileName;
-    m_requestEncodingTargetFileName = targetFileName;
-    m_requestEncodingCounter++;
-}
-
 void TestRecorder::initTestCase() {
     m_config = new Config();
-
-    // create result data file here because it is created in MainWindow and not by Recorder
-    m_resultDataFile.setFileName(m_config->resultDataFile());
-    if (m_resultDataFile.exists()) {
-        m_resultDataFile.remove();
-    }
-    QDomDocument resultDataDom;
-    QVERIFY(!m_resultDataFile.exists());
-    QVERIFY(m_resultDataFile.open(QFile::ReadWrite));
-    QTextStream stream(&m_resultDataFile);
-    QDomElement ufoidElement = resultDataDom.createElement("UFOID");
-    resultDataDom.appendChild(ufoidElement);
-    stream << resultDataDom.toString();
-    m_resultDataFile.flush();
-    m_resultDataFile.close();
-    QVERIFY(m_resultDataFile.exists());
-
     m_camera = new Camera(m_config->cameraIndex(), m_config->cameraWidth(), m_config->cameraHeight());
-    m_recorder = new Recorder(m_camera, m_config);
+    m_dataManager = new DataManager(m_config);
+    m_recorder = new Recorder(m_camera, m_config, m_dataManager);
 }
 
 void TestRecorder::cleanupTestCase() {
     m_recorder->deleteLater();
     m_camera->deleteLater();
     m_config->deleteLater();
-    QVERIFY(m_resultDataFile.remove());
-    QVERIFY(!m_resultDataFile.exists());
     QDir videoDir(m_config->resultVideoDir());
     QVERIFY(videoDir.removeRecursively());
     QVERIFY(!videoDir.exists());
@@ -150,63 +117,15 @@ void TestRecorder::constructor() {
     QCOMPARE(m_recorder->m_objectNegativeColor, cv::Scalar(0, 0, 255));
     QCOMPARE(m_recorder->m_objectRectangleColor, m_recorder->m_objectPositiveColor);
 
-    QCOMPARE(m_recorder->m_resultDataFile.fileName(), m_config->resultDataFile());
     QCOMPARE(m_recorder->m_resultVideoDirName, m_config->resultVideoDir());
     QCOMPARE(m_recorder->m_videoFileExtension, QString(".avi"));
     QCOMPARE(m_recorder->m_thumbnailExtension, QString(".jpg"));
     QCOMPARE(m_recorder->m_thumbnailDirName, QString("thumbnails"));
-    QFile resultDataFile(m_config->resultDataFile());
-    QVERIFY(resultDataFile.exists());
     QDir thumbDir(m_config->resultVideoDir() + "/" + m_recorder->m_thumbnailDirName);
     QVERIFY(thumbDir.exists());
 
     QVERIFY(!m_recorder->m_willSaveVideo);
     QVERIFY(!m_recorder->m_recording);
-}
-
-void TestRecorder::saveResultData() {
-    QString dateTime = "2016-05-22--12-00-00";
-    QString videoLength = "01:02";
-    QDomDocument resultDataDom;
-    QDomElement videoEntry;
-    connect(m_recorder, SIGNAL(resultDataSaved(QString,QString,QString)),
-            this, SLOT(onResultDataSaved(QString,QString,QString)));
-
-    // case: write one entry
-
-    // check result data file doesn't have any other content than the main tag
-    QVERIFY(m_resultDataFile.open(QFile::ReadOnly));
-    QVERIFY(resultDataDom.setContent(m_resultDataFile.readAll()));
-    m_resultDataFile.close();
-    QVERIFY(resultDataDom.firstChild().childNodes().isEmpty());
-    resultDataDom.clear();
-
-    QCOMPARE(m_resultDataSavedCounter, 0);
-    m_recorder->m_firstFrame = cv::Mat(cv::Size(m_config->cameraWidth(), m_config->cameraWidth()), CV_8UC3);
-
-    m_recorder->saveResultData(dateTime, videoLength);
-
-    QCOMPARE(m_resultDataSavedCounter, 1);
-    QVERIFY(!m_recorder->m_resultDataFile.isOpen());
-    // check content of result data file
-    QVERIFY(m_resultDataFile.open(QFile::ReadOnly));
-    QVERIFY(resultDataDom.setContent(m_resultDataFile.readAll()));
-    m_resultDataFile.close();
-    QVERIFY(!resultDataDom.firstChild().childNodes().isEmpty());
-    QCOMPARE(resultDataDom.firstChild().childNodes().count(), 1);
-    videoEntry = resultDataDom.firstChild().childNodes().at(0).toElement();
-    QCOMPARE(videoEntry.nodeName(), QString("Video"));
-    QCOMPARE(videoEntry.attributes().length(), 3);
-    QCOMPARE(videoEntry.attribute("Pathname"), m_config->resultVideoDir());
-    QCOMPARE(videoEntry.attribute("Length"), videoLength);
-    QCOMPARE(videoEntry.attribute("DateTime"), dateTime);
-    resultDataDom.clear();
-    // check thumbnail
-    QString thumbnailFileName = m_config->resultVideoDir() + "/thumbnails/" + dateTime + ".jpg";
-    QFile thumbnailFile(thumbnailFileName);
-    QVERIFY(thumbnailFile.exists());
-    QVERIFY(thumbnailFile.remove());
-    QVERIFY(!thumbnailFile.exists());
 }
 
 void TestRecorder::mockCamera() {
@@ -279,8 +198,6 @@ void TestRecorder::videoCodecs()
         if (m_recorder) {
             m_recorder->disconnect(m_recorder, SIGNAL(videoEncodingRequested(QString,QString)), this,
                                    SLOT(onVideoEncodingRequested(QString,QString)));
-            m_recorder->disconnect(m_recorder, SIGNAL(resultDataSaved(QString,QString,QString)), this,
-                                   SLOT(onResultDataSaved(QString,QString,QString)));
             m_recorder->deleteLater();
         }
 
@@ -295,11 +212,9 @@ void TestRecorder::videoCodecs()
 
         qDebug() << "=== Testing codec" << codecStr << "===";
 
-        m_recorder = new Recorder(m_camera, m_config);
+        m_recorder = new Recorder(m_camera, m_config, m_dataManager);
         connect(m_recorder, SIGNAL(videoEncodingRequested(QString,QString)), this,
                 SLOT(onVideoEncodingRequested(QString,QString)));
-        connect(m_recorder, SIGNAL(resultDataSaved(QString,QString,QString)), this,
-                SLOT(onResultDataSaved(QString,QString,QString)));
 
         cv::Mat firstFrame = cv::Mat(m_config->cameraHeight(), m_config->cameraWidth(), CV_8UC3);
         // Recorder will be getting mockCameraNextFrame
@@ -318,7 +233,6 @@ void TestRecorder::videoCodecs()
         m_requestEncodingTempFileName = "";
         m_requestEncodingTargetFileName = "";
         m_requestEncodingCounter = 0;
-        m_resultDataSavedCounter = 0;
 
         m_recorder->startRecording(firstFrame);
         QTest::qWait(100);
@@ -338,7 +252,6 @@ void TestRecorder::videoCodecs()
         } else {
             QTest::qWait(500);
         }
-        QCOMPARE(m_resultDataSavedCounter, 1);
 
         QVERIFY(!tempFile.exists());
         QVERIFY(resultVideoFile.exists());
@@ -366,11 +279,30 @@ void TestRecorder::videoCodecs()
     mockCameraNextFrame = cv::Mat();
 }
 
+void TestRecorder::saveVideoThumbnailImage() {
+    QString dateTime = "2017-04-10--12-00-00";
+    QString thumbnailFileName = m_config->resultVideoDir() + "/thumbnails/" + dateTime + ".jpg";
+    QFile thumbnailFile(thumbnailFileName);
+    Mat thumbnailImage(100, 200, CV_8UC3);
+
+    m_recorder->saveVideoThumbnailImage(thumbnailImage, dateTime);
+
+    QVERIFY(thumbnailFile.exists());
+    QVERIFY(thumbnailFile.remove());
+    QVERIFY(!thumbnailFile.exists());
+}
+
 void TestRecorder::fourccToStr(int fourcc, char str[5]) {
     for (int i=0; i < 4; i++) {
         str[i] = (fourcc >> (i*8)) & 0xFF;
     }
     str[4] = '\0';
+}
+
+void TestRecorder::onVideoEncodingRequested(QString tempFileName, QString targetFileName) {
+    m_requestEncodingTempFileName = tempFileName;
+    m_requestEncodingTargetFileName = targetFileName;
+    m_requestEncodingCounter++;
 }
 
 QTEST_MAIN(TestRecorder)

@@ -9,8 +9,8 @@ QT       += testlib
 QT       -= gui
 
 TARGET = testvideobuffer
-CONFIG   += console
-CONFIG   -= app_bundle
+CONFIG += console testcase
+CONFIG -= app_bundle
 
 TEMPLATE = app
 

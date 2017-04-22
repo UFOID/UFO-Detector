@@ -22,6 +22,7 @@
 #include "config.h"
 #include "camera.h"
 #include "videobuffer.h"
+#include "datamanager.h"
 #include <QDomDocument>
 #include <QFile>
 #include <QObject>
@@ -58,7 +59,7 @@ class Recorder : public QObject {
 Q_OBJECT
 
 public:
-    explicit Recorder(Camera* cameraPtr = 0, Config* configPtr = 0);
+    explicit Recorder(Camera* cameraPtr, Config* configPtr, DataManager* dataManager);
     void startRecording(cv::Mat &firstFrame);
     void stopRecording(bool willSaveVideo);
     void setRectangle(cv::Rect &r, bool isRed);
@@ -70,6 +71,7 @@ private:
 
     Camera* m_camera;
     Config* m_config;
+    DataManager* m_dataManager;
     cv::VideoWriter m_videoWriter;
     cv::Mat m_firstFrame;
     VideoBuffer* m_videoBuffer;
@@ -94,10 +96,6 @@ private:
     std::vector<QProcess*> m_encoderProcesses;
     std::vector<QString> m_tempVideoFiles;
 
-    QDomDocument m_resultDataDomDocument;
-    QFile m_resultDataFile;
-    QDomElement m_resultDataRootElement;
-
     void recordThread();
 
     /**
@@ -108,18 +106,16 @@ private:
     void readFrameThread();
 
     /**
-     * @brief Save information about the video to result data file.
-     * Emits resultDataSaved() signal.
-     * @param dateTime format: yyyy-MM-dd--hh-mm-ss
-     * @param videoLength format: mm:ss
+     * @brief Save video thumbnail image.
+     * @param image
+     * @param dateTime
      */
-    void saveResultData(QString dateTime, QString videoLength);
-
-public slots:
-    void reloadResultDataFile();
+    void saveVideoThumbnailImage(Mat& image, QString dateTime);
 
 #ifndef _UNIT_TEST_
 private slots:
+#else
+public slots:
 #endif
     /**
      * @brief Creates a new QProcess that encodes the temporary raw video with ffmpeg/avconv.
@@ -133,7 +129,6 @@ private slots:
     void onVideoEncodingFinished();
 
 signals:
-    void resultDataSaved(QString file, QString date, QString length);
     void recordingStarted();
     void recordingFinished();
     void videoEncodingRequested(QString tempVideoName, QString targetVideoName);

@@ -164,7 +164,7 @@ void CTracker::updateEmpty(){
     for(int i=0; i < (int)tracks.size(); i++)
     {
         tracks[i]->skipped_frames++;
-        if((int)tracks[i]->skipped_frames > maximum_allowed_skipped_frames)
+        if((int)tracks[i]->skipped_frames > (long)maximum_allowed_skipped_frames)
         {
 
             if(tracks[i]->posCounter>tracks[i]->negCounter){

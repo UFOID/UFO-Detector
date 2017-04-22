@@ -7,8 +7,8 @@
 QT       += widgets testlib xml network
 
 TARGET = testActualDetector
-CONFIG   += console
-CONFIG   -= app_bundle
+CONFIG += console testcase
+CONFIG -= app_bundle
 
 TEMPLATE = app
 
@@ -32,7 +32,6 @@ SOURCES += \
     ../mock/mockconfig.cpp \
     ../mock/mockcamera.cpp \
     ../mock/mockRecorder.cpp \
-    ../mock/mockMainWindow.cpp \
     ../../Ctracker.cpp \
     ../../Detector.cpp \
     ../../Kalman.cpp \
@@ -41,7 +40,7 @@ SOURCES += \
     testActualDetector.cpp\
     ../../planechecker.cpp \
    ../../detectorstate.cpp \
-   ../../videobuffer.cpp
+    ../mock/mockdatamanager.cpp
 
 
 HEADERS += ../../actualdetector.h \
@@ -55,8 +54,6 @@ HEADERS += ../../actualdetector.h \
     ../../videocodecsupportinfo.h \
     ../../planechecker.h \
     ../../detectorstate.h \
-    ../../../ui-qt/mainwindow.h \
-    ../../videobuffer.h
-
+    ../../datamanager.h
 
 
