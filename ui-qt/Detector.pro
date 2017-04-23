@@ -28,6 +28,8 @@ include(../ufo-detector-engine/ufo-detector-engine.pri)
 SOURCES += main.cpp\
     mainwindow.cpp \
     graphicsscene.cpp \
+    polygonnode.cpp \
+    polygonedge.cpp \
     videowidget.cpp \
     clickablelabel.cpp \
     imageexplorer.cpp \
@@ -41,6 +43,8 @@ SOURCES += main.cpp\
 HEADERS  += \
     mainwindow.h \
     graphicsscene.h \
+    polygonnode.h \
+    polygonedge.h \
     videowidget.h \
     clickablelabel.h \
     imageexplorer.h \

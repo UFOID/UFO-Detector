@@ -16,34 +16,35 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "datamanager.h"
+#ifndef POLYGONEDGE_H
+#define POLYGONEDGE_H
 
-DataManager::DataManager(Config* config, QObject* parent) : QObject(parent) {
-    m_config = config;
-}
+#include "polygonnode.h"
+#include <QObject>
+#include <QGraphicsLineItem>
 
-bool DataManager::readResultDataFile() {
-    return true;
-}
+class PolygonEdge : public QGraphicsLineItem
+{
+public:
 
-void DataManager::saveResultData(QString dateTime, QString videoLength) {
-    Q_UNUSED(dateTime);
-    Q_UNUSED(videoLength);
-}
+    enum { Type = QGraphicsItem::UserType + 2 };
 
-void DataManager::handleUpdateReply(QNetworkReply *reply) {
-    Q_UNUSED(reply);
-}
+    PolygonEdge(PolygonNode* startNode, PolygonNode* endNode, QGraphicsLineItem* parent = 0);
+    ~PolygonEdge();
 
-void DataManager::handleBirdClassifierReply(QNetworkReply *reply) {
-    Q_UNUSED(reply);
-}
+    /**
+     * @brief Notify this class about node change.
+     */
+    void notifyNodeChange();
 
-bool DataManager::readDetectionAreaFile(bool clipToCamera) {
-    Q_UNUSED(clipToCamera);
-    return true;
-}
+#ifndef _UNIT_TEST_
+private:
+#endif
+    PolygonNode* m_startNode;
+    PolygonNode* m_endNode;
 
-QList<QPolygon*>& DataManager::detectionArea() {
-    return m_detectionAreaPolygons;
-}
+protected:
+    int type() const override;
+};
+
+#endif // POLYGONEDGE_H

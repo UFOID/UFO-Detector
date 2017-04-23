@@ -20,9 +20,21 @@
 #define DIALOG_H
 
 #include "config.h"
-#include <QDialog>
-#include <opencv2/opencv.hpp>
 #include "graphicsscene.h"
+#include "datamanager.h"
+#include <QDialog>
+#include <QApplication>
+#include <QGraphicsSceneMouseEvent>
+#include <QPainter>
+#include <QDir>
+#include <QtXml>
+#include <opencv2/opencv.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <chrono>
+#include <iostream>
+
+using namespace cv;
+using namespace std;
 
 class Camera;
 
@@ -40,7 +52,8 @@ class DetectionAreaEditDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit DetectionAreaEditDialog(QWidget *parent = 0, Camera *camPtr = 0, Config *configPtr = 0);
+    explicit DetectionAreaEditDialog(QWidget *parent = 0, Camera* camera = 0,
+        Config* config = 0, DataManager* dataManager = 0);
     ~DetectionAreaEditDialog();
 
 private slots:
@@ -51,30 +64,31 @@ private slots:
 
 private:
     Ui::DetectionAreaEditDialog *ui;
-    Camera *cameraPtr;
+    Camera *m_camera;
     Config *m_config;
-    GraphicsScene *scene;
+    DataManager* m_dataManager;
+    GraphicsScene *m_scene;
+    bool m_pictureTaken;
+    bool m_isFirstPicture;
 
     /**
-     * @brief Get all points inside the selected area and pass vector with points to savePointsAsXML()
+     * @brief Save detection area polygons into XML file.
+     * @return true on success, false on failure
      */
-    void getPointsInContour(std::vector<cv::Point2f> & contour);
+    bool savePolygonsAsXml();
 
     /**
-     * @brief Save the points to area xml
+     * @brief Check that polygon is acceptable as detection area polygon: area is larger than 1.
+     * @param polygon
+     * @return true if polygon is valid, false if not
      */
-    void savePointsAsXML(std::vector<cv::Point2f> & contour);
-    int WIDTH;
-    int HEIGHT;
-    std::string areaFilePath;
-    bool isPictureTaken;
-    bool wasSaved;
-    void closeEvent(QCloseEvent *);
+    bool checkPolygon(QPolygon* polygon);
 
-
-signals:
-    //void savedFile();
-
+    /**
+     * @brief Read existing detection area polygons from file.
+     * @return true on success, false on failure
+     */
+    bool readPolygonsFromFile();
 };
 
 #endif // DIALOG_H

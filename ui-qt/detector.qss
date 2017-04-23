@@ -27,9 +27,20 @@ QMainWindow, QDialog {
     color: white;
 }
 
-QPushButton, QToolButton, QLineEdit, QComboBox, QTextEdit, QListView, QTreeView {
+QPushButton, QToolButton, QComboBox, QListView, QTreeView {
     background-color: #3c4a62;
     color: white;
+}
+
+QLineEdit:disabled, QPushButton:disabled, QToolButton:disabled {
+    background-color: #515c65;
+    color: grey;
+}
+
+QLineEdit, QTextEdit {
+    background-color: #3c4a62;
+    color: white;
+    border: 1px solid #777777;
 }
 
 QLabel, QCheckBox, QScrollBar {
@@ -63,11 +74,5 @@ QComboBox QListView {
 VideoWidget ClickableLabel, VideoWidget QLabel {
     background-color: #3c4a62;
     border: 1px solid #777777;
-}
-
-QLineEdit:disabled
-{
-    background-color: #515c65;
-    color: grey;
 }
 

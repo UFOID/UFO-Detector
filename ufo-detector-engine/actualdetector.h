@@ -145,7 +145,14 @@ private:
     inline int detectMotion(const cv::Mat & m_motion, cv::Mat & m_resultFrame, cv::Mat & m_resultFrameCropped,
                      std::vector<cv::Point> &m_region,
                      int m_maxDeviation);
-    bool parseDetectionAreaFile(std::string file_region, std::vector<cv::Point> &m_region);
+
+    /**
+     * @brief Initialize detection area.
+     * Currently combining all defined detection areas into a single one.
+     * @return true on success, false on failure
+     */
+    bool initDetectionArea();
+
     bool lightDetection(cv::Rect &rectangle, cv::Mat &croppedImage);
     void detectingThread();
     void detectingThreadHigh();
