@@ -17,13 +17,6 @@
  */
 
 #include "graphicsscene.h"
-#include <QDebug>
-#include <QGraphicsSceneMouseEvent>
-#include <QPainter>
-#include <opencv2/highgui/highgui.hpp>
-#include <iostream>
-#include <QPainter>
-#include "camera.h"
 
 using namespace cv;
 using namespace std;
@@ -31,75 +24,172 @@ using namespace std;
 /*
  * Graphics scene for drawing points to the detection area dialog
  */
-GraphicsScene::GraphicsScene(QObject *parent, Camera *camPtr) :
+GraphicsScene::GraphicsScene(QObject *parent, Camera *camera) :
     QGraphicsScene(parent)
 {
-    Mat src;    
-    src = camPtr->getWebcamFrame();
-    cv::cvtColor(src, src, CV_BGR2RGB);
-    QImage imgToDisplay = QImage((uchar*)src.data, src.cols, src.rows, src.step, QImage::Format_RGB888);
-    addPixmap(QPixmap::fromImage(imgToDisplay));
+    m_camera = camera;
+    m_picture = NULL;
+    m_polygonClosed = false;
+    m_tmpLine = NULL;
+}
+
+void GraphicsScene::addDetectionAreaPolygon(QPolygon* polygon) {
+    if (!polygon) {
+        return;
+    }
+    for (int i = 0; i < polygon->size(); i++) {
+        PolygonNode* newNode = new PolygonNode();
+        newNode->setPos(polygon->at(i));
+        if (i > 0) {
+            PolygonNode* prevNode = m_polygonNodes.last();
+            PolygonEdge* edge = new PolygonEdge(prevNode, newNode);
+            this->addItem(edge);
+            m_polygonEdges.append(edge);
+        }
+        this->addItem(newNode);
+        newNode->setZValue(100);
+        m_polygonNodes.append(newNode);
+    }
 }
 
 void GraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
-    if (mouseEvent->button() == Qt::LeftButton)
-	{
-        QPoint pos = mouseEvent->scenePos().toPoint();
-        pol.append(pos);
-        double rad  = 2;
-        this->addEllipse(pos.x()-rad, pos.y()-rad, rad*2.0, rad*2.0, QPen(Qt::red), QBrush(Qt::SolidPattern));
-        if(pol.size() > 1)
-		{
-            QPainterPath myPath;
-            myPath.addPolygon(pol);
-            addPath(myPath,QPen(Qt::red,1));
+    if (mouseEvent->button() != Qt::LeftButton) {
+        return;
+    }
+    mouseEvent->accept();
+    QPoint pos = mouseEvent->scenePos().toPoint();
+
+    // moving existing node
+    QGraphicsItem* clickedItem = itemAt(pos, QTransform());
+    if (clickedItem && (clickedItem->type() == PolygonNode::Type)) {
+        clickedItem->grabMouse();
+        m_addingNode = false;
+        return;
+    }
+
+    if (m_polygonClosed) {
+        return;
+    }
+
+    // creating a new node
+    m_tmpNode = new PolygonNode();
+    this->addItem(m_tmpNode);
+    m_tmpNode->setPos(pos);
+    m_tmpNode->setZValue(100);
+    m_tmpNode->grabMouse();
+    m_addingNode = true;
+
+    if (!m_polygonNodes.isEmpty()) {
+        QPointF prevPos = m_polygonNodes.last()->pos();
+        QLineF line(prevPos, pos);
+        if (m_tmpLine) {
+            delete m_tmpLine;
+        }
+        m_tmpLine = addLine(line, QPen(Qt::red));
+    }
+}
+
+void GraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
+    QPointF scenePos = event->scenePos();
+    QGraphicsItem* draggedItem = this->mouseGrabberItem();
+
+    event->accept();
+
+    if (draggedItem) {
+        QPointF delta = scenePos - event->lastScenePos();
+        draggedItem->moveBy(delta.x(), delta.y());
+    }
+
+    if (m_addingNode && !m_polygonNodes.isEmpty()) {
+        QPointF prevPos = m_polygonNodes.last()->pos();
+        QLineF line(prevPos, scenePos);
+        if (!m_tmpLine) {
+            m_tmpLine = addLine(line, QPen(Qt::red));
+        } else {
+            m_tmpLine->setLine(line);
         }
     }
 }
 
-std::vector<Point2f> GraphicsScene::getCoor()
-{
-    std::vector<Point2f> vecPoint;
+void GraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
+    event->accept();
 
-    if (pol.size()>2)
-	{
-        connectDots();
-        std::vector<QPoint> myVec = pol.toStdVector();
+    QGraphicsItem* draggedItem = this->mouseGrabberItem();
+    if (draggedItem) {
+        draggedItem->ungrabMouse();
+    }
 
-        for(int i=0; i < (int)myVec.size(); i++)
-		{
-            QPoint point = myVec[i];
-            Point2f p(point.x(), point.y());
-           vecPoint.push_back(p);
+    if (m_tmpLine) {
+        delete m_tmpLine;
+        m_tmpLine = NULL;
+    }
+
+    if (m_addingNode) {
+        if (m_polygonNodes.size() > 0) {
+            PolygonNode* prevNode = m_polygonNodes.last();
+            m_polygonNodes.append(m_tmpNode);
+            PolygonEdge* edge = new PolygonEdge(prevNode, m_tmpNode);
+            this->addItem(edge);
+            m_polygonEdges.append(edge);
+        } else  {
+            m_polygonNodes.append(m_tmpNode);
         }
-
-        pol.clear();
-        return vecPoint;
+        m_addingNode = false;
     }
-    else
-	{
-         cout << "empty vector" << endl;
-         return vecPoint;
-    }
-
 }
 
-void GraphicsScene::connectDots()
-{
-    if (pol.size()>2)
-	{
-       addLine(QLine(pol.first(),pol.last()),QPen(Qt::red,1));
+QPolygon* GraphicsScene::detectionAreaPolygon() {
+    m_polygon.clear();
+    for (int i = 0; i < m_polygonNodes.count(); i++) {
+        m_polygon << m_polygonNodes.at(i)->pos().toPoint();
     }
-
+    return &m_polygon;
 }
-void GraphicsScene::clearPoly()
+
+bool GraphicsScene::connectDots()
 {
-    pol.clear();
+    if ((m_polygonNodes.size() > 2) && !m_polygonClosed) {
+        PolygonNode* firstNode = m_polygonNodes.first();
+        PolygonNode* lastNode = m_polygonNodes.last();
+        PolygonEdge* edge = new PolygonEdge(lastNode, firstNode);
+        this->addItem(edge);
+        m_polygonEdges.append(edge);
+        m_polygonClosed = true;
+        return true;
+    }
+    return false;
+}
+
+void GraphicsScene::clearPolygon()
+{
+    m_polygon.clear();
+    m_polygonClosed = false;
+
+    while (!m_polygonNodes.isEmpty()) {
+        PolygonNode* node = m_polygonNodes.takeLast();
+        delete node;
+    }
+    while (!m_polygonEdges.isEmpty()) {
+        PolygonEdge* edge = m_polygonEdges.takeLast();
+        delete edge;
+    }
+}
+
+bool GraphicsScene::takePicture() {
+    Mat src;
+    src = m_camera->getWebcamFrame();
+    cv::cvtColor(src, src, CV_BGR2RGB);
+    QImage imgToDisplay = QImage((uchar*)src.data, src.cols, src.rows, src.step, QImage::Format_RGB888);
+    if (items().contains((QGraphicsItem*)m_picture)) {
+        removeItem((QGraphicsItem*)m_picture);
+    }
+    m_picture = addPixmap(QPixmap::fromImage(imgToDisplay));
+    return true;
 }
 
 GraphicsScene::~GraphicsScene()
 {
-    qDebug() << "deleted scene";
+    clearPolygon();
 }
 

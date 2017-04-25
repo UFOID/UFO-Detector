@@ -16,34 +16,38 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef MAINWINDOW_H
+#define MAINWINDOW_H
+
+#include "camera.h"
+#include "config.h"
 #include "datamanager.h"
+#include "detectionareaeditdialog.h"
+#include <QMainWindow>
+#include <QApplication>
 
-DataManager::DataManager(Config* config, QObject* parent) : QObject(parent) {
-    m_config = config;
+namespace Ui {
+class MainWindow;
 }
 
-bool DataManager::readResultDataFile() {
-    return true;
-}
+class MainWindow : public QMainWindow
+{
+    Q_OBJECT
 
-void DataManager::saveResultData(QString dateTime, QString videoLength) {
-    Q_UNUSED(dateTime);
-    Q_UNUSED(videoLength);
-}
+public:
+    explicit MainWindow(QWidget *parent = 0);
+    ~MainWindow();
 
-void DataManager::handleUpdateReply(QNetworkReply *reply) {
-    Q_UNUSED(reply);
-}
+private:
+    Ui::MainWindow *ui;
+    Config* m_config;
+    Camera* m_camera;
+    DataManager* m_dataManager;
+    DetectionAreaEditDialog* m_editor;
 
-void DataManager::handleBirdClassifierReply(QNetworkReply *reply) {
-    Q_UNUSED(reply);
-}
+private slots:
+    void on_openDetectionAreaEditorButton_clicked();
 
-bool DataManager::readDetectionAreaFile(bool clipToCamera) {
-    Q_UNUSED(clipToCamera);
-    return true;
-}
+};
 
-QList<QPolygon*>& DataManager::detectionArea() {
-    return m_detectionAreaPolygons;
-}
+#endif // MAINWINDOW_H

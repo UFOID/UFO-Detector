@@ -285,7 +285,8 @@ void DataManager::saveResultData(QString dateTime, QString videoLength) {
 
     if(!m_resultDataFile.open(QIODevice::WriteOnly | QIODevice::Text))
     {
-        qDebug() << "DataManager: failed to open result data file" << m_resultDataFile.fileName();
+        QString errorMsg = tr("DataManager: failed to open result data file %1").arg(m_resultDataFile.fileName());
+        emit messageBroadcasted(errorMsg);
         return;
     }
     else
@@ -296,10 +297,161 @@ void DataManager::saveResultData(QString dateTime, QString videoLength) {
         stream << m_resultDataDomDocument.toString();
         if (stream.status() != QTextStream::Ok)
         {
-            qDebug() << "DataManager: problem writing to result data file" << m_resultDataFile.fileName();
+            QString errorMsg = tr("DataManager: problem writing to result data file %1").arg(m_resultDataFile.fileName());
+            emit messageBroadcasted(errorMsg);
         }
         m_resultDataFile.flush();
         m_resultDataFile.close();
     }
     emit resultDataSaved(m_config->resultVideoDir(), dateTime, videoLength);
+}
+
+bool DataManager::readDetectionAreaFile(bool clipToCamera) {
+    QFile areaFile(m_config->detectionAreaFile());
+    QDomDocument doc;
+    QDomElement root;
+    int x = 0;
+    int y = 0;
+    int cameraId = m_config->cameraIndex();
+    int cameraWidth = m_config->cameraWidth();
+    int cameraHeight = m_config->cameraHeight();
+    QPolygon cameraRectangle;
+    bool polygonsClipped = false;
+    bool polygonWasClosed = false;
+
+    if(!areaFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QString errorMsg = tr("Failed to open the detection area file %1. Please create it in Settings dialog or manually.").arg(areaFile.fileName());
+        emit messageBroadcasted(errorMsg);
+        return false;
+    }
+
+    if(!doc.setContent(&areaFile)) {
+        QString errorMsg = tr("Error reading the detection area file %1").arg(areaFile.fileName());
+        areaFile.close();
+        emit messageBroadcasted(errorMsg);
+        return false;
+    }
+
+    areaFile.close();
+    root = doc.documentElement();
+    if (root.nodeName() != "detectionarealist") {
+        QString errorMsg = tr("Expected <detectionarealist> tag in detection area file but not found");
+        emit messageBroadcasted(errorMsg);
+        return false;
+    }
+    QDomNodeList areaList = root.childNodes();
+
+    if (areaList.count() > 1) {
+        QString errorMsg = tr("More than one detection areas defined, combining all together");
+        emit messageBroadcasted(errorMsg);
+    }
+
+    for (int i = 0; i < areaList.count(); i++) {
+        QDomNode area = areaList.at(i);
+        QDomNodeList areaNodes = area.childNodes();
+
+        if (area.nodeName() != "detectionarea") {
+            QString errorMsg = tr("Expected <detectionarea> tag in detection area file but not found.");
+            emit messageBroadcasted(errorMsg);
+            return false;
+        }
+
+        QDomNodeList cameraList = area.toElement().elementsByTagName("camera");
+
+        if (cameraList.count() != 1) {
+            QString errorMsg = tr("Expected single <camera> tag in detection area. Assuming camera index 0.");
+            emit messageBroadcasted(errorMsg);
+        }
+        for (int c = 0; c < cameraList.count(); c++) {
+            QDomElement cameraElement = cameraList.at(c).toElement();
+            cameraId = cameraElement.attribute("id").toInt();
+            cameraWidth = cameraElement.attribute("width").toInt();
+            cameraHeight = cameraElement.attribute("height").toInt();
+            if (cameraId == m_config->cameraIndex()) {
+                break;
+            }
+        }
+
+        cameraRectangle << QPoint(0, 0) << QPoint(0, cameraHeight - 1)
+                        << QPoint(cameraWidth - 1, cameraHeight - 1) << QPoint(cameraWidth - 1, 0);
+
+        while (!m_detectionAreaPolygons.isEmpty()) {
+            QPolygon* polygon = m_detectionAreaPolygons.takeLast();
+            delete polygon;
+        }
+
+        for (int a = 0; a < areaNodes.count(); a++) {
+            QDomNode areaSubNode = areaNodes.at(a);
+
+            if (areaSubNode.nodeName() == "polygon") {
+                QDomNodeList pointList = areaSubNode.childNodes();
+                QPolygon* polygon = new QPolygon();
+
+                for (int p = 0; p < pointList.count(); p++) {
+                    QDomElement pointElement = pointList.at(p).toElement();
+                    if (pointElement.nodeName() == "point") {
+                        x = pointElement.attribute("x").toInt();
+                        y = pointElement.attribute("y").toInt();
+                        polygon->append(QPoint(x, y));
+                    }
+                }
+                if (clipToCamera && polygon->size() &&
+                    !cameraRectangle.boundingRect().contains(polygon->boundingRect()))
+                {
+                    if (polygon->first() == polygon->last()) {
+                        polygonWasClosed = true;
+                    }
+                    *polygon = polygon->intersected(cameraRectangle);
+                    polygonsClipped = true;
+                    if (!polygonWasClosed) {
+                        // intersected() treats polygon as implicitly closed
+                        // so extra node is added: remove it
+                        if (polygon->first() == polygon->last()) {
+                            polygon->removeLast();
+                        }
+                    }
+                }
+                m_detectionAreaPolygons.append(polygon);
+            }
+        }
+    }
+    if (polygonsClipped) {
+        QString warningMsg = tr("Detection area was clipped in order to fit the camera size.");
+        emit messageBroadcasted(warningMsg);
+    }
+    return true;
+}
+
+QList<QPolygon*>& DataManager::detectionArea() {
+    return m_detectionAreaPolygons;
+}
+
+bool DataManager::resetDetectionAreaFile(bool overwrite) {
+    QFile detectionAreaFile(m_config->detectionAreaFile());
+    if (detectionAreaFile.exists() && !overwrite) {
+        return false;
+    }
+    if (!detectionAreaFile.open(QFile::WriteOnly | QFile::Truncate)) {
+        return false;
+    }
+    int id = m_config->cameraIndex();
+    int width = m_config->cameraWidth();
+    int height = m_config->cameraHeight();
+    QTextStream out(&detectionAreaFile);
+
+    out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl;
+    out << "<detectionarealist>" << endl;
+    out << "  <detectionarea>" << endl;
+    out << "    <camera id=\"" << id << "\" width=\"" << width
+        << "\" height=\"" << height << "\"/>" << endl;
+    out << "    <polygon>" << endl;
+    out << "      <point x=\"0\" y=\"0\"/>" << endl;
+    out << "      <point x=\"0\" y=\"" << (height - 1) << "\"/>" << endl;
+    out << "      <point x=\"" << (width - 1) << "\" y=\"" << (height - 1) << "\"/>" << endl;
+    out << "      <point x=\"" << (width - 1) << "\" y=\"0\"/>" << endl;
+    out << "    </polygon>" << endl;
+    out << "  </detectionarea>" << endl;
+    out << "</detectionarealist>" << endl;
+    detectionAreaFile.close();
+    return true;
 }

@@ -112,6 +112,11 @@ void TestActualDetector::initTestCase() {
     if (!detectionAreaFile.exists()) {
         makeDetectionAreaFile();
     }
+    QPolygon* detectionArea = new QPolygon();
+    *detectionArea << QPoint(0, 0) << QPoint(0, m_config->cameraHeight() - 1)
+                  << QPoint(m_config->cameraWidth() - 1, m_config->cameraHeight() - 1)
+                  << QPoint(m_config->cameraWidth() - 1, 0);
+    m_dataManager->m_detectionAreaPolygons << detectionArea;
 }
 
 void TestActualDetector::cleanupTestCase() {
@@ -406,14 +411,20 @@ void TestActualDetector::makeDetectionAreaFile() {
     QFile detectionAreaFile(m_config->detectionAreaFile());
     QVERIFY(detectionAreaFile.open(QFile::ReadWrite));
     QTextStream out(&detectionAreaFile);
-    out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-    out << "<UFOID>\n";
-    for (int y = 0; y < m_config->cameraHeight(); y++) {
-        for (int x = 0; x < m_config->cameraWidth(); x++) {
-            out << "\t<point x=\"" << x << "\" y=\"" << y << "\"/>\n";
-        }
-    }
-    out << "</UFOID>";
+    out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl;
+    out << "<detectionarealist>" << endl;
+    out << "<detectionarea>" << endl;
+    out << "<camera id=\"" << m_config->cameraIndex() << "\" width=\""
+        << m_config->cameraWidth() << "\" height=\"" << m_config->cameraHeight()
+        << "\"/>" << endl;
+    out << "<polygon>" << endl;
+    out << "<point x=\"0\" y=\"0\"/>" << endl;
+    out << "<point x=\"0\" y=\"" << m_config->cameraHeight() << "\"/>" << endl;
+    out << "<point x=\"" << m_config->cameraWidth() << "\" y=\"" << m_config->cameraHeight() << "\"/>" << endl;
+    out << "<point x=\"" << m_config->cameraWidth() << "\" y=\"0\"/>" << endl;
+    out << "</polygon>" << endl;
+    out << "</detectionarea>" << endl;
+    out << "</detectionarealist>" << endl;
     detectionAreaFile.close();
 }
 

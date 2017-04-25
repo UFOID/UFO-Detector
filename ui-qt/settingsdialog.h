@@ -43,22 +43,21 @@ class SettingsDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit SettingsDialog(QWidget *parent = 0, Camera* camPtr = 0, Config* configPtr = 0);
+    explicit SettingsDialog(QWidget* parent = 0, Camera* camera = 0, Config* config = 0,
+        DataManager* dataManager = 0);
     ~SettingsDialog();
 
 private:
     Ui::SettingsDialog *ui;
-    Camera* cameraPtr;
+    Camera* m_camera;
     Config* m_config;
-    void saveSettings();
+    DataManager* m_dataManager;
     bool m_detectionAreaDialogIsOpen;
-    bool wasSaved;
+    bool m_wasSaved;
     DetectionAreaEditDialog* m_detectionAreaDialog;
     CameraResolutionDialog* m_resolutionDialog;
 
-    //std::unique_ptr<std::thread> threadXMLfile;
-    //void checkAreaFile();
-
+    void saveSettings();
 
 private slots:
     void on_toolButtonVideoPath_clicked();
@@ -70,21 +69,12 @@ private slots:
     void on_buttonSelectDetectionArea_clicked();
     void on_toolButtonResolutionDialog_clicked();
     void onResolutionAcceptedInDialog(QSize resolution);
-    //void startThreadCheckXML();
-    //void cleanupThreadCheckXML();
     void on_toolButtonCodecHelp_clicked();
     void on_toolButtonTokenHelp_clicked();
 
     void on_checkBoxFilterAiplanes_clicked();
 
     void on_toolButtonFilterAirplanes_clicked();
-
-public slots:
-
-signals:
-    //void finishedCheckingXML();
-
-
 };
 
 #endif // SETTINGS_H

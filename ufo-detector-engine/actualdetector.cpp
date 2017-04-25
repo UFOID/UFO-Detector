@@ -56,7 +56,7 @@ ActualDetector::~ActualDetector()
 
 bool ActualDetector::initialize()
 {
-    if (!parseDetectionAreaFile(m_detectionAreaFile, m_region)){
+    if (!initDetectionArea()){
         return false;
     }
     state->resetState();
@@ -307,8 +307,6 @@ void ActualDetector::detectingThread()
     delete detector;    
 }
 
-
-
 /*
  * Check if there was motion between frames. Return the AmountOfMotion detected
  */
@@ -365,6 +363,40 @@ inline int ActualDetector::detectMotion(const Mat & motion, Mat & result, Mat & 
         return number_of_changes;
     }
     return 0;
+}
+
+bool ActualDetector::initDetectionArea() {
+
+    bool readOk = m_dataManager->readDetectionAreaFile(true);
+    if (!readOk) {
+        return false;
+    }
+    int size = 0;
+    QRect cameraRect(0, 0, m_config->cameraWidth(), m_config->cameraHeight());
+
+    QList<QPolygon*> polygonList = m_dataManager->detectionArea();
+    QListIterator<QPolygon*> polygonListIt(polygonList);
+
+    while (polygonListIt.hasNext()) {
+        QPolygon* polygon = polygonListIt.next();
+        QRect boundingRect = polygon->boundingRect();
+
+        if (!cameraRect.contains(boundingRect)) {
+            QString errorMsg = tr("ERROR: Selected area of detection does not match camera resolution. Re-select area of detection.");
+            emit broadcastOutputText(errorMsg);
+            return false;
+        }
+
+        for (int bx = boundingRect.x(); bx < boundingRect.width(); bx++) {
+            for (int by = boundingRect.y(); by < boundingRect.height(); by++) {
+                if (polygon->containsPoint(QPoint(bx, by), Qt::OddEvenFill)) {
+                    m_region.push_back(cv::Point2f(bx, by));
+                    size++;
+                }
+            }
+        }
+    }
+    return true;
 }
 
 /*
@@ -680,73 +712,6 @@ std::vector<Rect> ActualDetector::getConstantRecs(int totalLight)
     }
 
     return rectVec;
-
-}
-
-/*
- * Read the detection area file
- */
-bool ActualDetector::parseDetectionAreaFile(string file_region, vector<Point> &region)
-{
-    region.clear();
-
-    QFile fileXML(file_region.c_str());
-    QDomDocument doc;
-    QDomElement root;
-    int size = m_config->detectionAreaSize();
-
-    if(!fileXML.open(QIODevice::ReadOnly | QIODevice::Text))
-    {
-        qDebug() << "Failed to open the detection area file" << QString(file_region.data());
-        emit errorReadingDetectionAreaFile();
-        return false;
-    }
-    else
-    {
-        if(!doc.setContent(&fileXML))
-        {
-            qDebug() << "Error reading the detection area file" << QString(file_region.data());
-            emit errorReadingDetectionAreaFile();
-            return false;
-        }
-        else
-        {
-            root = doc.firstChildElement();
-            QDomNode node = root.firstChild();
-            int x, y;
-            int count = 0;
-            while( !node.isNull())
-            {
-                if( node.isElement())
-                {
-                    QDomElement element = node.toElement();
-                    x = element.attribute("x").toInt();
-                    y = element.attribute("y").toInt();
-                    if(y>m_cameraHeight || x>m_cameraWidth)
-                    {
-                        qDebug() << y;
-                        qDebug() << x;
-                        /// @todo auto-scale area of detection
-                        auto output_text = tr("ERROR: Selected area of detection does not match camera resolution. Re-select area of detection.");
-                        emit broadcastOutputText(output_text);
-                        return false;
-                    }
-                    Point2f p(x,y);
-                    region.push_back(p);
-                    count++;
-                }
-                node = node.nextSibling();
-
-                if (count%1000 == 0)
-                {
-                    float division = (float)size / (float)count;
-                    int percentage =  85/division;
-                    emit progressValueChanged(percentage);
-                }
-            }
-            return true;
-        }
-    }
 
 }
 

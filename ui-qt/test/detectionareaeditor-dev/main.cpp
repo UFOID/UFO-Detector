@@ -16,34 +16,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "datamanager.h"
+#include "mainwindow.h"
+#include <QApplication>
 
-DataManager::DataManager(Config* config, QObject* parent) : QObject(parent) {
-    m_config = config;
-}
+int main(int argc, char *argv[])
+{
+    QApplication a(argc, argv);
+    MainWindow w;
+    w.show();
 
-bool DataManager::readResultDataFile() {
-    return true;
-}
-
-void DataManager::saveResultData(QString dateTime, QString videoLength) {
-    Q_UNUSED(dateTime);
-    Q_UNUSED(videoLength);
-}
-
-void DataManager::handleUpdateReply(QNetworkReply *reply) {
-    Q_UNUSED(reply);
-}
-
-void DataManager::handleBirdClassifierReply(QNetworkReply *reply) {
-    Q_UNUSED(reply);
-}
-
-bool DataManager::readDetectionAreaFile(bool clipToCamera) {
-    Q_UNUSED(clipToCamera);
-    return true;
-}
-
-QList<QPolygon*>& DataManager::detectionArea() {
-    return m_detectionAreaPolygons;
+    return a.exec();
 }

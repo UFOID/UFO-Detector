@@ -168,6 +168,7 @@ void MainWindow::setSignalsAndSlots(ActualDetector* actualDetector)
     connect(this, SIGNAL(elementWasRemoved()), m_dataManager, SLOT(readResultDataFile()));
     connect(m_actualDetector, SIGNAL(progressValueChanged(int)), this, SLOT(on_progressBar_valueChanged(int)));
     connect(m_actualDetector, SIGNAL(broadcastOutputText(QString)), this, SLOT(update_output_text(QString)));
+    connect(m_dataManager, SIGNAL(messageBroadcasted(QString)), this, SLOT(update_output_text(QString)));
     connect(this, SIGNAL(updatePixmap(QImage)), this, SLOT(displayPixmap(QImage)));
     connect(ui->videoList, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(onVideoListContextMenuRequested(const QPoint&)));
 
@@ -405,7 +406,7 @@ void MainWindow::on_settingsButton_clicked()
 {
     if (!m_detecting)
     {
-        m_settingsDialog = new SettingsDialog(0, m_camera, m_config);
+        m_settingsDialog = new SettingsDialog(0, m_camera, m_config, m_dataManager);
         m_settingsDialog->setModal(true);
         m_settingsDialog->show();
         m_settingsDialog->setAttribute(Qt::WA_DeleteOnClose);
