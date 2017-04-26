@@ -22,6 +22,11 @@ VideoBuffer::VideoBuffer(int capacity, QObject *parent) : QObject(parent) {
     m_capacity = capacity;
 }
 
+VideoBuffer::~VideoBuffer()
+{
+
+}
+
 BufferedVideoFrame* VideoBuffer::waitNextFrame() {
     if (!m_buffer.isEmpty()) {
         return m_buffer.takeFirst();

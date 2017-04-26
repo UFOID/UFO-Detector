@@ -210,6 +210,7 @@ void TestVideoBuffer::waitNextFrame_emptyBuffer() {
 
     frameReaderThread.exit();
     frameReaderThread.wait();
+    delete frameReader;
 }
 
 void TestVideoBuffer::onFrameBuffered(bool success) {
@@ -261,6 +262,7 @@ void TestVideoBuffer::pushFrame_fullBuffer() {
 
     frameWriterThread.exit();
     frameWriterThread.wait();
+    delete frameWriter;
 }
 
 QTEST_MAIN(TestVideoBuffer)

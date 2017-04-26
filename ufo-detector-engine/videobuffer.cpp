@@ -27,6 +27,12 @@ VideoBuffer::VideoBuffer(int capacity, QObject *parent) : QObject(parent) {
     m_waitTimeoutMs = 100;
 }
 
+VideoBuffer::~VideoBuffer()
+{
+    delete m_freeSlots;
+    delete m_reservedSlots;
+}
+
 BufferedVideoFrame* VideoBuffer::waitNextFrame() {
     BufferedVideoFrame* frame = NULL;
     bool slotAcquired = false;
