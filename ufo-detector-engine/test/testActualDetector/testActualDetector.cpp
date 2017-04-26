@@ -222,6 +222,7 @@ void TestActualDetector::mockCameraBlockNextFrame() {
     m_consumeCameraFrames = false;
     mockCamera_setFrameBlockingEnabled(false);
     m_cameraFrameConsumerThread->join();
+    delete m_cameraFrameConsumerThread;
     QVERIFY(!m_cameraFrameConsumerRunning);
     // there will be one more frame
     QVERIFY(2 == m_cameraFramesConsumed);
