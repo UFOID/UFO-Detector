@@ -93,7 +93,8 @@ Config::Config(QObject *parent) : QObject(parent)
 }
 
 Config::~Config() {
-    m_videoCodecSupportInfo->deleteLater();
+    delete m_videoCodecSupportInfo;
+    delete m_settings;
 }
 
 QString Config::applicationVersion() {

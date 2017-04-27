@@ -38,7 +38,7 @@ class VideoBuffer : public QObject
     Q_OBJECT
 public:
     explicit VideoBuffer(int capacity, QObject *parent = 0);
-
+    ~VideoBuffer();
     /**
      * @brief Wait next frame and pop it from the buffer. Will block in case of empty buffer.
      * Call to stopWait() method will stop the waiting. In that case, this method

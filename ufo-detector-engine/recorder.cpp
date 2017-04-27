@@ -125,6 +125,7 @@ void Recorder::recordThread(){
                 }
                 frame->m_frame->release();
             }
+            delete frame->m_frame;
             delete frame;
             frame = NULL;
         }

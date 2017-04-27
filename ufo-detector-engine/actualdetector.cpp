@@ -350,8 +350,7 @@ inline int ActualDetector::detectMotion(const Mat & motion, Mat & result, Mat & 
             m_rect = Rect(x,y);
             Mat croppedThresh = motion(m_rect);
             croppedThresh.copyTo(m_treshImg);
-            Mat cropped = result(m_rect);
-            cropped.copyTo(result_cropped);
+            result_cropped = result(m_rect);
 
         }
         else

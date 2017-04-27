@@ -235,6 +235,7 @@ bool CameraInfo::init() {
     }
     updateAspectRatios();
     m_initialized = ok;
+    delete m_webCamera;
     return ok;
 }
 
