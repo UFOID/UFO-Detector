@@ -12,7 +12,7 @@ CONFIG += console
 CONFIG -= app_bundle
 
 # enable this to compile for Raspberry Pi etc.
-CONFIG += embedded
+#CONFIG += embedded
 
 TEMPLATE = app
 
