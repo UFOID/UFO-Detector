@@ -1,6 +1,6 @@
 # UFO Detector
 
-The UFO Detector is a software that allows the autonomous video recording of possible UFOs. It is designed to detect and record objects that cannot be identified as something known during the day or night. [See it in action]
+The UFO Detector is a software that allows the autonomous video recording of unidentifiable flying objects. This includes [unknown aircrafts](http://ufoid.net/videos/2-objects-flying-close-together), [meteors](http://ufoid.net/videos/meteor-captured-in-north-hollywood-ca) or other [aerial anomalies](http://ufoid.net/videos/object-disappearing-in-clouds). It is designed to detect and record objects that cannot be identified as something known during the day or night. [See it in action]
 
 ### Features:
   - Autonomous video recording of possible UFOâ€™s
@@ -75,6 +75,7 @@ Since the objects that the software looks for are not well defined (i.e. being â
 1.	Motion Detection: The program looks for moving objects within the selected area of detection. The user can specify the size of noise which will be ignored. Each moving object is tracked.
 2.	Light detection: We assume any UFO is light emitting (i.e. object being brighter than the background) in order to decrease the amount of false-positives.
 3.	Object recognition: Each detected bright object is analyzed using cascade classifier which was trained using images of flying birds. This is only used if the detection process is run during the day. Currently only birds are filtered out in this way.
+4.	Aircraft filter: Using data from the internet to check whether there are aircrafts within the camera view.
 
 ### License:
 GPLv3
