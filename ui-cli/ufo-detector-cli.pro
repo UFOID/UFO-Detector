@@ -2,13 +2,17 @@ QT += core
 QT -= gui
 
 unix {
-    QMAKE_CXXFLAGS += -std=c++1y
-    CONFIG += c++1y
+    # NOTE: c++14 is not supported in Raspberry Pi on Qemu
+    QMAKE_CXXFLAGS += -std=c++11    # 14: c++1y
+    CONFIG += c++11
 }
 
 TARGET = ufo-detector-cli
 CONFIG += console
 CONFIG -= app_bundle
+
+# enable this to compile for Raspberry Pi etc.
+CONFIG += embedded
 
 TEMPLATE = app
 
@@ -20,3 +24,8 @@ SOURCES += main.cpp \
 HEADERS += \
     console.h
 
+embedded {
+    INSTALLS += target
+    target.files = ufo-detector-cli
+    target.path = /home/pi/bin
+}

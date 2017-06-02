@@ -40,4 +40,5 @@ HEADERS  += $$PWD/recorder.h \
     $$PWD/videocodecsupportinfo.h \
     $$PWD/planechecker.h \
     $$PWD/detectorstate.h \
-    $$PWD/datamanager.h
+    $$PWD/datamanager.h \
+    $$PWD/defines.h

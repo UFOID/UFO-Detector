@@ -36,7 +36,9 @@ void CTracker::Update(const std::vector<cv::Point2d>& detections, const std::vec
 		// If no tracks yet
 		for (size_t i = 0; i < detections.size(); ++i)
 		{
-			tracks.push_back(std::make_unique<CTrack>(detections[i], rects[i], dt, Accel_noise_mag, NextTrackID++));
+            //tracks.push_back(std::make_unique<CTrack>(detections[i], rects[i], dt, Accel_noise_mag, NextTrackID++));
+            std::unique_ptr<CTrack> track(new CTrack(detections[i], rects[i], dt, Accel_noise_mag, NextTrackID++));
+            tracks.push_back(std::move(track));
 		}
 	}
 
@@ -134,7 +136,9 @@ void CTracker::Update(const std::vector<cv::Point2d>& detections, const std::vec
 	{
         if (find(assignment.begin(), assignment.end(), i) == assignment.end())
 		{
-			tracks.push_back(std::make_unique<CTrack>(detections[i], rects[i], dt, Accel_noise_mag, NextTrackID++));
+            //tracks.push_back(std::make_unique<CTrack>(detections[i], rects[i], dt, Accel_noise_mag, NextTrackID++));
+            std::unique_ptr<CTrack> track(new CTrack(detections[i], rects[i], dt, Accel_noise_mag, NextTrackID++));
+            tracks.push_back(std::move(track));
 		}
 	}
 
