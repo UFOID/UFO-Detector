@@ -62,12 +62,15 @@ int main(int argc, char *argv[])
         QCoreApplication::translate("ufo-detector-cli", "Reset detection area file."));
     cmdLineParser.addOption(resetDetectionAreaFileOption);
 
-    /// @todo add option to list camera resolutions
+    QCommandLineOption listCameraResolutionsOption("list-camera-resolutions",
+        QCoreApplication::translate("ufo-detector-cli", "List available web camera resolutions."));
+    cmdLineParser.addOption(listCameraResolutionsOption);
 
     cmdLineParser.process(a);
 
     bool resetConfigFile = cmdLineParser.isSet(resetConfigFileOption);
     bool resetDetectionAreaFile = cmdLineParser.isSet(resetDetectionAreaFileOption);
+    bool listCameraResolutions = cmdLineParser.isSet(listCameraResolutionsOption);
 
     try {
         Config config;
@@ -83,7 +86,7 @@ int main(int argc, char *argv[])
                 return -1;
             }
             std::cout << "Configuration file " << config.configFileName().toStdString() << " saved" << endl;
-            if (resetConfigFile && !resetDetectionAreaFile) {
+            if (resetConfigFile && !resetDetectionAreaFile && !listCameraResolutions) {
                 return 0;
             }
         }
@@ -92,10 +95,12 @@ int main(int argc, char *argv[])
         if (resetDetectionAreaFile) {
             if (dataManager.resetDetectionAreaFile(true)) {
                 std::cout << "Created detection area file " << config.detectionAreaFile().toStdString() << endl;
-                return 0;
             } else {
                 std::cerr << "Failed to create detection area file " << config.detectionAreaFile().toStdString() << endl;
                 return -1;
+            }
+            if (!listCameraResolutions) {
+                return 0;
             }
         }
         if (!dataManager.init()) {
@@ -106,6 +111,21 @@ int main(int argc, char *argv[])
         if (!camera.init()) {
             std::cerr << "Couldn't initialize web camera, quitting" << std::endl;
             return -1;
+        }
+        if (listCameraResolutions) {
+            std::cout << "Querying available web camera resolutions, this may take a while..." << endl;
+            camera.queryAvailableResolutions();
+            if (camera.availableResolutions().size() == 0) {
+                std::cout << "No web camera resolutions found" << endl;
+            } else {
+                std::cout << "Supported web camera resolutions:" << endl;
+            }
+            QListIterator<QSize> resolutionIt(camera.availableResolutions());
+            while (resolutionIt.hasNext()) {
+                QSize resolution = resolutionIt.next();
+                std::cout << resolution.width() << " x " << resolution.height() << endl;
+            }
+            return 0;
         }
 
         ActualDetector actualDetector(&camera, &config, &dataManager, &a);

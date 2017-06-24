@@ -82,9 +82,10 @@ public:
 
     /**
      * @brief Run web camera resolution query.
+     * @param verboseQuery Whether to print query results for each query
      * @return
      */
-    bool queryAvailableResolutions();
+    bool queryAvailableResolutions(bool verboseQuery = false);
 
     /**
      * @brief List of available web camera resolutions.

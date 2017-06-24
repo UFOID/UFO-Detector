@@ -101,14 +101,14 @@ int Camera::index()
     return m_index;
 }
 
-bool Camera::queryAvailableResolutions()
+bool Camera::queryAvailableResolutions(bool verboseQuery)
 {
     if (!m_cameraInfo->isInitialized())
     {
         // first release current cv::VideoCapture
         this->release();
         // CameraInfo::init() will reserve cv::VideoCapture and do the query
-        m_cameraInfo->init();
+        m_cameraInfo->init(verboseQuery);
         // now can continue using own cv::VideoCapture
         this->init();
     }

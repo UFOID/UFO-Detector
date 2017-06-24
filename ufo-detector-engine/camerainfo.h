@@ -48,9 +48,10 @@ public:
      * NOTE: web camera must not be reserved when calling this method so release
      * the camera first
      *
+     * @param verboseResolutionQuery Print result for each web camera resolution query trial
      * @return true if initialization was successful, false otherwise
      */
-    bool init();
+    bool init(bool verboseResolutionQuery = false);
 
     /**
      * @brief Check whether this instance of CameraInfo is initialized.
@@ -92,9 +93,10 @@ private:
 
     /**
      * @brief Query available resolutions from web camera.
+     * @param verbose Verbose query when true, quiet otherwise
      * @return true if querying succeeded, false if it failed
      */
-    bool queryResolutions();
+    bool queryResolutions(bool verbose = false);
 
     /**
      * @brief Update aspect ratio list based on common and available resolutions.
