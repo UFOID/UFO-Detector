@@ -62,7 +62,7 @@ public:
         UserTokenAtUfoId,   // sharing results
         ClassifierVersion,
         CheckAirplanes,
-        Coordinates,
+        AirplaneCoordinates,
         SETTINGS_COUNT
     };
 
@@ -331,7 +331,26 @@ public:
      * @brief Set the coordinates used by PlaneChecker.
      * @param coordinates
      */
-    void setAirplanesCoordinates(QString coordinates);
+    void setAirplaneCoordinates(QString coordinates);
+
+    /**
+     * @brief Check whether configuration file exists.
+     * @return true if configuration file exists, false if not
+     */
+    bool configFileExists();
+
+    /**
+     * @brief Reset configuration file to default values. File is created if it doesn't exist.
+     * If configuration file doesn't exist, it is created even if overwrite is defined as false.
+     * @param overwrite Overwrite existing values.
+     */
+    void createDefaultConfig(bool overwrite = false);
+
+    /**
+     * @brief Configuration file name.
+     * @note Might not be set if configuration file doesn't exist yet.
+     */
+    QString configFileName();
 
 
 #ifndef _UNIT_TEST_
@@ -368,6 +387,9 @@ private:
     bool m_defaultSaveResultImages;     ///< whether to save result images by default
 
     QString m_defaultUserTokenAtUfoId;  ///< default user token for ufoid.net: empty value by default
+
+    bool m_defaultCheckAirplanes;       ///< whether to check airplanes
+    QString m_defaultAirplaneCoordinates;
 
     VideoCodecSupportInfo* m_videoCodecSupportInfo; ///< info about video codec support
 

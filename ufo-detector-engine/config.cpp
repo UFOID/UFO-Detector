@@ -42,7 +42,7 @@ Config::Config(QObject *parent) : QObject(parent)
     m_settingKeys[Config::UserTokenAtUfoId] = "userTokenAtUfoId";
     m_settingKeys[Config::ClassifierVersion] = "classifierVersion";
     m_settingKeys[Config::CheckAirplanes] = "checkAirplanes";
-    m_settingKeys[Config::Coordinates] = "coordinates";
+    m_settingKeys[Config::AirplaneCoordinates] = "airplaneCoordinates";
 
     m_settings = new QSettings("UFOID", "Detector");
 
@@ -60,9 +60,14 @@ Config::Config(QObject *parent) : QObject(parent)
     m_defaultMinPositiveDetections = 2;
     m_defaultBirdClassifierFileName = QCoreApplication::applicationDirPath() + "/cascade.xml";
 
+    m_defaultVideoCodecStr = "FFV1";    // will be changed for Win8, see below
+
 #if defined (Q_OS_WIN)
     m_defaultVideoEncoderLocation = QCoreApplication::applicationDirPath()+"/ffmpeg.exe";
     m_defaultDetectionDataDir = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)+"/UFO ID";
+    if ((QSysInfo::windowsVersion()==QSysInfo::WV_WINDOWS8) || (QSysInfo::windowsVersion()==QSysInfo::WV_WINDOWS8_1)) {
+        m_defaultVideoCodecStr = "LAGS";
+    }
 
 #elif defined (Q_OS_LINUX) || defined (Q_OS_UNIX)
     /// @todo use which(1) to find if ffmpeg and avconv are present. Prefer avconv at least in *ubuntu.
@@ -80,16 +85,14 @@ Config::Config(QObject *parent) : QObject(parent)
     m_defaultDetectionAreaSize = 0;
 
     m_defaultResultVideoDir = m_defaultResultDocumentDir + "/Videos";
-    if ((QSysInfo::windowsVersion()==QSysInfo::WV_WINDOWS8) || (QSysInfo::windowsVersion()==QSysInfo::WV_WINDOWS8_1)) {
-        m_defaultVideoCodecStr = "LAGS";
-    } else {
-        m_defaultVideoCodecStr = "FFV1";
-    }
+
     m_defaultResultVideoWithRectangles = false;
     m_defaultResultImageDir = m_defaultResultDocumentDir + "/Images";
     m_defaultSaveResultImages = false;
 
     m_defaultUserTokenAtUfoId = "";
+    m_defaultCheckAirplanes = false;
+    m_defaultAirplaneCoordinates = "";
 }
 
 Config::~Config() {
@@ -186,12 +189,12 @@ QString Config::userTokenAtUfoId() {
 
 bool Config::checkAirplanes()
 {
-    return m_settings->value(m_settingKeys[Config::CheckAirplanes], false).toBool();
+    return m_settings->value(m_settingKeys[Config::CheckAirplanes], m_defaultCheckAirplanes).toBool();
 }
 
 QString Config::coordinates()
 {
-    return m_settings->value(m_settingKeys[Config::Coordinates]).toString();
+    return m_settings->value(m_settingKeys[Config::AirplaneCoordinates], m_defaultAirplaneCoordinates).toString();
 }
 
 VideoCodecSupportInfo* Config::videoCodecSupportInfo() {
@@ -301,9 +304,9 @@ void Config::setCheckAirplanes(bool check)
     emit settingsChanged();
 }
 
-void Config::setAirplanesCoordinates(QString coordinates)
+void Config::setAirplaneCoordinates(QString coordinates)
 {
-    m_settings->setValue(m_settingKeys[Config::Coordinates], QVariant(coordinates));
+    m_settings->setValue(m_settingKeys[Config::AirplaneCoordinates], QVariant(coordinates));
     m_settings->sync();
     emit settingsChanged();
 }
@@ -312,4 +315,43 @@ void Config::setClassifierVersion(int version) {
     m_settings->setValue(m_settingKeys[Config::ClassifierVersion], QVariant(version));
     m_settings->sync();
     emit settingsChanged();
+}
+
+bool Config::configFileExists() {
+    return QFile(m_settings->fileName()).exists();
+}
+
+void Config::createDefaultConfig(bool overwrite) {
+    if (configFileExists() && !overwrite) {
+        return;
+    }
+    m_settings->setValue(m_settingKeys[Config::ApplicationVersion], QVariant(m_defaultApplicationVersion));
+    m_settings->setValue(m_settingKeys[Config::CheckApplicationUpdates], QVariant(m_defaultCheckApplicationUpdates));
+    m_settings->setValue(m_settingKeys[Config::CameraIndex], QVariant(m_defaultCameraIndex));
+    m_settings->setValue(m_settingKeys[Config::CameraWidth], QVariant(m_defaultCameraWidth));
+    m_settings->setValue(m_settingKeys[Config::CameraHeight], QVariant(m_defaultCameraHeight));
+    m_settings->setValue(m_settingKeys[Config::CheckCameraAspectRatio], QVariant(m_defaultCheckCameraAspectRatio));
+    m_settings->setValue(m_settingKeys[Config::DetectionAreaFile], QVariant(m_defaultDetectionAreaFileName));
+    m_settings->setValue(m_settingKeys[Config::DetectionAreaSize], QVariant(m_defaultDetectionAreaSize));
+    m_settings->setValue(m_settingKeys[Config::NoiseFilterPixelSize], QVariant(m_defaultNoiseFilterPixelSize));
+    m_settings->setValue(m_settingKeys[Config::MotionThreshold], QVariant(m_defaultMotionThreshold));
+    m_settings->setValue(m_settingKeys[Config::MinPositiveDetections], QVariant(m_defaultMinPositiveDetections));
+    m_settings->setValue(m_settingKeys[Config::BirdClassifierTrainingFile], QVariant(m_defaultBirdClassifierFileName));
+    m_settings->setValue(m_settingKeys[Config::ResultDataFile], QVariant(m_defaultResultDataFileName));
+    m_settings->setValue(m_settingKeys[Config::ResultVideoDir], QVariant(m_defaultResultVideoDir));
+    m_settings->setValue(m_settingKeys[Config::ResultVideoCodec], QVariant(m_defaultVideoCodecStr));
+    m_settings->setValue(m_settingKeys[Config::ResultVideoWithObjectRectangles], QVariant(m_defaultResultVideoWithRectangles));
+    m_settings->setValue(m_settingKeys[Config::VideoEncoderLocation], QVariant(m_defaultVideoEncoderLocation));
+    m_settings->setValue(m_settingKeys[Config::ResultImageDir], QVariant(m_defaultResultImageDir));
+    m_settings->setValue(m_settingKeys[Config::SaveResultImages], QVariant(m_defaultSaveResultImages));
+    m_settings->setValue(m_settingKeys[Config::UserTokenAtUfoId], QVariant(m_defaultUserTokenAtUfoId));
+    m_settings->setValue(m_settingKeys[Config::ClassifierVersion], QVariant(m_defaultClassifierVersion));
+    m_settings->setValue(m_settingKeys[Config::CheckAirplanes], QVariant(m_defaultCheckAirplanes));
+    m_settings->setValue(m_settingKeys[Config::AirplaneCoordinates], QVariant(m_defaultAirplaneCoordinates));
+    m_settings->sync();
+    emit settingsChanged();
+}
+
+QString Config::configFileName() {
+    return m_settings->fileName();
 }

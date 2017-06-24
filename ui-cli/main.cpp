@@ -64,19 +64,28 @@ int main(int argc, char *argv[])
 
     try {
         Config config;
+        if (!config.configFileExists()) {
+            std::cout << "Configuration file doesn't exist, creating it with default values..." << endl;
+            config.createDefaultConfig();
+            if (!config.configFileExists()) {
+                std::cerr << "Failed to create configuration file, quitting" << endl;
+                return -1;
+            }
+            std::cout << "Created configuration file " << config.configFileName().toStdString() << endl;
+        }
 
         DataManager dataManager(&config, &a);
         if (m_resetDetectionAreaFile) {
             if (dataManager.resetDetectionAreaFile(true)) {
-                std::cout << "Created " << config.detectionAreaFile().toStdString() << endl;
+                std::cout << "Created detection area file " << config.detectionAreaFile().toStdString() << endl;
                 return 0;
             } else {
-                std::cerr << "Failed to create " << config.detectionAreaFile().toStdString() << endl;
+                std::cerr << "Failed to create detection area file " << config.detectionAreaFile().toStdString() << endl;
                 return -1;
             }
         }
         if (!dataManager.init()) {
-            std::cerr << "Problems in data manager initialization, continuing" << std::endl;
+            std::cerr << "Problems in data manager initialization, continuing anyway" << std::endl;
         }
 
         Camera camera(config.cameraIndex(), config.cameraWidth(), config.cameraHeight());
@@ -92,7 +101,7 @@ int main(int argc, char *argv[])
         a.connect(&a, SIGNAL(aboutToQuit()), &console, SLOT(onApplicationAboutToQuit()));
 
         if (!console.start()) {
-            std::cerr << "Error starting Console" << std::endl;
+            std::cerr << "Error starting Console, quitting" << std::endl;
             return -1;
         }
         return a.exec();
