@@ -47,34 +47,34 @@ int main(int argc, char *argv[])
     std::cerr << "Warning: termination signals not yet handled in other than Unix" << std::endl;
 #endif
 
-    QCommandLineParser parser;
-    parser.addHelpOption();
-    parser.addVersionOption();
+    QCommandLineParser cmdLineParser;
+    cmdLineParser.addHelpOption();
+    cmdLineParser.addVersionOption();
 
-    parser.setApplicationDescription(QCoreApplication::translate("ufo-detector-cli",
+    cmdLineParser.setApplicationDescription(QCoreApplication::translate("ufo-detector-cli",
         "UFO Detector command line application"));
 
     QCommandLineOption resetConfigFileOption("reset-config-file",
         QCoreApplication::translate("reset-config-file", "Reset configuration file."));
-    parser.addOption(resetConfigFileOption);
+    cmdLineParser.addOption(resetConfigFileOption);
 
     QCommandLineOption resetDetectionAreaFileOption("reset-area-file",
         QCoreApplication::translate("ufo-detector-cli", "Reset detection area file."));
-    parser.addOption(resetDetectionAreaFileOption);
+    cmdLineParser.addOption(resetDetectionAreaFileOption);
 
     /// @todo add option to list camera resolutions
 
-    parser.process(a);
+    cmdLineParser.process(a);
 
-    bool m_resetConfigFile = parser.isSet(resetConfigFileOption);
-    bool m_resetDetectionAreaFile = parser.isSet(resetDetectionAreaFileOption);
+    bool resetConfigFile = cmdLineParser.isSet(resetConfigFileOption);
+    bool resetDetectionAreaFile = cmdLineParser.isSet(resetDetectionAreaFileOption);
 
     try {
         Config config;
-        if (!config.configFileExists() || m_resetConfigFile) {
+        if (!config.configFileExists() || resetConfigFile) {
             if (!config.configFileExists()) {
                 std::cout << "Configuration file doesn't exist, creating with default values..."  << endl;
-            } else if (m_resetConfigFile) {
+            } else if (resetConfigFile) {
                 std::cout << "Setting default configuration values..." << endl;
             }
             config.createDefaultConfig(true);
@@ -83,13 +83,13 @@ int main(int argc, char *argv[])
                 return -1;
             }
             std::cout << "Configuration file " << config.configFileName().toStdString() << " saved" << endl;
-            if (m_resetConfigFile && !m_resetDetectionAreaFile) {
+            if (resetConfigFile && !resetDetectionAreaFile) {
                 return 0;
             }
         }
 
         DataManager dataManager(&config, &a);
-        if (m_resetDetectionAreaFile) {
+        if (resetDetectionAreaFile) {
             if (dataManager.resetDetectionAreaFile(true)) {
                 std::cout << "Created detection area file " << config.detectionAreaFile().toStdString() << endl;
                 return 0;
