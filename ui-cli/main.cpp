@@ -54,24 +54,38 @@ int main(int argc, char *argv[])
     parser.setApplicationDescription(QCoreApplication::translate("ufo-detector-cli",
         "UFO Detector command line application"));
 
+    QCommandLineOption resetConfigFileOption("reset-config-file",
+        QCoreApplication::translate("reset-config-file", "Reset configuration file."));
+    parser.addOption(resetConfigFileOption);
+
     QCommandLineOption resetDetectionAreaFileOption("reset-area-file",
         QCoreApplication::translate("ufo-detector-cli", "Reset detection area file."));
     parser.addOption(resetDetectionAreaFileOption);
 
+    /// @todo add option to list camera resolutions
+
     parser.process(a);
 
+    bool m_resetConfigFile = parser.isSet(resetConfigFileOption);
     bool m_resetDetectionAreaFile = parser.isSet(resetDetectionAreaFileOption);
 
     try {
         Config config;
-        if (!config.configFileExists()) {
-            std::cout << "Configuration file doesn't exist, creating it with default values..." << endl;
-            config.createDefaultConfig();
+        if (!config.configFileExists() || m_resetConfigFile) {
             if (!config.configFileExists()) {
-                std::cerr << "Failed to create configuration file, quitting" << endl;
+                std::cout << "Configuration file doesn't exist, creating with default values..."  << endl;
+            } else if (m_resetConfigFile) {
+                std::cout << "Setting default configuration values..." << endl;
+            }
+            config.createDefaultConfig(true);
+            if (!config.configFileExists()) {
+                std::cerr << "Failed to write configuration file, quitting" << endl;
                 return -1;
             }
-            std::cout << "Created configuration file " << config.configFileName().toStdString() << endl;
+            std::cout << "Configuration file " << config.configFileName().toStdString() << " saved" << endl;
+            if (m_resetConfigFile && !m_resetDetectionAreaFile) {
+                return 0;
+            }
         }
 
         DataManager dataManager(&config, &a);
