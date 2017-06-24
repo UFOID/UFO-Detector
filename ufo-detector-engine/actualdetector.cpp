@@ -81,7 +81,7 @@ bool ActualDetector::initialize()
         string dateTime=QDateTime::currentDateTime().toString("yyyy-MM-dd--hh-mm-ss").toStdString();
         QDir dir = QDir::root();
         dir.mkpath(QString::fromStdString(m_resultImageDirNameBase + dateTime));
-        m_resultImageDirName = (QString::fromStdString(m_resultImageDirNameBase + dateTime +"/"+"image")).toLatin1().toStdString();
+        m_resultImageDirName = m_resultImageDirNameBase + dateTime +"/image";
         m_pathNameThresh = m_resultImageDirName + "Thresh";
     }
 
