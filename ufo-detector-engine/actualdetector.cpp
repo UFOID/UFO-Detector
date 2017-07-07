@@ -143,7 +143,7 @@ void ActualDetector::detectingThread()
         frameCount++;
         if (!fpsMeasurementDone && (frameCount >= framesInFpsMeasurement)) {
             float fps = ((float)frameCount / (float)fpsMeasurementTimer.elapsed()) * (float)1000;
-            m_logger->print("ActualDetector reading " + QString::number(fps) + "FPS on average");
+            m_logger->print("ActualDetector reading " + QString::number(fps) + " FPS on average");
             fpsMeasurementDone = true;
         }
 

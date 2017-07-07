@@ -51,17 +51,24 @@ void Logger::print(QString message) {
     if (!m_outputToFileEnabled && !m_outputToStdioEnabled) {
         return;
     }
-    QString outputStr;
+    print(message.toStdString());
+}
+
+void Logger::print(std::string message) {
+    if (!m_outputToFileEnabled && !m_outputToStdioEnabled) {
+        return;
+    }
+    std::string outputStr;
     if (m_timestampEnabled) {
         QDateTime now = QDateTime::currentDateTime();
         QString timestamp = now.toString(LOGGER_TIMESTAMP_FORMAT_QT);
-        outputStr = "[" + timestamp + "] ";
+        outputStr = "[" + timestamp.toStdString() + "] ";
     }
     outputStr += message + '\n';
     if (m_outputToFileEnabled) {
         if (!m_file.isOpen()) {
             m_file.setFileName(m_fileName);
-            m_file.open(QFile::WriteOnly);
+            m_file.open(QFile::WriteOnly | QFile::Append);
             if (m_file.isWritable()) {
                 m_fileIsWritable = true;
             } else {
@@ -69,20 +76,18 @@ void Logger::print(QString message) {
             }
         }
         if (m_fileIsWritable) {
-            m_file.write(outputStr.toUtf8());
+            m_file.write(outputStr.data());
             m_file.flush();
         }
     }
     if (m_outputToStdioEnabled) {
-        std::cout << outputStr.toStdString() << std::flush;
+        std::cout << outputStr << std::flush;
     }
 }
 
-void Logger::print(std::string message) {
-    print(QString::fromStdString(message));
-}
-
 void Logger::print(const char* message) {
-    print(QString(message));
+    if (message && (m_outputToFileEnabled || m_outputToStdioEnabled)) {
+        print(std::string(message));
+    }
 }
 
