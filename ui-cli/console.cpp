@@ -18,10 +18,11 @@
 
 #include "console.h"
 
-Console::Console(Config* config, ActualDetector* detector, Camera* camera,
+Console::Console(Config* config, Logger* logger, ActualDetector* detector, Camera* camera,
                  DataManager* dataManager, QObject* parent) : QObject(parent)
 {
     m_config = config;
+    m_logger = logger;
     m_actualDetector = detector;
     m_camera = camera;
     m_dataManager = dataManager;
@@ -78,7 +79,9 @@ void Console::onDetectorStartProgressChanged(int progress) {
 }
 
 void Console::logMessage(QString message) {
-    std::cout << message.toStdString() << std::endl;
+    if (m_logger) {
+        m_logger->print(message);
+    }
 }
 
 void Console::onPositiveMessage() {

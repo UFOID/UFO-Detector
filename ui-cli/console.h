@@ -20,6 +20,7 @@
 #define CONSOLE_H
 
 #include "config.h"
+#include "logger.h"
 #include "actualdetector.h"
 #include "recorder.h"
 #include "planechecker.h"
@@ -34,7 +35,7 @@ class Console : public QObject
 {
     Q_OBJECT
 public:
-    explicit Console(Config* config, ActualDetector* detector, Camera* camera,
+    explicit Console(Config* config, Logger* logger, ActualDetector* detector, Camera* camera,
                      DataManager* dataManager, QObject *parent = 0);
 
     ~Console();
@@ -55,6 +56,7 @@ public:
 private:
 #endif
     Config* m_config;
+    Logger* m_logger;
     ActualDetector* m_actualDetector;
     PlaneChecker* m_planeChecker;
     Camera* m_camera;

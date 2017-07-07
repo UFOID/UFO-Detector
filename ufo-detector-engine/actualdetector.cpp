@@ -18,10 +18,12 @@
 
 #include "actualdetector.h"
 
-ActualDetector::ActualDetector(Camera* camera, Config* config, DataManager* dataManager, QObject *parent) :
-    QObject(parent), m_camPtr(camera)
+ActualDetector::ActualDetector(Camera* camera, Config* config, Logger* logger,
+    DataManager* dataManager, QObject *parent) :
+        QObject(parent), m_camPtr(camera)
 {
     m_config = config;
+    m_logger = logger;
     m_dataManager = dataManager;
     const QString DETECTION_AREA_FILE = m_config->detectionAreaFile();
     const QString IMAGEPATH = m_config->resultImageDir() + "/";
@@ -39,13 +41,12 @@ ActualDetector::ActualDetector(Camera* camera, Config* config, DataManager* data
     setNoiseLevel(m_config->noiseFilterPixelSize());
     setThresholdLevel(m_config->motionThreshold());
 
-    m_recorder = new Recorder(m_camPtr, m_config, m_dataManager);
+    m_recorder = new Recorder(m_camPtr, m_config, m_logger, m_dataManager);
 
     state = new DetectorState(this, m_recorder);
     state->MIN_POS_REQUIRED = m_config->minPositiveDetections();
     connect(state, SIGNAL(sendOutputText(QString)), this, SIGNAL(broadcastOutputText(QString)));
-
-    qDebug() << "ActualDetector constructed";
+    //qDebug() << "ActualDetector constructed";
 }
 
 ActualDetector::~ActualDetector()
@@ -90,13 +91,13 @@ bool ActualDetector::initialize()
     if (!m_birdsCascade.load(m_config->birdClassifierTrainingFile().toStdString()))
     {
         auto output_text = tr("WARNING: could not load bird detection data (cascade classifier file)");
-        qWarning() << output_text;
+        //qWarning() << output_text;
         emit broadcastOutputText(output_text);
         m_isInNightMode = true;
         m_isCascadeFound = false;
     }
 
-    qDebug() << "Initialized ActualDetector";
+    //qDebug() << "Initialized ActualDetector";
     this_thread::sleep_for(std::chrono::seconds(1));
     m_startedRecording = false;
 
@@ -130,7 +131,7 @@ void ActualDetector::detectingThread()
     Scalar Colors[]={Scalar(255,0,0),Scalar(0,255,0),Scalar(0,0,255),Scalar(255,255,0),Scalar(0,255,255),Scalar(255,0,255),Scalar(255,127,255),Scalar(127,0,255),Scalar(127,0,127)};
     pair < vector<Point2d>,vector<Rect> > centerAndRectPair;
 
-    qDebug() << "ActualDetector::detectingThread() started";
+    m_logger->print("ActualDetector::detectingThread() started");
 
     fpsMeasurementTimer.start();
 
@@ -141,9 +142,8 @@ void ActualDetector::detectingThread()
         tempImage = m_camPtr->getWebcamFrame();
         frameCount++;
         if (!fpsMeasurementDone && (frameCount >= framesInFpsMeasurement)) {
-            qDebug() << "ActualDetector reading" << ((float)frameCount /
-                         (float)fpsMeasurementTimer.elapsed()) * (float)1000
-                     << "FPS on average";
+            float fps = ((float)frameCount / (float)fpsMeasurementTimer.elapsed()) * (float)1000;
+            m_logger->print("ActualDetector reading " + QString::number(fps) + "FPS on average");
             fpsMeasurementDone = true;
         }
 
@@ -303,7 +303,7 @@ void ActualDetector::detectingThread()
         std::this_thread::yield();
         std::this_thread::sleep_for(std::chrono::microseconds(threadYieldPauseUsec));
     }
-    qDebug() << "ActualDetector::detectingThread() finished";
+    m_logger->print("ActualDetector::detectingThread() finished");
     delete detector;    
 }
 
@@ -569,6 +569,7 @@ void ActualDetector::checkIfNight()
                 }
 
                 //find rectangle coordinates in region and remove them
+                /// @todo mark ignored areas in live camera stream
                 regionNew=m_region;
                 vector<Point>::iterator it = regionNew.begin();
                 for ( ; it != regionNew.end(); )
@@ -617,7 +618,7 @@ void ActualDetector::checkIfNight()
             else if(m_isMainThreadRunning && counter==timerSeconds)
             {
                 isSleeping=false;
-                qDebug() << "re run loop and timer";
+                m_logger->print("Checking for low light condition...");
             }
             else if(!m_isMainThreadRunning)
             {
@@ -635,7 +636,7 @@ void ActualDetector::stopOnlyDetecting()
 {
     if(m_startedRecording)
     {
-        qDebug() << "wait till stopped recording";
+        m_logger->print("Waiting for recording to stop...");
         this_thread::sleep_for(chrono::seconds(1));
         stopOnlyDetecting();
     }

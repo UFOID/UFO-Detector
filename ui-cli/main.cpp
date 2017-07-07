@@ -135,9 +135,9 @@ int main(int argc, char *argv[])
             return 0;
         }
 
-        ActualDetector actualDetector(&camera, &config, &dataManager, &a);
+        ActualDetector actualDetector(&camera, &config, &logger, &dataManager, &a);
 
-        Console console(&config, &actualDetector, &camera, &dataManager, &a);
+        Console console(&config, &logger, &actualDetector, &camera, &dataManager, &a);
         console.init();
         a.connect(&a, SIGNAL(aboutToQuit()), &console, SLOT(onApplicationAboutToQuit()));
 

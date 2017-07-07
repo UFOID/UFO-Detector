@@ -18,8 +18,8 @@
 
 #include "recorder.h"
 
-Recorder::Recorder(Camera* cameraPtr, Config* configPtr, DataManager* dataManager) :
-    m_camera(cameraPtr), m_config(configPtr), m_dataManager(dataManager)
+Recorder::Recorder(Camera* cameraPtr, Config* configPtr, Logger *logger, DataManager* dataManager) :
+    m_camera(cameraPtr), m_config(configPtr), m_logger(logger), m_dataManager(dataManager)
 {
     qDebug() << "Creating recorder";
     const int width = m_config->cameraWidth();
@@ -51,7 +51,7 @@ Recorder::Recorder(Camera* cameraPtr, Config* configPtr, DataManager* dataManage
 
     m_recording = false;
     connect(this, SIGNAL(videoEncodingRequested(QString,QString)), this, SLOT(startEncodingVideo(QString,QString)));
-    qDebug() << "Recorder created";
+    //qDebug() << "Recorder created";
 }
 
 /*
@@ -77,7 +77,7 @@ void Recorder::startRecording(Mat &firstFrame)
  * Thread to record a video
  */
 void Recorder::recordThread(){
-    qDebug() << "++++++++recorder thread called+++";
+    m_logger->print("++++++++ recorder thread called +++");
     emit recordingStarted();
 
     QString dateTime = QDateTime::currentDateTime().toString("yyyy-MM-dd--hh-mm-ss");
@@ -100,11 +100,11 @@ void Recorder::recordThread(){
     }
     m_videoWriter.open(filenameTemp.toStdString(), recordCodec, OUTPUT_FPS, m_videoResolution, true);
 
-    qDebug() << "Video timestamp" << dateTime;
+    m_logger->print("Video timestamp " + dateTime);
 
     if (!m_videoWriter.isOpened())
     {
-        qDebug() << "ERROR: Failed to write temporary video" << filenameTemp;
+        m_logger->print("ERROR: Failed to write temporary video " + filenameTemp);
         return;
     }
 
@@ -134,7 +134,7 @@ void Recorder::recordThread(){
     int millisec = timer.elapsed();
     QString videoLength = QString("%1:%2").arg( millisec / 60000, 2, 10, QChar('0'))
             .arg((millisec % 60000) / 1000, 2, 10, QChar('0'));
-    qDebug() << "Video length" << videoLength;
+    m_logger->print("Video length " + videoLength);
 
     if(m_willSaveVideo)
     {
@@ -149,14 +149,14 @@ void Recorder::recordThread(){
         {
             // Rename temp video to final
             rename(filenameTemp.toLocal8Bit().data(), filenameFinal.toLocal8Bit().data());
-            qDebug() << "Finished recording, saved video";
+            m_logger->print("Finished recording, saved video");
             emit recordingFinished();
         }
     }
     else
     {
         remove(filenameTemp.toLocal8Bit().data());
-        qDebug() << "Finished recording, discarded video";
+        m_logger->print("Finished recording, discarded video");
         emit recordingFinished();
     }
 }
@@ -210,7 +210,7 @@ void Recorder::onVideoEncodingFinished()
 
     if(m_encoderProcesses.size() == 0)
     {
-        qDebug() << "Video encoder(s) finished";
+        m_logger->print("Video encoder(s) finished");
         emit recordingFinished();
     }
 }
@@ -257,7 +257,7 @@ void Recorder::readFrameThread()
         frame->m_duplicateCount = skippedFrames;
 
         if (m_videoBuffer->count() >= m_videoBuffer->capacity()) {
-            qDebug() << "Alert: video buffer is full. Decrease video frame rate.";
+            m_logger->print("Alert: video buffer is full. Decrease video frame rate.");
         }
         m_videoBuffer->pushFrame(frame);
     }
