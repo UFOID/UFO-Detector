@@ -21,6 +21,7 @@
 #include "actualdetector.h"
 #include "camera.h"
 #include "config.h"
+#include "logger.h"
 #include <iostream>
 #include <QDebug>
 
@@ -41,6 +42,10 @@ int main(int argc, char *argv[])
         }
 
         Config myConfig;
+        Logger logger;
+        logger.setOutputToFileEnabled(false);
+        logger.setOutputToStdioEnabled(true);
+        logger.setTimestampEnabled(true);
         DataManager dataManager(&myConfig);
         dataManager.init();
 
@@ -48,7 +53,7 @@ int main(int argc, char *argv[])
         myCam.init();
 
         MainWindow mainWindow(&myCam, &myConfig, &dataManager, NULL);
-        ActualDetector detector(&myCam, &myConfig, &dataManager, &mainWindow);
+        ActualDetector detector(&myCam, &myConfig, &logger, &dataManager, &mainWindow);
 
         mainWindow.setSignalsAndSlots(&detector);
         mainWindow.show();
