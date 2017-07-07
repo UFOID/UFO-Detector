@@ -21,6 +21,7 @@
 #include "actualdetector.h"
 #include "datamanager.h"
 #include "console.h"
+#include "logger.h"
 #include <iostream>
 #include <QCoreApplication>
 #include <csignal>
@@ -71,21 +72,27 @@ int main(int argc, char *argv[])
     bool resetConfigFile = cmdLineParser.isSet(resetConfigFileOption);
     bool resetDetectionAreaFile = cmdLineParser.isSet(resetDetectionAreaFileOption);
     bool listCameraResolutions = cmdLineParser.isSet(listCameraResolutionsOption);
+    bool optionsCauseQuit = resetConfigFile || resetDetectionAreaFile || listCameraResolutions;
 
     try {
+        Logger logger;
+        logger.setOutputToFileEnabled(false);
+        logger.setOutputToStdioEnabled(true);
+        logger.setTimestampEnabled(!optionsCauseQuit);
+
         Config config;
         if (!config.configFileExists() || resetConfigFile) {
             if (!config.configFileExists()) {
-                std::cout << "Configuration file doesn't exist, creating with default values..."  << endl;
+                logger.print(QCoreApplication::translate("ufo-detector-cli", "Configuration file doesn't exist, creating with default values..."));
             } else if (resetConfigFile) {
-                std::cout << "Setting default configuration values..." << endl;
+                logger.print(QCoreApplication::translate("ufo-detector-cli", "Setting default configuration values..."));
             }
             config.createDefaultConfig(true);
             if (!config.configFileExists()) {
-                std::cerr << "Failed to write configuration file, quitting" << endl;
+                logger.print(QCoreApplication::translate("ufo-detector-cli", "Failed to write configuration file, quitting"));
                 return -1;
             }
-            std::cout << "Configuration file " << config.configFileName().toStdString() << " saved" << endl;
+            logger.print(QCoreApplication::translate("ufo-detector-cli", "Configuration file %1 saved").arg(config.configFileName()));
             if (resetConfigFile && !resetDetectionAreaFile && !listCameraResolutions) {
                 return 0;
             }
@@ -94,9 +101,9 @@ int main(int argc, char *argv[])
         DataManager dataManager(&config, &a);
         if (resetDetectionAreaFile) {
             if (dataManager.resetDetectionAreaFile(true)) {
-                std::cout << "Created detection area file " << config.detectionAreaFile().toStdString() << endl;
+                logger.print(QCoreApplication::translate("ufo-detector-cli", "Created detection area file %1").arg(config.detectionAreaFile()));
             } else {
-                std::cerr << "Failed to create detection area file " << config.detectionAreaFile().toStdString() << endl;
+                logger.print(QCoreApplication::translate("ufo-detector-cli", "Failed to create detection area file %1").arg(config.detectionAreaFile()));
                 return -1;
             }
             if (!listCameraResolutions) {
@@ -104,26 +111,26 @@ int main(int argc, char *argv[])
             }
         }
         if (!dataManager.init()) {
-            std::cerr << "Problems in data manager initialization, continuing anyway" << std::endl;
+            logger.print(QCoreApplication::translate("ufo-detector-cli", "Problems in data manager initialization, continuing anyway"));
         }
 
         Camera camera(config.cameraIndex(), config.cameraWidth(), config.cameraHeight());
         if (!camera.init()) {
-            std::cerr << "Couldn't initialize web camera, quitting" << std::endl;
+            logger.print(QCoreApplication::translate("ufo-detector-cli", "Couldn't initialize web camera, quitting"));
             return -1;
         }
         if (listCameraResolutions) {
-            std::cout << "Querying available web camera resolutions, this may take a while..." << endl;
+            logger.print(QCoreApplication::translate("ufo-detector-cli", "Querying available web camera resolutions, this may take a while..."));
             camera.queryAvailableResolutions();
             if (camera.availableResolutions().size() == 0) {
-                std::cout << "No web camera resolutions found" << endl;
+                logger.print(QCoreApplication::translate("ufo-detector-cli", "No web camera resolutions found"));
             } else {
-                std::cout << "Supported web camera resolutions:" << endl;
+                logger.print(QCoreApplication::translate("ufo-detector-cli", "Supported web camera resolutions:"));
             }
             QListIterator<QSize> resolutionIt(camera.availableResolutions());
             while (resolutionIt.hasNext()) {
                 QSize resolution = resolutionIt.next();
-                std::cout << resolution.width() << " x " << resolution.height() << endl;
+                logger.print(QCoreApplication::translate("ufo-detector-cli", "%1 x %2", "resolution: width x height").arg(resolution.width()).arg(resolution.height()));
             }
             return 0;
         }
@@ -135,12 +142,12 @@ int main(int argc, char *argv[])
         a.connect(&a, SIGNAL(aboutToQuit()), &console, SLOT(onApplicationAboutToQuit()));
 
         if (!console.start()) {
-            std::cerr << "Error starting Console, quitting" << std::endl;
+            logger.print(QCoreApplication::translate("ufo-detector-cli", "Error starting Console, quitting"));
             return -1;
         }
         return a.exec();
     } catch (std::exception &e) {
-        std::cout << e.what() << std::endl;
+        std::cerr << "Caught exception: " << e.what();
     }
     return -1;
 }
