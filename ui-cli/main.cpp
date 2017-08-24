@@ -97,6 +97,13 @@ int main(int argc, char *argv[])
                 return 0;
             }
         }
+        QFileInfo logFileInfo(config.logFileName());
+        QString logFileName = logFileInfo.absolutePath() + QDir::separator() + logFileInfo.baseName()
+                + "-cli." + logFileInfo.suffix();
+        logger.print("Logging to file " + logFileName);
+        logger.setFileName(logFileName);
+        logger.setOutputToFileEnabled(true);
+        logger.print("ufo-detector-cli starting");
 
         DataManager dataManager(&config, &a);
         if (resetDetectionAreaFile) {

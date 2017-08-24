@@ -48,6 +48,7 @@ bool Logger::isTimestampEnabled() {
 }
 
 void Logger::print(QString message) {
+    // do basic checks here to avoid supposedly slower toStdString() call
     if (!m_outputToFileEnabled && !m_outputToStdioEnabled) {
         return;
     }
@@ -86,6 +87,7 @@ void Logger::print(std::string message) {
 }
 
 void Logger::print(const char* message) {
+    // do basic checks here to avoid supposedly slower string conversion call
     if (message && (m_outputToFileEnabled || m_outputToStdioEnabled)) {
         print(std::string(message));
     }

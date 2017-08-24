@@ -43,7 +43,8 @@ int main(int argc, char *argv[])
 
         Config myConfig;
         Logger logger;
-        logger.setOutputToFileEnabled(false);
+        logger.setFileName(myConfig.logFileName());
+        logger.setOutputToFileEnabled(true);
         logger.setOutputToStdioEnabled(true);
         logger.setTimestampEnabled(true);
         DataManager dataManager(&myConfig);
