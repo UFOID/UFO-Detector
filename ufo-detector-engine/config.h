@@ -63,6 +63,7 @@ public:
         ClassifierVersion,
         CheckAirplanes,
         AirplaneCoordinates,
+        LogFileName,
         SETTINGS_COUNT
     };
 
@@ -207,6 +208,13 @@ public:
      * @return
      */
     QString coordinates();
+
+    /**
+     * @brief The full file name of the message log file.
+     * @return
+     */
+    QString logFileName();
+
     /**
      * @brief Get video codec support info object. The object has been initialized.
      * @return pointer to initialized VideoCodecSupportInfo
@@ -334,6 +342,12 @@ public:
     void setAirplaneCoordinates(QString coordinates);
 
     /**
+     * @brief Set the full file name of the message log file.
+     * @param fileName
+     */
+    void setLogFileName(QString fileName);
+
+    /**
      * @brief Check whether configuration file exists.
      * @return true if configuration file exists, false if not
      */
@@ -390,6 +404,8 @@ private:
 
     bool m_defaultCheckAirplanes;       ///< whether to check airplanes
     QString m_defaultAirplaneCoordinates;
+
+    QString m_defaultLogFileName;       ///< default message log file name
 
     VideoCodecSupportInfo* m_videoCodecSupportInfo; ///< info about video codec support
 

@@ -43,6 +43,7 @@ Config::Config(QObject *parent) : QObject(parent)
     m_settingKeys[Config::ClassifierVersion] = "classifierVersion";
     m_settingKeys[Config::CheckAirplanes] = "checkAirplanes";
     m_settingKeys[Config::AirplaneCoordinates] = "airplaneCoordinates";
+    m_settingKeys[Config::LogFileName] = "logFileName";
 
     m_settings = new QSettings("UFOID", "Detector");
 
@@ -93,6 +94,8 @@ Config::Config(QObject *parent) : QObject(parent)
     m_defaultUserTokenAtUfoId = "";
     m_defaultCheckAirplanes = false;
     m_defaultAirplaneCoordinates = "";
+
+    m_defaultLogFileName = m_defaultDetectionDataDir + "/messageLog.txt";
 }
 
 Config::~Config() {
@@ -195,6 +198,10 @@ bool Config::checkAirplanes()
 QString Config::coordinates()
 {
     return m_settings->value(m_settingKeys[Config::AirplaneCoordinates], m_defaultAirplaneCoordinates).toString();
+}
+
+QString Config::logFileName() {
+    return m_settings->value(m_settingKeys[Config::LogFileName], m_defaultLogFileName).toString();
 }
 
 VideoCodecSupportInfo* Config::videoCodecSupportInfo() {
@@ -311,6 +318,12 @@ void Config::setAirplaneCoordinates(QString coordinates)
     emit settingsChanged();
 }
 
+void Config::setLogFileName(QString fileName) {
+    m_settings->setValue(m_settingKeys[Config::LogFileName], QVariant(fileName));
+    m_settings->sync();
+    emit settingsChanged();
+}
+
 void Config::setClassifierVersion(int version) {
     m_settings->setValue(m_settingKeys[Config::ClassifierVersion], QVariant(version));
     m_settings->sync();
@@ -348,6 +361,7 @@ void Config::createDefaultConfig(bool overwrite) {
     m_settings->setValue(m_settingKeys[Config::ClassifierVersion], QVariant(m_defaultClassifierVersion));
     m_settings->setValue(m_settingKeys[Config::CheckAirplanes], QVariant(m_defaultCheckAirplanes));
     m_settings->setValue(m_settingKeys[Config::AirplaneCoordinates], QVariant(m_defaultAirplaneCoordinates));
+    m_settings->setValue(m_settingKeys[Config::LogFileName], QVariant(m_defaultLogFileName));
     m_settings->sync();
     emit settingsChanged();
 }
