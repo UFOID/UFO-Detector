@@ -19,7 +19,16 @@ LIBS += -lgcov
 test.target=test
 unix:!macx {
     LIB_PATH=$${TOP_BUILD_DIR}/lib:\$\$LD_LIBRARY_PATH
-    test.commands=for d in $${SUBDIRS}; do origdir="\$$PWD" && cd "\$$d" && LD_LIBRARY_PATH=$$LIB_PATH && $(MAKE) test && cd "\$$origdir" || exit 1; done
+    test.commands=for d in $${SUBDIRS}; do \
+        origdir="\$$PWD"; \
+        cd "\$$d"; \
+        LD_LIBRARY_PATH=$$LIB_PATH; \
+        TARGETNAME=`cat Makefile | grep -e "^TARGET" | awk \'{print \$$3}\'`; \
+        echo "TARGETNAME = \$$TARGETNAME"; \
+        $(MAKE); \
+        ./\$$TARGETNAME -xml -o \$$TARGETNAME.xml -o -,txt; \
+        cd "\$$origdir"; \
+        done
 }
 unix:macx {
     LIB_PATH=$${TOP_BUILD_DIR}/lib:\$\$DYLD_LIBRARY_PATH

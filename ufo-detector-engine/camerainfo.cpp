@@ -221,11 +221,11 @@ CameraInfo::CameraInfo(int cameraIndex, QObject *parent, int openCvBackend) : QO
     updateAspectRatios();
 }
 
-bool CameraInfo::init() {
+bool CameraInfo::init(bool verboseResolutionQuery) {
     bool ok = false;
     m_webCamera = new cv::VideoCapture(m_cameraIndex + m_cameraBackend);
     if (m_webCamera && m_webCamera->open(m_cameraIndex)) {
-        ok = queryResolutions();
+        ok = queryResolutions(verboseResolutionQuery);
         if (!ok) {
             qDebug() << "Querying web camera resolutions failed";
         }
@@ -251,7 +251,7 @@ QList<int> CameraInfo::knownAspectRatios() {
     return m_knownAspectRatios;
 }
 
-bool CameraInfo::queryResolutions() {
+bool CameraInfo::queryResolutions(bool verbose) {
     int width = 0;
     int height = 0;
     QSize testRes;
@@ -260,7 +260,9 @@ bool CameraInfo::queryResolutions() {
     int smallestIndex;
     int largestIndex;
 
-    qDebug() << "Querying web camera for supported resolutions";
+    if (verbose) {
+        qDebug() << "Querying web camera for supported resolutions";
+    }
 
     // find smallest supported resolution
     testRes = m_commonResolutions.at(0);
@@ -301,10 +303,14 @@ bool CameraInfo::queryResolutions() {
         width = m_webCamera->get(CV_CAP_PROP_FRAME_WIDTH);
         height = m_webCamera->get(CV_CAP_PROP_FRAME_HEIGHT);
         if ((testRes.width() == width) && (testRes.height() == height)) {
-            qDebug() << "Web camera supports resolution" << width << "x" << height;
+            if (verbose) {
+                qDebug() << "Web camera supports resolution" << width << "x" << height;
+            }
             m_availableResolutions << testRes;
         } else {
-            qDebug() << "No support for resolution" << testRes.width() << "x" << testRes.height() <<"-- got " << width << "x" << height << "instead";
+            if (verbose) {
+                qDebug() << "No support for resolution" << testRes.width() << "x" << testRes.height() <<"-- got " << width << "x" << height << "instead";
+            }
             QSize newRes(width, height);
             if (!m_commonResolutions.contains(newRes) && !m_availableResolutions.contains(newRes)) {
                 m_availableResolutions << newRes;

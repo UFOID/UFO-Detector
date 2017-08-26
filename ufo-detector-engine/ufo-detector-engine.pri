@@ -25,7 +25,8 @@ SOURCES += $$PWD/recorder.cpp \
     $$PWD/videocodecsupportinfo.cpp \
     $$PWD/planechecker.cpp \
     $$PWD/detectorstate.cpp \
-    $$PWD/datamanager.cpp
+    $$PWD/datamanager.cpp \
+    $$PWD/logger.cpp
 
 HEADERS  += $$PWD/recorder.h \
     $$PWD/actualdetector.h \
@@ -40,4 +41,6 @@ HEADERS  += $$PWD/recorder.h \
     $$PWD/videocodecsupportinfo.h \
     $$PWD/planechecker.h \
     $$PWD/detectorstate.h \
-    $$PWD/datamanager.h
+    $$PWD/datamanager.h \
+    $$PWD/defines.h \
+    $$PWD/logger.h

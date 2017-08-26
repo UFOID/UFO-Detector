@@ -39,6 +39,7 @@
 #include "Ctracker.h"
 #include "Detector.h"
 #include "detectorstate.h"
+#include "logger.h"
 
 using namespace cv;
 
@@ -54,7 +55,7 @@ class ActualDetector : public QObject
  Q_OBJECT
 
 public:
-    ActualDetector(Camera* camera, Config* config, DataManager* dataManager, QObject *parent = 0);
+    ActualDetector(Camera* camera, Config* config, Logger* logger, DataManager* dataManager, QObject *parent = 0);
     ~ActualDetector();
 
     /**
@@ -96,6 +97,7 @@ private:
     Recorder* m_recorder;
     Camera* m_camPtr;
     Config* m_config;
+    Logger* m_logger;
     DataManager* m_dataManager;
     cv::Mat m_resultFrame;
     cv::Mat m_resultFrameCropped;

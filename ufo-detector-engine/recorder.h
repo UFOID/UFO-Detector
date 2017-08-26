@@ -20,6 +20,7 @@
 #define RECORDER_H
 
 #include "config.h"
+#include "logger.h"
 #include "camera.h"
 #include "videobuffer.h"
 #include "datamanager.h"
@@ -59,7 +60,7 @@ class Recorder : public QObject {
 Q_OBJECT
 
 public:
-    explicit Recorder(Camera* cameraPtr, Config* configPtr, DataManager* dataManager);
+    explicit Recorder(Camera* cameraPtr, Config* configPtr, Logger* logger, DataManager* dataManager);
     void startRecording(cv::Mat &firstFrame);
     void stopRecording(bool willSaveVideo);
     void setRectangle(cv::Rect &r, bool isRed);
@@ -71,6 +72,7 @@ private:
 
     Camera* m_camera;
     Config* m_config;
+    Logger* m_logger;
     DataManager* m_dataManager;
     cv::VideoWriter m_videoWriter;
     cv::Mat m_firstFrame;

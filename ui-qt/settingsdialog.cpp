@@ -90,8 +90,7 @@ void SettingsDialog::saveSettings()
     m_config->setResultVideoCodec(ui->comboBoxCodec->currentData().toString());
     m_config->setUserTokenAtUfoId(ui->lineToken->text());
     m_config->setCheckAirplanes(ui->checkBoxFilterAiplanes->isChecked());
-    m_config->setAirplanesCoordinates(ui->lineEditFilterAirplanes->text());
-
+    m_config->setAirplaneCoordinates(ui->lineEditFilterAirplanes->text());
 }
 
 void SettingsDialog::on_toolButtonVideoPath_clicked()
