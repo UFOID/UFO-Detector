@@ -105,8 +105,15 @@ bool DataManager::checkDetectionAreaFile() {
     if(areaFile.exists()) {
         qDebug() << "DataManager: found detection area file";
         return true;
+    } else {
+        qDebug() << "DataManager: couldn't find detection area file";
+        if (areaFile.open(QIODevice::WriteOnly | QIODevice::Text)){
+            qDebug() << "DataManager: created detection area file " << areaFile.fileName();
+            areaFile.close();
+            return true;
+        }
     }
-    qDebug() << "DataManager: couldn't find detection area file";
+    qDebug() << "DataManager: failed to create detection area file " << areaFile.fileName();
     return false;
 }
 
