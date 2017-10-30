@@ -104,7 +104,7 @@ void VideoUploaderDialog::callAPI(QNetworkReply* reply)
 
     if(reply->error() == QNetworkReply::NoError)
     {
-
+        ui->textBrowser->append("ULOAD STARTED - Do not close this window");
         disconnect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(callAPI(QNetworkReply*)) );
 
         QFileInfo fileInfo(file->fileName());
@@ -141,8 +141,8 @@ void VideoUploaderDialog::callAPI(QNetworkReply* reply)
         qDebug() << reply->errorString();
         ui->textBrowser->append("Invalid Upload token");
         ui->textBrowser->append("To upload a video create a free UFOID.net account and copy your given User Token from you User Profile in to the settings of the UFO Detector");
-        ui->buttonUpload->setEnabled(false);
     }
+    ui->buttonUpload->setEnabled(false);
 
     delete reply;
 }
