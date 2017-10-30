@@ -57,7 +57,6 @@ private slots:
     void on_buttonUpload_clicked();
     void progress(qint64 bytesSent, qint64 bytesTotal);
     void callAPI(QNetworkReply *reply);
-    void successReply(QNetworkReply *reply);
     void errorCall(QNetworkReply *reply);
 };
 
