@@ -116,7 +116,7 @@ void VideoUploaderDialog::callAPI(QNetworkReply* reply)
 
         QHttpPart textPart;
         textPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"token\""));
-        textPart.setBody(userToken);
+        textPart.setBody(userToken.toUtf8());
 
         QHttpPart imagePart;
         file->open(QIODevice::ReadOnly);
