@@ -35,7 +35,7 @@ MainWindow::MainWindow(Camera* cameraPtr, Config* configPtr, DataManager* dataMa
 
     m_programVersion = APPLICATION_VERSION;
 
-    this->setWindowTitle("UFO Detector | BETA " + m_programVersion);
+    this->setWindowTitle("The Black Vault UFO Detector | BETA " + m_programVersion + " | powered by ufoid.net");
 
     const int width = m_config->cameraWidth();
     const int height = m_config->cameraHeight();
@@ -75,6 +75,7 @@ MainWindow::MainWindow(Camera* cameraPtr, Config* configPtr, DataManager* dataMa
     ui->statusLabel->setStyleSheet(m_detectionStatusStyleOff);
     ui->recordingTestButton->hide();
     ui->progressBar->hide();
+    ui->outputText->append(tr("Created for www.theblackvault.com"));
     ui->outputText->append(tr("For feedback and bug reports contact the developer at contact@ufoid.net"));
 
     if (checkCamera(width, height))

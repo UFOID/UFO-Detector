@@ -35,7 +35,7 @@ UpdateApplicationDialog::UpdateApplicationDialog(QWidget *parent, QString versio
 
 void UpdateApplicationDialog::on_commandLinkButton_clicked()
 {
-    QDesktopServices::openUrl(QUrl("http://ufoid.net"));
+    QDesktopServices::openUrl(QUrl("http://www.theblackvault.com/casefiles/the-ufo-detector/"));
 }
 
 UpdateApplicationDialog::~UpdateApplicationDialog()
