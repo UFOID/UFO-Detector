@@ -59,4 +59,4 @@ GPLv3
 
 https://github.com/Smorodov/Multitarget-tracker/
 
-[See it in action]: https://www.youtube.com/watch?v=Jai15P4kuug
+[See it in action]: https://youtu.be/p6eEqumIGuQ
