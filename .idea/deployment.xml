@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" serverName="Remote Development" remoteFilesAllowedToDisappearOnAutoupload="false" confirmBeforeUploading="false">
+    <option name="confirmBeforeUploading" value="false" />
+    <serverData>
+      <paths name="OrangePi (5424fd30-e0b7-4fac-89a0-40d01a14d162)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/tmp/tmp.cXagpoKYI3" local="$PROJECT_DIR$" />
+          </mappings>
+          <excludedPaths>
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-debug-remote" />
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-debug-remote" />
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-debug" />
+            <excludedPath local="true" path="$PROJECT_DIR$/../../../../../home/detector" />
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-debug" />
+          </excludedPaths>
+        </serverdata>
+      </paths>
+      <paths name="Remote Host (1) firefly (ecc376d0-2908-42a7-bab3-667fb8186227)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/tmp/tmp.kjJKPDmuqg" local="$PROJECT_DIR$" />
+          </mappings>
+          <excludedPaths>
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-firefly" />
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-orangepi" />
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-debug" />
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-orangepi" />
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-debug" />
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-firefly" />
+          </excludedPaths>
+        </serverdata>
+      </paths>
+      <paths name="Remote Host (b7f4dcd9-2923-4d88-bdaa-393fcc515fc8)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/tmp/tmp.495stOiTt5" local="$PROJECT_DIR$" />
+          </mappings>
+          <excludedPaths>
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-debug-remote" />
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-firefly" />
+            <excludedPath local="true" path="$PROJECT_DIR$/../../../../../tmp/detector" />
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-orangepi" />
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-debug" />
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-orangepi" />
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-debug" />
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-firefly" />
+          </excludedPaths>
+        </serverdata>
+      </paths>
+      <paths name="firefly (d60ebfc0-4faa-46c7-ba55-6c23ad42b9eb)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/tmp/tmp.cFeFgxsuAr" local="$PROJECT_DIR$" />
+          </mappings>
+          <excludedPaths>
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-firefly" />
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-orangepi" />
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-debug" />
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-orangepi" />
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-debug" />
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-firefly" />
+          </excludedPaths>
+        </serverdata>
+      </paths>
+    </serverData>
+  </component>
+</project>

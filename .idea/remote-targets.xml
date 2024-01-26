@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="RemoteTargetsManager">
+    <targets>
+      <target name="pi@192.168.1.126:22" type="ssh/sftp" uuid="ccecff8a-6c52-46d0-92ea-d7fd016913a5">
+        <config>
+          <option name="projectRootOnTarget" value="/home/pi/detector" />
+          <option name="serverName" value="pi@192.168.1.126:22 password" />
+          <option name="useRsync" value="true" />
+        </config>
+      </target>
+      <target name="firefly@192.168.1.23:22" type="ssh/sftp" uuid="429f6ea2-05ba-4814-bfcc-08970df5abda">
+        <config>
+          <option name="projectRootOnTarget" value="/home/firefly/detector" />
+          <option name="serverName" value="firefly@192.168.1.23:22 password" />
+          <option name="useRsync" value="true" />
+        </config>
+      </target>
+    </targets>
+  </component>
+</project>
