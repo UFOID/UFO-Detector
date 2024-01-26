@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CMakeWorkspace" PROJECT_DIR="$PROJECT_DIR$" />
+  <component name="MakefileWorkspace">
+    <contentRoot DIR="$PROJECT_DIR$/build-Detector-Desktop_Qt_6_5_2_MinGW_64_bit-Debug" />
+  </component>
+</project>
